@@ -69,7 +69,7 @@ class UsersServiceTest {
             });
 
             // assert
-            assertEquals(exception.getErrorType(), ErrorType.CONFLICT);
+            assertEquals(ErrorType.CONFLICT, exception.getErrorType());
         }
     }
 
