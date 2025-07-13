@@ -1,8 +1,8 @@
-package com.loopers.interfaces.api.users;
+package com.loopers.interfaces.api;
 
 import com.loopers.domain.users.UsersModel;
 import com.loopers.infrastructure.users.UsersJpaRepository;
-import com.loopers.interfaces.api.ApiResponse;
+import com.loopers.interfaces.api.users.UsersV1Dto;
 import com.loopers.support.type.Gender;
 import com.loopers.utils.DatabaseCleanUp;
 import org.junit.jupiter.api.*;
