@@ -22,7 +22,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public boolean exists(UserCriteria criteria) {
-        var spec = UserJpaSpecifiaction.with(criteria);
+        var spec = UserJpaSpecification.with(criteria);
         return jpaRepository.exists(spec);
     }
 
@@ -33,7 +33,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<UserEntity> find(UserCriteria criteria) {
-        var spec = UserJpaSpecifiaction.with(criteria);
+        var spec = UserJpaSpecification.with(criteria);
         var list = jpaRepository.findAll(spec);
         if (list.size() > 1) {
             throw new CoreException(ErrorType.INTERNAL_ERROR, "More than one user found");
