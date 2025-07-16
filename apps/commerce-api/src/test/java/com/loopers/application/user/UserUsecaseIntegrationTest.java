@@ -38,7 +38,7 @@ class UserUsecaseIntegrationTest {
         void saveUser_whenUserRegisters() {
             var command = new UserCommand.Create(
                     "testUser",
-                    Gender.MALE,
+                    UserEntity.Gender.MALE,
                     "1993-04-09",
                     "test@gmail.com"
             );
@@ -59,14 +59,14 @@ class UserUsecaseIntegrationTest {
             // arrange
             var commandAlreadyExists = new UserCommand.Create(
                     "testUser",
-                    Gender.MALE,
+                    UserEntity.Gender.MALE,
                     "1993-04-09",
                     "test@gmail.com"
             );
             userFacade.signUp(commandAlreadyExists);
             var commandUtd = new UserCommand.Create(
                     "testUser",
-                    Gender.FEMALE,
+                    UserEntity.Gender.FEMALE,
                     "1993-04-09",
                     "test@naver.com"
             );
@@ -90,7 +90,7 @@ class UserUsecaseIntegrationTest {
             // arrange
             var command = new UserCommand.Create(
                     "testUser",
-                    Gender.MALE,
+                    UserEntity.Gender.MALE,
                     "1993-04-09",
                     "test@gmail.com"
             );

@@ -1,9 +1,9 @@
 package com.loopers.interfaces.api;
 
 import com.loopers.domain.user.UserCommand;
+import com.loopers.domain.user.UserEntity;
 import com.loopers.domain.user.UserService;
 import com.loopers.interfaces.api.user.UserV1Dto;
-import com.loopers.domain.user.Gender;
 import com.loopers.utils.DatabaseCleanUp;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,7 +115,7 @@ class UserV1ApiE2ETest {
             // arrange
             String requestUrl = ENDPOINT.apply("/me");
             var signUpCommand = new UserCommand.Create(
-                    "testuser", Gender.MALE, "1993-04-09", "test@gmail.com");
+                    "testuser", UserEntity.Gender.MALE, "1993-04-09", "test@gmail.com");
             var testUser = userService.create(signUpCommand);
 
 

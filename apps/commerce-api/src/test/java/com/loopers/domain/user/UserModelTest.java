@@ -26,7 +26,7 @@ class UserModelTest {
             // arrange
             UserCommand.Create command = new UserCommand.Create(
                     invalidLoginId,
-                    Gender.MALE,
+                    UserEntity.Gender.MALE,
                     "1993-04-09",
                     "test@gmail.com"
             );
@@ -54,7 +54,7 @@ class UserModelTest {
             // arrange
             UserCommand.Create command = new UserCommand.Create(
                     "testId",
-                    Gender.MALE,
+                    UserEntity.Gender.MALE,
                     "1993-04-09",
                     invalidEmail
             );
@@ -80,7 +80,7 @@ class UserModelTest {
             // arrange
             UserCommand.Create command = new UserCommand.Create(
                     "testId",
-                    Gender.MALE,
+                    UserEntity.Gender.MALE,
                     invalidBirthDate,
                     "test@gmail.com"
             );

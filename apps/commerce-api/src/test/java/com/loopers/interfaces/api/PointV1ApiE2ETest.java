@@ -1,9 +1,9 @@
 package com.loopers.interfaces.api;
 
 import com.loopers.domain.user.UserCommand;
+import com.loopers.domain.user.UserEntity;
 import com.loopers.domain.user.UserService;
 import com.loopers.interfaces.api.point.PointV1Dto;
-import com.loopers.domain.user.Gender;
 import com.loopers.utils.DatabaseCleanUp;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +53,7 @@ public class PointV1ApiE2ETest {
         void returnsChargedPoints_whenUserChargesPoints() {
             // arrange
             String requestUrl = ENDPOINT.apply("/charge");
-            var signUpCommand = new UserCommand.Create("tester", Gender.MALE, "1993-04-09", "test@gmail.com");
+            var signUpCommand = new UserCommand.Create("tester", UserEntity.Gender.MALE, "1993-04-09", "test@gmail.com");
             var testUser = userService.create(signUpCommand);
             long pointsToCharge = 1000;
             var request = new PointV1Dto.PointsChargeRequest(testUser.getLoginId(), pointsToCharge);
@@ -106,7 +106,7 @@ public class PointV1ApiE2ETest {
         void returnsPoints_whenUserRequestsPoints() {
             // arrange
             String requestUrl = ENDPOINT.apply("");
-            var signUpCommand = new UserCommand.Create("tester", Gender.MALE, "1993-04-09", "test@gmail.com");
+            var signUpCommand = new UserCommand.Create("tester", UserEntity.Gender.MALE, "1993-04-09", "test@gmail.com");
             var testUser = userService.create(signUpCommand);
             var headers = new MultiValueMapAdapter<>(Map.of("X-USER-ID", List.of(testUser.getLoginId())));
 

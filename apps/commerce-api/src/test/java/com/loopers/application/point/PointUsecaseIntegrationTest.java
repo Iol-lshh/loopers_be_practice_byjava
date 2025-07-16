@@ -5,7 +5,6 @@ import com.loopers.domain.user.UserEntity;
 import com.loopers.domain.user.UserService;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
-import com.loopers.domain.user.Gender;
 import com.loopers.utils.DatabaseCleanUp;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -42,7 +41,7 @@ class PointUsecaseIntegrationTest {
             // given
             var command = new UserCommand.Create(
                     "testUser",
-                    Gender.MALE,
+                    UserEntity.Gender.MALE,
                     "1993-04-09",
                     "test@gmail.com"
             );
