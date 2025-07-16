@@ -13,7 +13,7 @@ public class UserFacade {
     private final UserService userService;
 
     public UserInfo signUp(UserCommand.Create command) {
-        UserEntity model = userService.signUp(command);
+        UserEntity model = userService.create(command);
         return UserInfo.from(model);
     }
 

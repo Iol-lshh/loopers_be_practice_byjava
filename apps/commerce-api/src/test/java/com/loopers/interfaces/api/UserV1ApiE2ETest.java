@@ -56,7 +56,7 @@ class UserV1ApiE2ETest {
         void returnsCreatedUser_whenRegistrationIsSuccessful() {
             // arrange
             String requestUrl = ENDPOINT.apply("");
-            UserV1Dto.UsersRegisterRequest request = new UserV1Dto.UsersRegisterRequest(
+            UserV1Dto.UsersSignUpRequest request = new UserV1Dto.UsersSignUpRequest(
                 "testuser",
                 "남",
                 "1990-01-01",
@@ -87,9 +87,9 @@ class UserV1ApiE2ETest {
         void throwsBadRequest_whenGenderIsInvalid() {
             // arrange
             String requestUrl = ENDPOINT.apply("");
-            UserV1Dto.UsersRegisterRequest request = new UserV1Dto.UsersRegisterRequest(
+            UserV1Dto.UsersSignUpRequest request = new UserV1Dto.UsersSignUpRequest(
                 "testuser",
-                "",
+                null,
                 "1990-01-01",
                 "test@example.com"
             );
@@ -116,7 +116,7 @@ class UserV1ApiE2ETest {
             String requestUrl = ENDPOINT.apply("/me");
             var signUpCommand = new UserCommand.Create(
                     "testuser", Gender.MALE, "1993-04-09", "test@gmail.com");
-            var testUser = userService.signUp(signUpCommand);
+            var testUser = userService.create(signUpCommand);
 
 
 

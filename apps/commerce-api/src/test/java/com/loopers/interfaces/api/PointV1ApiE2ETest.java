@@ -54,7 +54,7 @@ public class PointV1ApiE2ETest {
             // arrange
             String requestUrl = ENDPOINT.apply("/charge");
             var signUpCommand = new UserCommand.Create("tester", Gender.MALE, "1993-04-09", "test@gmail.com");
-            var testUser = userService.signUp(signUpCommand);
+            var testUser = userService.create(signUpCommand);
             long pointsToCharge = 1000;
             var request = new PointV1Dto.PointsChargeRequest(testUser.getLoginId(), pointsToCharge);
 
@@ -107,7 +107,7 @@ public class PointV1ApiE2ETest {
             // arrange
             String requestUrl = ENDPOINT.apply("");
             var signUpCommand = new UserCommand.Create("tester", Gender.MALE, "1993-04-09", "test@gmail.com");
-            var testUser = userService.signUp(signUpCommand);
+            var testUser = userService.create(signUpCommand);
             var headers = new MultiValueMapAdapter<>(Map.of("X-USER-ID", List.of(testUser.getLoginId())));
 
             // act

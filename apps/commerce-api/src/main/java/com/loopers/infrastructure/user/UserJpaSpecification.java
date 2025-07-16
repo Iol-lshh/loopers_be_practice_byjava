@@ -14,9 +14,10 @@ public class UserJpaSpecification {
                 if (criterion instanceof UserCriteria.ByLoginId(String loginId)) {
                     predicate = criteriaBuilder.and(predicate,
                             criteriaBuilder.equal(root.get("loginId"), loginId));
+                    break;
                 }
-                // Add more criteria handling as needed
             }
+            // Add more criteria handling as needed
 
             return predicate;
         };

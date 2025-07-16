@@ -19,7 +19,7 @@ public class UserV1Dto {
     }
 
 
-    public record UsersRegisterRequest(
+    public record UsersSignUpRequest(
             String loginId, String gender, String birthDate, String email
     ) {
         public UserCommand.Create toCommand() {

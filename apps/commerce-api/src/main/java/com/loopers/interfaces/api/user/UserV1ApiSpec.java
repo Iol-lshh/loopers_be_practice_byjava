@@ -13,7 +13,7 @@ public interface UserV1ApiSpec {
     )
     ApiResponse<UserV1Dto.UsersResponse> signUp(
             @Schema(name = "요청", description = "회원가입할 사용자 정보 입력")
-            UserV1Dto.UsersRegisterRequest request
+            UserV1Dto.UsersSignUpRequest request
     );
 
     @Operation(

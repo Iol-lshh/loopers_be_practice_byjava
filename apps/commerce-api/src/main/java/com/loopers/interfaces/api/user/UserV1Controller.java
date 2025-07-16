@@ -19,7 +19,7 @@ public class UserV1Controller implements UserV1ApiSpec {
     @PostMapping("")
     @Override
     public ApiResponse<UserV1Dto.UsersResponse> signUp(
-            @RequestBody UserV1Dto.UsersRegisterRequest request
+            @RequestBody UserV1Dto.UsersSignUpRequest request
     ) {
         UserCommand.Create command = request.toCommand();
         UserInfo info = userFacade.signUp(command);

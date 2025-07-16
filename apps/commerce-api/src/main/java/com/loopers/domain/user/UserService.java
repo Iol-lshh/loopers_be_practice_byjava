@@ -15,7 +15,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional
-    public UserEntity signUp(UserCommand.Create command) {
+    public UserEntity create(UserCommand.Create command) {
         var byLoginId = UserCriteria.byLoginId(command.loginId());
         if (userRepository.exists(byLoginId)) {
             throw new CoreException(ErrorType.CONFLICT, "이미 존재하는 로그인 ID입니다.");

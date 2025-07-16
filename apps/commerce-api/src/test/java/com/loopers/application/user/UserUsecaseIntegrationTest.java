@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -17,7 +18,7 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 class UserUsecaseIntegrationTest {
 
-    @Autowired
+    @MockitoSpyBean
     private UserRepository userRepository;
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
@@ -35,8 +36,6 @@ class UserUsecaseIntegrationTest {
         @Test
         @DisplayName("회원 가입시 User 저장이 수행된다. ( spy 검증 )")
         void saveUser_whenUserRegisters() {
-            var spyUsersRepository = spy(userRepository);
-            UserService spyUserService = new UserService(spyUsersRepository);
             var command = new UserCommand.Create(
                     "testUser",
                     Gender.MALE,
@@ -45,13 +44,13 @@ class UserUsecaseIntegrationTest {
             );
 
             // act
-            UserEntity result = spyUserService.signUp(command);
+            var result = userFacade.signUp(command);
 
             // verify
-            verify(spyUsersRepository).exists(any(UserCriteria.class));
-            verify(spyUsersRepository).save(any(UserEntity.class));
+            verify(userRepository).exists(any(UserCriteria.class));
+            verify(userRepository).save(any(UserEntity.class));
             assertNotNull(result);
-            assertEquals("testUser", result.getLoginId());
+            assertEquals("testUser", result.loginId());
         }
 
         @Test

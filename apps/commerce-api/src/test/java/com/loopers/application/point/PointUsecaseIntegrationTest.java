@@ -46,7 +46,7 @@ class PointUsecaseIntegrationTest {
                     "1993-04-09",
                     "test@gmail.com"
             );
-            UserEntity tester = userService.signUp(command);
+            UserEntity tester = userService.create(command);
 
             // when
             PointInfo points = pointFacade.get(tester.getLoginId());
