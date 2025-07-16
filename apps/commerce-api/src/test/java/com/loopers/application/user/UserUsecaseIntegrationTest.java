@@ -101,14 +101,12 @@ class UserUsecaseIntegrationTest {
             UserInfo result = userFacade.get("testUser");
 
             // assert
-            assertAll(
-                () -> assertNotNull(result),
-                () -> assertNotNull(result.id()),
-                () -> assertEquals(expected.getLoginId(), result.loginId()),
-                () -> assertEquals(expected.getGender().getValue(), result.gender()),
-                () -> assertEquals(expected.getBirthDate(), result.birthDate()),
-                () -> assertEquals(expected.getEmail(), result.email())
-            );
+            assertNotNull(result);
+            assertNotNull(result.id());
+            assertEquals(expected.getLoginId(), result.loginId());
+            assertEquals(expected.getGender().getValue(), result.gender());
+            assertEquals(expected.getBirthDate(), result.birthDate());
+            assertEquals(expected.getEmail(), result.email());
         }
 
         @Test

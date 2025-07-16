@@ -11,6 +11,9 @@ public class UserValidator {
         if (loginId == null || loginId.isBlank()) {
             throw new CoreException(ErrorType.BAD_REQUEST, "아이디는 비어있을 수 없습니다: " + loginId);
         }
+        if (!loginId.matches("^[a-zA-Z0-9]+$")) {
+            throw new CoreException(ErrorType.BAD_REQUEST, "아이디는 영문 및 숫자만 허용됩니다: " + loginId);
+        }
         if (loginId.length() > 10) {
             throw new CoreException(ErrorType.BAD_REQUEST, "아이디는 10자 이하여야 합니다: " + loginId);
         }
@@ -37,7 +40,7 @@ public class UserValidator {
         if (email == null || email.isBlank()) {
             throw new CoreException(ErrorType.BAD_REQUEST, "이메일은 비어있을 수 없습니다: " + email);
         }
-        if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
+        if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\\.[a-zA-Z]{2,}$")) {
             throw new CoreException(ErrorType.BAD_REQUEST, "이메일은 올바른 형식이어야 합니다: " + email);
         }
     }
