@@ -69,9 +69,6 @@ class UserV1ApiE2ETest {
             ResponseEntity<ApiResponse<UserV1Dto.UsersResponse>> response =
                 testRestTemplate.exchange(requestUrl, HttpMethod.POST, new HttpEntity<>(request), responseType);
 
-            System.out.println("Response Status: " + response.getStatusCode());
-            System.out.println("Response Body: " + response.getBody());
-
             // assert
             assertTrue(response.getStatusCode().is2xxSuccessful());
             assertNotNull(response.getBody());
@@ -117,8 +114,6 @@ class UserV1ApiE2ETest {
             var signUpCommand = new UserCommand.Create(
                     "testuser", UserEntity.Gender.MALE, "1993-04-09", "test@gmail.com");
             var testUser = userService.create(signUpCommand);
-
-
 
             // act
             var headers = new MultiValueMapAdapter<>(Map.of("X-USER-ID", List.of(testUser.getLoginId())));
