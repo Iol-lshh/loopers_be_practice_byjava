@@ -46,9 +46,8 @@ public class UserEntity extends BaseEntity {
         return new UserEntity(command.loginId(), command.gender(), command.birthDate(), command.email());
     }
 
-    public UserPointVo charge(Long amount) {
-        this.point = this.point.charge(amount);
-        return this.point;
+    public void charge(Long amount) {
+        this.point = UserPointVo.plus(this.point, amount);
     }
 
     @Getter

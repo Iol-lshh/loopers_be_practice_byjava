@@ -24,9 +24,9 @@ class UserModelTest {
         })
         void failsToCreateUser_whenLoginIdIsInvalid(String invalidLoginId) {
             // arrange
-            UserCommand.Create command = new UserCommand.Create(
+            UserCommand.Create command = UserCommand.Create.of(
                     invalidLoginId,
-                    UserEntity.Gender.MALE,
+                    "남",
                     "1993-04-09",
                     "test@gmail.com"
             );
@@ -52,9 +52,9 @@ class UserModelTest {
         })
         void failsToCreateUser_whenEmailIsInvalid(String invalidEmail) {
             // arrange
-            UserCommand.Create command = new UserCommand.Create(
+            UserCommand.Create command = UserCommand.Create.of(
                     "testId",
-                    UserEntity.Gender.MALE,
+                    "남",
                     "1993-04-09",
                     invalidEmail
             );
@@ -78,9 +78,9 @@ class UserModelTest {
         })
         void failsToCreateUser_whenBirthDateIsInvalid(String invalidBirthDate) {
             // arrange
-            UserCommand.Create command = new UserCommand.Create(
+            UserCommand.Create command = UserCommand.Create.of(
                     "testId",
-                    UserEntity.Gender.MALE,
+                    "남",
                     invalidBirthDate,
                     "test@gmail.com"
             );
@@ -88,6 +88,32 @@ class UserModelTest {
             // act
             CoreException exception = assertThrows(CoreException.class, () -> {
                 UserEntity.of(command);
+            });
+
+            // assert
+            assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
+        }
+
+        @DisplayName("성별이 정의된 값이 아니면, UserCommand.Create 생성에 실패한다.")
+        @ParameterizedTest()
+        @ValueSource(strings = {
+                "",
+                "남성", "여성", "기타",
+                "남성 ", " 여 성", "기타 ",
+                "남성입니다", "여성입니다", "기타입니다", "남성_여성", "남성.여성", "남성-여성",
+                "@", "_", "123", "남성123", "여성123", "기타123",
+                "tester", "1993-12-30", "test@gmail.com"
+        })
+        void failsToCreateUser_whenGenderIsInvalid(String invalidGender) {
+
+            // act
+            CoreException exception = assertThrows(CoreException.class, () -> {
+                UserCommand.Create.of(
+                        "testId",
+                        invalidGender,
+                        "1993-04-09",
+                        "test@gmail.com"
+                );
             });
 
             // assert
