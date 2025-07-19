@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -24,6 +26,8 @@ class UserUsecaseIntegrationTest {
     private DatabaseCleanUp databaseCleanUp;
     @Autowired
     private UserFacade userFacade;
+    @Autowired
+    private UserService userService;
 
     @AfterEach
     void tearDown() {
@@ -94,8 +98,7 @@ class UserUsecaseIntegrationTest {
                     "1993-04-09",
                     "test@gmail.com"
             );
-            UserEntity expected = UserEntity.of(command);
-            UserEntity savedUser = userRepository.save(expected);
+            UserInfo expected = userFacade.signUp(command);
 
             // act
             UserInfo result = userFacade.get("testUser");
@@ -103,23 +106,20 @@ class UserUsecaseIntegrationTest {
             // assert
             assertNotNull(result);
             assertNotNull(result.id());
-            assertEquals(expected.getLoginId(), result.loginId());
-            assertEquals(expected.getGender().getValue(), result.gender());
-            assertEquals(expected.getBirthDate(), result.birthDate());
-            assertEquals(expected.getEmail(), result.email());
+            assertEquals(expected, result);
         }
 
         @Test
-        @DisplayName("해당 ID 의 회원이 존재하지 않을 경우, null 이 반환된다.")
-        void returnsNull_whenUserDoesNotExist() {
+        @DisplayName("해당 ID 의 회원이 존재하지 않을 경우, 빈 Optional이 반환된다.")
+        void returnsEmptyOptional_whenUserDoesNotExist() {
             // arrange
-            String nonExistentLoginId = "nonExistentUser";
+            var criteria = UserCriteria.byLoginId("nonExistentUser");
 
             // act
-            UserInfo result = userFacade.get(nonExistentLoginId);
+            Optional<UserEntity> result = userService.find(criteria);
 
             // assert
-            assertNull(result);
+            assertTrue(result.isEmpty());
         }
     }
 }
