@@ -16,17 +16,38 @@ class UserPointModelTest {
         @Test
         void failsToChargePoints_whenAmountIsZeroOrNegative() {
             // arrange
-            long testUserId = 1L;
-            var utd = UserPointVo.init();
+            var user = UserEntity.of(UserCommand.Create.of(
+                    "testUser", "남",
+                    "1993-04-09", "test@gmail.com"
+                    ));
             long invalidAmount = -100;
 
             // act
             CoreException exception = assertThrows(CoreException.class, () -> {
-                utd.charge(invalidAmount);
+                user.charge(invalidAmount);
             });
 
             // assert
             assertEquals(ErrorType.BAD_REQUEST, exception.getErrorType());
+        }
+
+        @DisplayName("0 이상으로 포인트가 충전시 성공한다.")
+        @Test
+        void succeedsToChargePoints_whenAmountIsPositive() {
+            // arrange
+            var user = UserEntity.of(UserCommand.Create.of(
+                    "testUser", "남",
+                    "1993-04-09", "test@gmail.com"
+            ));
+            long validAmount = 100;
+
+            // act
+            user.charge(validAmount);
+            var currentPoint = user.getPoint();
+
+            // assert
+            assertNotNull(currentPoint);
+            assertEquals(100, currentPoint.getAmount());
         }
     }
 }
