@@ -17,8 +17,8 @@ public class PointFacade {
     public PointInfo get(String loginId) {
         UserCriteria criteria = UserCriteria.byLoginId(loginId);
         var targetUser = userService.find(criteria);
-        if(targetUser.isEmpty()) {
-            return null;
+        if (targetUser.isEmpty()) {
+            throw new CoreException(ErrorType.NOT_FOUND, "사용자를 찾을 수 없습니다: " + loginId);
         }
         return PointInfo.from(targetUser.get());
     }

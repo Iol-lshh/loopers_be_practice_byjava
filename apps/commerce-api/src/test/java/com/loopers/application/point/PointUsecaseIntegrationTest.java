@@ -56,27 +56,52 @@ class PointUsecaseIntegrationTest {
             assertEquals(tester.getId(), points.userId());
         }
 
-        @DisplayName("해당 ID 의 회원이 존재하지 않을 경우, null 이 반환된다.")
+        @DisplayName("해당 ID 의 회원이 존재하지 않을 경우, CoreException:NOT_FOUND 가 발생한다.")
         @Test
-        void getPoints_whenUserDoesNotExist() {
+        void throwNotFound_whenUserDoesNotExist() {
             // given
             String loginId = "nonExistentUser";
 
             // when
-            PointInfo points = pointFacade.get(loginId);
+            CoreException coreException = assertThrows(CoreException.class,
+                    () -> pointFacade.get(loginId));
 
             // then
-            assertNull(points);
+            assertEquals(ErrorType.NOT_FOUND, coreException.getErrorType());
         }
     }
 
     @DisplayName("포인트 충전")
     @Nested
     class Charge {
+        @DisplayName("존재하는 유저 ID 로 충전을 시도한 경우, 포인트 조회시 충전된 포인트가 반환된다.")
+        @Test
+        void chargePoints_whenUserExists() {
+            // given
+            var command = new UserCommand.Create(
+                    "testUser",
+                    UserEntity.Gender.MALE,
+                    "1993-04-09",
+                    "test@gmail.com"
+            );
+            UserEntity tester = userService.create(command);
+            Long chargeAmount = 100L;
+            pointFacade.charge(tester.getLoginId(), chargeAmount);
+
+            // when
+            PointInfo result = pointFacade.get(tester.getLoginId());
+
+            // then
+            assertNotNull(result);
+            assertNotNull(result.point());
+            assertEquals(tester.getId(), result.userId());
+            assertEquals(chargeAmount, result.point());
+        }
+
 
         @DisplayName("존재하지 않는 유저 ID 로 충전을 시도한 경우, 실패한다.")
         @Test
-        void chargePoints_whenUserExists() {
+        void throwNotFound_whenUserDoesNotExist() {
             // given
             String loginId = "nonExistentUser";
 
