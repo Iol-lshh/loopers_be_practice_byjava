@@ -10,7 +10,7 @@ public class UserJpaSpecification {
         return (root, query, criteriaBuilder) -> {
 
             Predicate predicate = criteriaBuilder.conjunction();
-            for(var criterion: criteria.getCriteria()) {
+            for(var criterion: criteria.criteria()) {
                 if (criterion instanceof UserCriteria.ByLoginId(String loginId)) {
                     predicate = criteriaBuilder.and(predicate,
                             criteriaBuilder.equal(root.get("loginId"), loginId));
