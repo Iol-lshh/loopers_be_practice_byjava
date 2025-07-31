@@ -10,7 +10,7 @@ public class MySqlTestContainersConfig {
     private static final MySQLContainer<?> mySqlContainer;
 
     static {
-        mySqlContainer = new MySQLContainer<>(DockerImageName.parse("mysql:5.7"))
+        mySqlContainer = new MySQLContainer<>(DockerImageName.parse("mysql:8.0"))
             .withDatabaseName("loopers")
             .withUsername("test")
             .withPassword("test")

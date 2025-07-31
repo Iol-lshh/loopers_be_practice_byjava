@@ -2,17 +2,17 @@ package com.loopers.domain.user;
 
 import java.util.List;
 
-public record UserCriteria(
+public record UserStatement(
         List<Criterion> criteria
 ) {
     public interface Criterion {}
 
-    public record ByLoginId(
+    public record LoginId(
             String loginId
     ) implements Criterion {}
 
-    public static UserCriteria byLoginId(String loginId) {
+    public static UserStatement loginId(String loginId) {
 
-        return new UserCriteria(List.of(new ByLoginId(loginId)));
+        return new UserStatement(List.of(new LoginId(loginId)));
     }
 }

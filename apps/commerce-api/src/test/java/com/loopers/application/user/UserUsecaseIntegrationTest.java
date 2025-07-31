@@ -51,7 +51,7 @@ class UserUsecaseIntegrationTest {
             var result = userFacade.signUp(command);
 
             // verify
-            verify(userRepository).exists(any(UserCriteria.class));
+            verify(userRepository).exists(any(UserStatement.class));
             verify(userRepository).save(any(UserEntity.class));
             assertNotNull(result);
             assertEquals("testUser", result.loginId());
@@ -76,9 +76,7 @@ class UserUsecaseIntegrationTest {
             );
 
             // act
-            CoreException exception = assertThrows(CoreException.class, () -> {
-                userFacade.signUp(commandUtd);
-            });
+            CoreException exception = assertThrows(CoreException.class, () -> userFacade.signUp(commandUtd));
 
             // assert
             assertEquals(ErrorType.CONFLICT, exception.getErrorType());
@@ -98,10 +96,10 @@ class UserUsecaseIntegrationTest {
                     "1993-04-09",
                     "test@gmail.com"
             );
-            UserInfo expected = userFacade.signUp(command);
+            UserResult expected = userFacade.signUp(command);
 
             // act
-            UserInfo result = userFacade.get("testUser");
+            UserResult result = userFacade.get(expected.id());
 
             // assert
             assertNotNull(result);
@@ -113,10 +111,10 @@ class UserUsecaseIntegrationTest {
         @DisplayName("해당 ID 의 회원이 존재하지 않을 경우, 빈 Optional이 반환된다.")
         void returnsEmptyOptional_whenUserDoesNotExist() {
             // arrange
-            var criteria = UserCriteria.byLoginId("nonExistentUser");
+            Long nonExistentUserId = 999L;
 
             // act
-            Optional<UserEntity> result = userService.find(criteria);
+            Optional<UserEntity> result = userService.find(nonExistentUserId);
 
             // assert
             assertTrue(result.isEmpty());

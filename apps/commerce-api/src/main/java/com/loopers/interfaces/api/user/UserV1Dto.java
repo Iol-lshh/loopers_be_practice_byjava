@@ -1,13 +1,13 @@
 package com.loopers.interfaces.api.user;
 
-import com.loopers.application.user.UserInfo;
+import com.loopers.application.user.UserResult;
 import com.loopers.domain.user.UserCommand;
 
 public class UserV1Dto {
     public record UsersResponse(
             Long id, String loginId, String gender, String birthDate, String email
     ) {
-        public static UsersResponse from(UserInfo info) {
+        public static UsersResponse from(UserResult info) {
             return new UsersResponse(
                 info.id(),
                 info.loginId(),

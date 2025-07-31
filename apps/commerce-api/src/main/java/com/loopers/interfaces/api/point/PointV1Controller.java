@@ -17,7 +17,7 @@ public class PointV1Controller implements PointV1ApiSpec {
     public ApiResponse<PointV1Dto.PointsResponse> charge(
             @RequestBody PointV1Dto.PointsChargeRequest request
     ) {
-        var info = pointFacade.charge(request.loginId(), request.point());
+        var info = pointFacade.charge(request.userId(), request.amount());
         var response = PointV1Dto.PointsResponse.from(info);
         return ApiResponse.success(response);
     }
@@ -25,9 +25,9 @@ public class PointV1Controller implements PointV1ApiSpec {
     @GetMapping("")
     @Override
     public ApiResponse<PointV1Dto.PointsResponse> get(
-            @RequestHeader("X-USER-ID") String loginId
+            @RequestHeader("X-USER-ID") Long userId
     ) {
-        var info = pointFacade.get(loginId);
+        var info = pointFacade.get(userId);
         var response = PointV1Dto.PointsResponse.from(info);
         return ApiResponse.success(response);
     }

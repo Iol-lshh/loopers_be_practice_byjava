@@ -4,6 +4,7 @@ import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -11,9 +12,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserModelTest {
+    @DisplayName("회원 생성")
     @Nested
     class Create {
-        @DisplayName("ID 가 영문 및 숫자 10자 이내 형식에 맞지 않으면, User 객체 생성에 실패한다.")
+        @DisplayName("로그인 ID가 null이면, User 객체 생성에 실패시, BAD_REQUEST 예외를 던진다.")
+        @Test
+        void failsToCreateUser_whenLoginIdIsNull() {
+            // arrange
+            UserCommand.Create command = UserCommand.Create.of(
+                    null,
+                    "남",
+                    "1993-04-09",
+                    "test@gmail.com"
+            );
+
+            // act
+            CoreException exception = assertThrows(CoreException.class, () ->
+                    UserEntity.of(command));
+
+            // assert
+            assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
+        }
+
+
+        @DisplayName("로그인 ID가 영문 및 숫자 10자 이내 형식에 맞지 않으면, User 객체 생성시, BAD_REQUEST 예외를 던진다.")
         @ParameterizedTest
         @ValueSource(strings = {
                 "",
@@ -32,15 +54,33 @@ class UserModelTest {
             );
 
             // act
-            CoreException exception = assertThrows(CoreException.class, () -> {
-                UserEntity.of(command);
-            });
+            CoreException exception = assertThrows(CoreException.class, () ->
+                    UserEntity.of(command));
 
             // assert
             assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
         }
 
-        @DisplayName("이메일이 xx@yy.zz 형식에 맞지 않으면, User 객체 생성에 실패한다.")
+        @DisplayName("이메일이 null 이면, User 객체 생성시, BAD_REQUEST 예외를 던진다.")
+        @Test
+        void failsToCreateUser_whenEmailIsNull() {
+            // arrange
+            UserCommand.Create command = UserCommand.Create.of(
+                    "testId",
+                    "남",
+                    "1993-04-09",
+                    null
+            );
+
+            // act
+            CoreException exception = assertThrows(CoreException.class, () ->
+                    UserEntity.of(command));
+
+            // assert
+            assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
+        }
+
+        @DisplayName("이메일이 xx@yy.zz 형식에 맞지 않으면, User 객체 생성시, BAD_REQUEST 예외를 던진다.")
         @ParameterizedTest
         @ValueSource(strings = {
                 "",
@@ -60,21 +100,40 @@ class UserModelTest {
             );
 
             // act
-            CoreException exception = assertThrows(CoreException.class, () -> {
-                UserEntity.of(command);
-            });
+            CoreException exception = assertThrows(CoreException.class, () ->
+                    UserEntity.of(command));
 
             // assert
             assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
         }
 
-        @DisplayName("생년월일이 yyyy-MM-dd 형식에 맞지 않으면, User 객체 생성에 실패한다.")
+        @DisplayName("생년월일이 null 이면, User 객체 생성시, BAD_REQUEST 예외를 던진다.")
+        @Test
+        void failsToCreateUser_whenBirthDateIsNull() {
+            // arrange
+            UserCommand.Create command = UserCommand.Create.of(
+                    "testId",
+                    "남",
+                    null,
+                    "test@gmail.com"
+            );
+
+            // act
+            CoreException exception = assertThrows(CoreException.class, () ->
+                    UserEntity.of(command));
+
+            // assert
+            assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
+        }
+
+
+        @DisplayName("생년월일이 yyyy-MM-dd 형식에 맞지 않으면, User 객체 생성시, BAD_REQUEST 예외를 던진다.")
         @ParameterizedTest
         @ValueSource(strings = {
                 "", "-", "--", "---", " - - ", "  -  -  ",
                 "19931230", "199312-30", "1993-1230", "1993-12-30-", "1993-12-30-1", 
                 "1993-1-30", "1993-12-3", "1993-12-300", "1993-12-300",
-                "3000-01-01",
+                "3000-01-01", "1993-13-01", "1993-00-01", "1993-01-32",
         })
         void failsToCreateUser_whenBirthDateIsInvalid(String invalidBirthDate) {
             // arrange
@@ -86,15 +145,14 @@ class UserModelTest {
             );
 
             // act
-            CoreException exception = assertThrows(CoreException.class, () -> {
-                UserEntity.of(command);
-            });
+            CoreException exception = assertThrows(CoreException.class, () ->
+                    UserEntity.of(command));
 
             // assert
             assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
         }
 
-        @DisplayName("성별이 정의된 값이 아니면, UserCommand.Create 생성에 실패한다.")
+        @DisplayName("성별이 정의된 값이 아니면, UserCommand.Register 생성시, BAD_REQUEST 예외를 던진다.")
         @ParameterizedTest()
         @ValueSource(strings = {
                 "",
@@ -107,14 +165,13 @@ class UserModelTest {
         void failsToCreateUser_whenGenderIsInvalid(String invalidGender) {
 
             // act
-            CoreException exception = assertThrows(CoreException.class, () -> {
-                UserCommand.Create.of(
-                        "testId",
-                        invalidGender,
-                        "1993-04-09",
-                        "test@gmail.com"
-                );
-            });
+            CoreException exception = assertThrows(CoreException.class, () ->
+                    UserCommand.Create.of(
+                    "testId",
+                    invalidGender,
+                    "1993-04-09",
+                    "test@gmail.com"
+            ));
 
             // assert
             assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);

@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -48,11 +50,11 @@ class PointUsecaseIntegrationTest {
             UserEntity tester = userService.create(command);
 
             // when
-            PointInfo points = pointFacade.get(tester.getLoginId());
+            PointResult points = pointFacade.get(tester.getId());
 
             // then
             assertNotNull(points);
-            assertNotNull(points.point());
+            assertNotNull(points.amount());
             assertEquals(tester.getId(), points.userId());
         }
 
@@ -60,11 +62,13 @@ class PointUsecaseIntegrationTest {
         @Test
         void throwNotFound_whenUserDoesNotExist() {
             // given
-            String loginId = "nonExistentUser";
+            Long nonExistentUserId = 999L;
+            Optional<UserEntity> nonExistentUser = userService.find(nonExistentUserId);
+            assertTrue(nonExistentUser.isEmpty());
 
             // when
             CoreException coreException = assertThrows(CoreException.class,
-                    () -> pointFacade.get(loginId));
+                    () -> pointFacade.get(nonExistentUserId));
 
             // then
             assertEquals(ErrorType.NOT_FOUND, coreException.getErrorType());
@@ -85,17 +89,17 @@ class PointUsecaseIntegrationTest {
                     "test@gmail.com"
             );
             UserEntity tester = userService.create(command);
+            assertNotNull(tester.getId());
             Long chargeAmount = 100L;
-            pointFacade.charge(tester.getLoginId(), chargeAmount);
 
             // when
-            PointInfo result = pointFacade.get(tester.getLoginId());
+            PointResult result = pointFacade.charge(tester.getId(), chargeAmount);
 
             // then
             assertNotNull(result);
-            assertNotNull(result.point());
+            assertNotNull(result.amount());
             assertEquals(tester.getId(), result.userId());
-            assertEquals(chargeAmount, result.point());
+            assertEquals(chargeAmount, result.amount());
         }
 
 
@@ -103,11 +107,13 @@ class PointUsecaseIntegrationTest {
         @Test
         void throwNotFound_whenUserDoesNotExist() {
             // given
-            String loginId = "nonExistentUser";
+            Long nonExistentUserId = 999L;
+            Optional<UserEntity> nonExistentUser = userService.find(nonExistentUserId);
+            assertTrue(nonExistentUser.isEmpty());
 
             // when
             CoreException coreException = assertThrows(CoreException.class,
-                    () -> pointFacade.charge(loginId, 100L));
+                    () -> pointFacade.charge(nonExistentUserId, 100L));
 
             // then
             assertEquals(ErrorType.NOT_FOUND, coreException.getErrorType());

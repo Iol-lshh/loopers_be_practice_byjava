@@ -1,21 +1,21 @@
 package com.loopers.interfaces.api.point;
 
-import com.loopers.application.point.PointInfo;
+import com.loopers.application.point.PointResult;
 
 public class PointV1Dto {
     public record PointsResponse(
-            Long userId, Long point
+            Long userId, Long amount
     ) {
-        public static PointsResponse from(PointInfo info) {
+        public static PointsResponse from(PointResult info) {
             return new PointsResponse(
                     info.userId(),
-                    info.point()
+                    info.amount()
             );
         }
     }
 
     public record PointsChargeRequest(
-            String loginId, Long point
+            Long userId, Long amount
     ) {
 
     }

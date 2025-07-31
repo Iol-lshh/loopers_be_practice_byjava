@@ -24,9 +24,10 @@ erDiagram
         datetime deletedAt
     }
 
-    PRODUCT_LIKE {
-        bigint productId PK, FK
+    LIKES {
+        bigint targetId PK, FK
         bigint userId PK, FK
+        String targetType PK
         datetime createdAt
     }
     ORDER {
@@ -57,9 +58,9 @@ erDiagram
         datetime deletedAt
     }
     BRAND ||..o{ PRODUCT : brandId
-    PRODUCT ||..o{ PRODUCT_LIKE : productId
+    PRODUCT ||..o{ LIKES : productId
     PRODUCT ||..o{ ORDER_ITEM : productId
     ORDER ||..o{ ORDER_ITEM : orderId
     USER ||..o{ ORDER : userId
-    USER ||..o{ PRODUCT_LIKE : userId
+    USER ||..o{ LIKES : userId
 ```
