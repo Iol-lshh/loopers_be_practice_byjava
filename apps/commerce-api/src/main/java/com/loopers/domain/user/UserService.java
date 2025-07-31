@@ -16,7 +16,7 @@ public class UserService {
 
     @Transactional
     public UserEntity create(UserCommand.Create command) {
-        var byLoginId = UserCriteria.byLoginId(command.loginId());
+        var byLoginId = UserStatement.loginId(command.loginId());
         if (userRepository.exists(byLoginId)) {
             throw new CoreException(ErrorType.CONFLICT, "이미 존재하는 로그인 ID입니다.");
         }
@@ -25,8 +25,13 @@ public class UserService {
         return userRepository.save(userEntity);
     }
 
-    @Transactional
-    public Optional<UserEntity> find(UserCriteria userCriteria) {
-        return userRepository.find(userCriteria);
+    @Transactional(readOnly = true)
+    public Optional<UserEntity> find(UserStatement userStatement) {
+        return userRepository.find(userStatement);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<UserEntity> find(Long id) {
+        return userRepository.find(id);
     }
 }

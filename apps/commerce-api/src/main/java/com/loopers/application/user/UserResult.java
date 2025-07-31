@@ -2,15 +2,15 @@ package com.loopers.application.user;
 
 import com.loopers.domain.user.UserEntity;
 
-public record UserInfo(
+public record UserResult(
         Long id,
         String loginId,
         String gender,
         String birthDate,
         String email
 ) {
-    public static UserInfo from(UserEntity model) {
-        return new UserInfo(
+    public static UserResult from(UserEntity model) {
+        return new UserResult(
                 model.getId(),
                 model.getLoginId(),
                 model.getGender().getValue(),
