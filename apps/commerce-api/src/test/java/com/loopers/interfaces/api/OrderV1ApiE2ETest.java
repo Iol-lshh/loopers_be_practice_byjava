@@ -145,7 +145,7 @@ public class OrderV1ApiE2ETest {
                     user.getId(),
                     List.of(new OrderCriteria.Item(product.getId(), 2L))
             );
-            var order = orderFacade.orderByPoint(command);
+            var order = orderFacade.order(command);
             assertTrue(orderService.find(order.orderId()).isPresent());
 
             // when
@@ -190,7 +190,7 @@ public class OrderV1ApiE2ETest {
                             new OrderCriteria.Item(product.getId(), 2L),
                             new OrderCriteria.Item(product2.getId(), 1L))
             );
-            var order = orderFacade.orderByPoint(command);
+            var order = orderFacade.order(command);
             assertTrue(orderService.find(order.orderId()).isPresent());
             String orderId = order.orderId().toString();
             String requestUrlWithOrderId = requestUrl + "/" + orderId;

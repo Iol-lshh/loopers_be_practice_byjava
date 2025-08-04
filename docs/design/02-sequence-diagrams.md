@@ -13,16 +13,13 @@ title: "시퀀스 다이어그램"
 ```mermaid
 sequenceDiagram
     actor User
-    User->>+BrandApi: GET /api/v1/brands/{brandId}
-
-    BrandApi->>+BrandUsecase: get(brandId)
+    User->>+BrandUsecase: get(brandId)
     BrandUsecase->>+BrandService: find(brandId): Optional<BrandEntity>
 
     alt 브랜드 조회 실패
         BrandUsecase->>User: ApiResponse<Metadata.fail(NotFound)>
     end
-    BrandUsecase->>-BrandApi: BrandInfo
-    BrandApi->>-User: ApiResponse<Metadata.success(BrandResponse)>
+    BrandUsecase->>-User: ApiResponse<Metadata.success(BrandResponse)>
 ```
 
 ### 상품 목록 조회
@@ -35,8 +32,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    User->>+ProductApi: GET /api/v1/products/{page}?brandId=?&size=?&sort=?
-    ProductApi->>+ProductUsecase: get(ProductCriteria)
+    User->>+ProductUsecase: get(ProductCriteria)
     opt 브랜드 필터링 시
         ProductUsecase->>+BrandService: find(brandId): Optional<BrandEntity>
         alt 브랜드 조회 실패 시
@@ -44,8 +40,7 @@ sequenceDiagram
         end
     end
     ProductUsecase->>+ProductService: find(ProductCriteria): List<ProductEntity>
-    ProductUsecase->>-ProductApi: List<ProductInfo>
-    ProductApi->>-User: ApiResponse<Metadata.success(List<ProductResponse>)>
+    ProductUsecase->>-User: ApiResponse<Metadata.success(List<ProductResponse>)>
 ```
 
 ### 상품 정보 조회
@@ -55,14 +50,12 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    User->>+ProductApi: GET /api/v1/products/{page}?brandId=?&size=?&sort=?
-    ProductApi->>+ProductUsecase: get(ProductCriteria)
+    User->>+ProductUsecase: get(ProductCriteria)
     ProductUsecase->>+ProductService: find(ProductCriteria): Optional<ProductEntity>
     alt 상품 조회 실패 시
         ProductUsecase->>User: ApiResponse<Metadata.fail(NotFound)>
     end
-    ProductUsecase->>-ProductApi: ProductInfo
-    ProductApi->>-User: ApiResponse<Metadata.success(ProductResponse)>
+    ProductUsecase->>-User: ApiResponse<Metadata.success(ProductResponse)>
 ```
 
 ## 좋아요 (Likes)
@@ -77,8 +70,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    User->>+ProductApi: POST /api/v1/products/{productId}/likes
-    ProductApi->>+LikeUsecase: like(userId, productId)
+    User->>+LikeUsecase: like(userId, productId)
     LikeUsecase->>+UserService: find(userId): Optional<UserEntity>
     alt 사용자 조회 실패 시
         LikeUsecase->>User: ApiResponse<Metadata.fail(NotFound)>
@@ -87,8 +79,7 @@ sequenceDiagram
     alt 상품 조회 실패 시
         LikeUsecase->>User: ApiResponse<Metadata.fail(NotFound)>
     end
-    LikeUsecase->>-ProductApi: ProductUserLikeInfo
-    ProductApi->>-User: ApiResponse<Metadata.success(ProductUserLikeResponse)>
+    LikeUsecase->>-User: ApiResponse<Metadata.success(ProductUserLikeResponse)>
 ```
 
 ### 상품 좋아요 취소
@@ -96,8 +87,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    User->>+ProductApi: DELETE /api/v1/products/{productId}/likes, X-USER-ID:{userId}
-    ProductApi->>+LikeUsecase: unlike(userId, productId)
+    User->>+LikeUsecase: unlike(userId, productId)
     LikeUsecase->>+UserService: find(userId): Optional<UserEntity>
     alt 사용자 조회 실패 시
         LikeUsecase->>User: ApiResponse<Metadata.fail(NotFound)>
@@ -106,8 +96,7 @@ sequenceDiagram
     alt 상품 조회 실패 시
         LikeUsecase->>User: ApiResponse<Metadata.fail(NotFound)>
     end
-    LikeUsecase->>-ProductApi: ProductUserLikeInfo
-    ProductApi->>-User: ApiResponse<Metadata.success(ProductUserLikeResponse)>
+    LikeUsecase->>-User: ApiResponse<Metadata.success(ProductUserLikeResponse)>
 ```
 
 ### 내가 좋아요 한 상품 목록 조회
@@ -115,15 +104,13 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    User->>+UserApi: GET /api/v1/users/likes, X-USER-ID:{userId}
-    UserApi->>+LikeUsecase: get(LikeCriteria)
+    User->>+LikeUsecase: get(LikeCriteria)
     LikeUsecase->>+UserService: find(userId): Optional<UserEntity>
     alt 사용자 조회 실패 시
         LikeUsecase->>User: ApiResponse<Metadata.fail(NotFound)>
     end
     LikeUsecase->>+ProductService: find(ProductCriteria): List<ProductEntity>
-    LikeUsecase->>-UserApi: List<ProductInfo>
-    UserApi->>-User: ApiResponse<Metadata.success(List<ProductResponse>)>
+    LikeUsecase->>-User: ApiResponse<Metadata.success(List<ProductResponse>)>
 ```
 
 ## 주문 / 결제 (Orders/Payments)
@@ -139,8 +126,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    User->>+OrderApi: POST /api/v1/orders OrderRequest
-    OrderApi->>+OrderUsecase: order(OrderCommand.Create)
+    User->>+OrderUsecase: order(OrderCommand.Create)
     OrderUsecase->>UserService: find(userId): Optional<UserEntity>
     alt 사용자 조회 실패 시
         OrderUsecase->>User: ApiResponse<Metadata.fail(NotFound)>
@@ -153,16 +139,26 @@ sequenceDiagram
     alt 상품 재고 부족으로 차감 실패 시
         OrderUsecase->>User: ApiResponse<Metadata.fail(BadRequest)>
     end
-    OrderUsecase->>PointService: decreasePoint(userId): PointEntity
-    alt 포인트 부족으로 차감 실패 시
-        OrderUsecase->>User: ApiResponse<Metadata.fail(BadRequest)>
+    OrderUsecase->>-User: ApiResponse<Metadata.success(OrderResponse)>
+```
+
+### 결제 요청
+
+```mermaid
+sequenceDiagram
+    actor User
+    User->>+PaymentUsecase: pay(orderId)
+    PaymentUsecase->>OrderService: find: Order
+    alt 주문 조회 실패 시
+        PaymentUsecase->>User: ApiResponse<Metadata.fail(NotFound)>
     end
-    OrderUsecase->>ExternalService: send(OrderEntity): ?
-    alt 외부 시스템 실패 시
-        ExternalService->>User: ApiResponse<Metadata.fail(InternalServerError)>
+    PaymentUsecase->>+PaymentWay: pay (Point)
+    alt 결제 처리 실패 시
+        PaymentUsecase->>User: ApiResponse<Metadata.fail(InternalServerError)>
     end
-    OrderUsecase->>-OrderApi: OrderInfo.Summary
-    OrderApi->>-User: ApiResponse<Metadata.success(OrderResponse)>
+    PaymentUsecase->>+PaymentService: save
+    PaymentUsecase->>+OrderService: updateStatus(orderId, OrderStatus.PAID)
+    PaymentUsecase->>-User: ApiResponse<Metadata.success(PaymentResponse)>
 ```
 
 ### 유저의 주문 목록 조회
@@ -170,15 +166,13 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    User->>+UserApi: GET /api/v1/users/orders, X-USER-ID:{userId}
-    UserApi->>+OrderFacade: get(OrderCriteria)
-    OrderFacade->>UserService: find(userId): Optional<UserEntity>
+    User->>+OrderUsecase: get(OrderCriteria)
+    OrderUsecase->>UserService: find(userId): Optional<UserEntity>
     alt 사용자 조회 실패 시
-        OrderFacade->>User: ApiResponse<Metadata.fail(NotFound)>
+        OrderUsecase->>User: ApiResponse<Metadata.fail(NotFound)>
     end
-    OrderFacade->>+OrderService: find(OrderCriteria): List<OrderEntity>
-    OrderFacade->>-UserApi: List<OrderInfo.Summary>
-    UserApi->>-User: ApiResponse<Metadata.success(List<OrderResponse>)>
+    OrderUsecase->>+OrderService: find(OrderCriteria): List<OrderEntity>
+    OrderUsecase->>-User: ApiResponse<Metadata.success(List<OrderResponse>)>
 ```
 
 ### 단일 주문 상세 조회
@@ -186,8 +180,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    User->>+OrderApi: GET /api/v1/orders/{orderId}, X-USER-ID:{userId}
-    OrderApi->>+OrderUsecase: get(orderId)
+    User->>+OrderUsecase: get(orderId)
     OrderUsecase->>+OrderService: find(orderId): Optional<OrderEntity>
     alt 주문 조회 실패 시
         OrderUsecase->>User: ApiResponse<Metadata.fail(NotFound)>
@@ -196,6 +189,5 @@ sequenceDiagram
     alt 상품 조회 실패 시
         OrderUsecase->>User: ApiResponse<Metadata.fail(InternalServerError)>
     end
-    OrderUsecase->>-OrderApi: OrderInfo.Detail
-    OrderApi->>-User: ApiResponse<Metadata.success(OrderDetailResponse)> 
+    OrderUsecase->>-User: ApiResponse<Metadata.success(OrderDetailResponse)> 
 ```

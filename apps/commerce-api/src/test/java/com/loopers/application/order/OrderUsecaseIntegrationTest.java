@@ -117,7 +117,7 @@ public class OrderUsecaseIntegrationTest {
                 user.getId(),
                 List.of(new OrderCriteria.Item(product.getId(), quantity))
         );
-        var info = orderFacade.orderByPoint(orderCriteria);
+        var info = orderFacade.order(orderCriteria);
         assertNotNull(info.orderId());
         var orderOptional = orderService.find(info.orderId());
         assertTrue(orderOptional.isPresent());
@@ -141,7 +141,7 @@ public class OrderUsecaseIntegrationTest {
             );
 
             // When
-            OrderResult.Summary orderInfo = orderFacade.orderByPoint(orderCriteria);
+            OrderResult.Summary orderInfo = orderFacade.order(orderCriteria);
 
             // Then
             assertNotNull(orderInfo.orderId());
@@ -163,7 +163,7 @@ public class OrderUsecaseIntegrationTest {
                         nonExistentUserId,
                         List.of(new OrderCriteria.Item(product.getId(), 1L)) // 임의의 상품 ID 사용
                 );
-                orderFacade.orderByPoint(orderCriteria);
+                orderFacade.order(orderCriteria);
             });
 
             // Then
@@ -184,7 +184,7 @@ public class OrderUsecaseIntegrationTest {
                         validUserId,
                         List.of(new OrderCriteria.Item(nonExistentProductId, 1L))
                 );
-                orderFacade.orderByPoint(orderCriteria);
+                orderFacade.order(orderCriteria);
             });
 
             // Then
@@ -201,9 +201,9 @@ public class OrderUsecaseIntegrationTest {
             // When
             var orderCriteria = new OrderCriteria.Order(
                     user.getId(),
-                    List.of(new OrderCriteria.Item(product.getId(), 1L))
+                    List.of(new OrderCriteria.Item(product.getId(), product.getStock() + 1))
             );
-            var result = assertThrows(CoreException.class, () -> orderFacade.orderByPoint(orderCriteria));
+            var result = assertThrows(CoreException.class, () -> orderFacade.order(orderCriteria));
 
             // Then
             assertEquals(ErrorType.BAD_REQUEST, result.getErrorType());
@@ -218,7 +218,7 @@ public class OrderUsecaseIntegrationTest {
             var emptyOrderCriteria = new OrderCriteria.Order(userId, emptyProductList);
 
             // When
-            var result = assertThrows(CoreException.class, () -> orderFacade.orderByPoint(emptyOrderCriteria));
+            var result = assertThrows(CoreException.class, () -> orderFacade.order(emptyOrderCriteria));
 
             // Then
             assertEquals(ErrorType.BAD_REQUEST, result.getErrorType());
@@ -236,7 +236,7 @@ public class OrderUsecaseIntegrationTest {
                     user.getId(),
                     List.of(new OrderCriteria.Item(product.getId(), 2L))
             );
-            var result = assertThrows(CoreException.class, () -> orderFacade.orderByPoint(orderCriteria));
+            var result = assertThrows(CoreException.class, () -> orderFacade.order(orderCriteria));
 
             // Then
             assertEquals(ErrorType.BAD_REQUEST, result.getErrorType());

@@ -4,6 +4,7 @@ import com.loopers.domain.order.OrderCommand;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class OrderCriteria {
     public record Item(
@@ -24,6 +25,14 @@ public class OrderCriteria {
                             item.quantity
                     )).toList();
             return new OrderCommand.Order(userId, items);
+        }
+
+        public Map<Long, Long> getOrderItemMap() {
+            return orderItems.stream()
+                    .collect(Collectors.toMap(
+                            OrderCriteria.Item::productId,
+                            OrderCriteria.Item::quantity
+                    ));
         }
     }
 }

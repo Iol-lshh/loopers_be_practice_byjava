@@ -1,5 +1,6 @@
 package com.loopers.domain.point;
 
+import com.loopers.domain.payment.PaymentWay;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +11,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Component
-public class PointService {
+public class PointService implements PaymentWay<PointEntity> {
     private final PointRepository pointRepository;
 
     @Transactional
@@ -32,10 +33,15 @@ public class PointService {
     }
 
     @Transactional
-    public PointEntity deduct(Long userId, Long totalPrice) {
+    public PointEntity pay(Long userId, Long totalPrice) {
         PointEntity point = pointRepository.findByUserId(userId).orElseThrow(() ->
                 new CoreException(ErrorType.BAD_REQUEST, "포인트가 부족합니다."));
         point.subtract(totalPrice);
         return pointRepository.save(point);
+    }
+
+    @Override
+    public PaymentWay.Type getType() {
+        return PaymentWay.Type.POINT;
     }
 }

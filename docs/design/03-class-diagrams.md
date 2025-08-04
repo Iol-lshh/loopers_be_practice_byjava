@@ -71,4 +71,13 @@ classDiagram
         - price: Long
     }
     Product "1" <.. "*" OrderItem: 참조
+    
+    class Payment {
+        - id: Long
+        - orderId: Long
+        - userId: Long
+        - amount: Long
+        - type: PaymentType
+    }
+    Payment "1" ..> "1" Order: 참조(결제)
 ```
