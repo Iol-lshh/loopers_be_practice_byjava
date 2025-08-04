@@ -27,6 +27,11 @@ public class PointV1ApiE2ETest {
 
     private final TestRestTemplate testRestTemplate;
     private final DatabaseCleanUp databaseCleanUp;
+    @AfterEach
+    void tearDown() {
+        databaseCleanUp.truncateAllTables();
+    }
+
     private final UserService userService;
 
     @Autowired
@@ -40,12 +45,7 @@ public class PointV1ApiE2ETest {
         this.userService = userService;
     }
 
-    @AfterEach
-    void tearDown() {
-        databaseCleanUp.truncateAllTables();
-    }
-
-    @DisplayName("포인트 충전")
+    @DisplayName("POST /api/v1/points/charge")
     @Nested
     class Charge {
         @DisplayName("존재하는 유저가 1000원을 충전할 경우, 충전된 보유 총량을 응답으로 반환한다.")
@@ -55,8 +55,9 @@ public class PointV1ApiE2ETest {
             String requestUrl = ENDPOINT.apply("/charge");
             var signUpCommand = new UserCommand.Create("tester", UserEntity.Gender.MALE, "1993-04-09", "test@gmail.com");
             var testUser = userService.create(signUpCommand);
+            assertTrue(userService.find(testUser.getId()).isPresent());
             long pointsToCharge = 1000;
-            var request = new PointV1Dto.PointsChargeRequest(testUser.getLoginId(), pointsToCharge);
+            var request = new PointV1Dto.PointsChargeRequest(testUser.getId(), pointsToCharge);
 
             // act
             ParameterizedTypeReference<ApiResponse<PointV1Dto.PointsResponse>> responseType = new ParameterizedTypeReference<>() {};
@@ -71,7 +72,7 @@ public class PointV1ApiE2ETest {
             assertTrue(response.getStatusCode().is2xxSuccessful());
             assertNotNull(response.getBody());
             assertEquals(testUser.getId(), response.getBody().data().userId());
-            assertEquals(request.point(), response.getBody().data().point());
+            assertEquals(request.amount(), response.getBody().data().amount());
         }
 
         @DisplayName("존재하지 않는 유저로 요청할 경우, 404 Not Found 응답을 반환한다.")
@@ -79,7 +80,8 @@ public class PointV1ApiE2ETest {
         void returnsNotFound_whenUserDoesNotExist() {
             // arrange
             String requestUrl = ENDPOINT.apply("/charge");
-            String nonExistentUserId = "nonexistentuser";
+            Long nonExistentUserId = 999L; // Assuming this user ID does not exist
+            assertTrue(userService.find(nonExistentUserId).isEmpty());
             long pointsToCharge = 1000;
             var request = new PointV1Dto.PointsChargeRequest(nonExistentUserId, pointsToCharge);
 
@@ -98,7 +100,7 @@ public class PointV1ApiE2ETest {
         }
     }
 
-    @DisplayName("포인트 조회")
+    @DisplayName("GET /api/v1/points")
     @Nested
     class Get {
         @DisplayName("포인트 조회에 성공할 경우, 보유 포인트를 응답으로 반환한다.")
@@ -108,9 +110,10 @@ public class PointV1ApiE2ETest {
             String requestUrl = ENDPOINT.apply("");
             var signUpCommand = new UserCommand.Create("tester", UserEntity.Gender.MALE, "1993-04-09", "test@gmail.com");
             var testUser = userService.create(signUpCommand);
-            var headers = new MultiValueMapAdapter<>(Map.of("X-USER-ID", List.of(testUser.getLoginId())));
+            assertTrue(userService.find(testUser.getId()).isPresent());
 
             // act
+            var headers = new MultiValueMapAdapter<>(Map.of("X-USER-ID", List.of(testUser.getId().toString())));
             ParameterizedTypeReference<ApiResponse<PointV1Dto.PointsResponse>> responseType = new ParameterizedTypeReference<>() {};
             var response = testRestTemplate.exchange(
                     requestUrl,
@@ -123,10 +126,10 @@ public class PointV1ApiE2ETest {
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertNotNull(response.getBody());
             assertEquals(testUser.getId(), response.getBody().data().userId());
-            assertTrue(response.getBody().data().point() >= 0);
+            assertTrue(response.getBody().data().amount() >= 0);
         }
 
-        @DisplayName("X-USER-ID 헤더가 없을 경우, 400 Bad Request 응답을 반환한다.")
+        @DisplayName("X-USER-ID 헤더가 없을 경우, 400 Bad Order 응답을 반환한다.")
         @Test
         void returnsBadRequest_whenUserIdHeaderIsMissing() {
             // arrange

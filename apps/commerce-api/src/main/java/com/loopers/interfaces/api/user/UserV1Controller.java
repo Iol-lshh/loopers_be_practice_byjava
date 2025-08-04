@@ -1,7 +1,7 @@
 package com.loopers.interfaces.api.user;
 
 import com.loopers.application.user.UserFacade;
-import com.loopers.application.user.UserInfo;
+import com.loopers.application.user.UserResult;
 import com.loopers.domain.user.UserCommand;
 import com.loopers.interfaces.api.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ public class UserV1Controller implements UserV1ApiSpec {
             @RequestBody UserV1Dto.UsersSignUpRequest request
     ) {
         UserCommand.Create command = request.toCommand();
-        UserInfo info = userFacade.signUp(command);
+        UserResult info = userFacade.signUp(command);
         UserV1Dto.UsersResponse response = UserV1Dto.UsersResponse.from(info);
         return ApiResponse.success(response);
     }
@@ -28,9 +28,9 @@ public class UserV1Controller implements UserV1ApiSpec {
     @GetMapping("/me")
     @Override
     public ApiResponse<UserV1Dto.UsersResponse> getMyInfo(
-            @RequestHeader("X-USER-ID") String loginId
+            @RequestHeader("X-USER-ID") Long userId
     ) {
-        UserInfo info = userFacade.get(loginId);
+        UserResult info = userFacade.get(userId);
         UserV1Dto.UsersResponse response = UserV1Dto.UsersResponse.from(info);
         return ApiResponse.success(response);
     }

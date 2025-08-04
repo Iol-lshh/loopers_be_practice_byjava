@@ -1,6 +1,6 @@
 package com.loopers.infrastructure.user;
 
-import com.loopers.domain.user.UserCriteria;
+import com.loopers.domain.user.UserStatement;
 import com.loopers.domain.user.UserEntity;
 import com.loopers.domain.user.UserRepository;
 import com.loopers.support.error.CoreException;
@@ -21,7 +21,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public boolean exists(UserCriteria criteria) {
+    public boolean exists(UserStatement criteria) {
         var spec = UserJpaSpecification.with(criteria);
         return jpaRepository.exists(spec);
     }
@@ -32,7 +32,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<UserEntity> find(UserCriteria criteria) {
+    public Optional<UserEntity> find(UserStatement criteria) {
         var spec = UserJpaSpecification.with(criteria);
         var list = jpaRepository.findAll(spec);
         if (list.size() > 1) {

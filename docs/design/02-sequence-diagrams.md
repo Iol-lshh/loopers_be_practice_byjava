@@ -96,7 +96,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    User->>+ProductApi: DELETE /api/v1/products/{productId}/likes
+    User->>+ProductApi: DELETE /api/v1/products/{productId}/likes, X-USER-ID:{userId}
     ProductApi->>+LikeUsecase: unlike(userId, productId)
     LikeUsecase->>+UserService: find(userId): Optional<UserEntity>
     alt 사용자 조회 실패 시
@@ -115,7 +115,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    User->>+UserApi: GET /api/v1/users/{userId}/likes
+    User->>+UserApi: GET /api/v1/users/likes, X-USER-ID:{userId}
     UserApi->>+LikeUsecase: get(LikeCriteria)
     LikeUsecase->>+UserService: find(userId): Optional<UserEntity>
     alt 사용자 조회 실패 시
@@ -170,7 +170,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    User->>+UserApi: GET /api/v1/users/{userId}/orders
+    User->>+UserApi: GET /api/v1/users/orders, X-USER-ID:{userId}
     UserApi->>+OrderFacade: get(OrderCriteria)
     OrderFacade->>UserService: find(userId): Optional<UserEntity>
     alt 사용자 조회 실패 시
@@ -186,7 +186,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    User->>+OrderApi: GET /api/v1/orders/{orderId}
+    User->>+OrderApi: GET /api/v1/orders/{orderId}, X-USER-ID:{userId}
     OrderApi->>+OrderUsecase: get(orderId)
     OrderUsecase->>+OrderService: find(orderId): Optional<OrderEntity>
     alt 주문 조회 실패 시

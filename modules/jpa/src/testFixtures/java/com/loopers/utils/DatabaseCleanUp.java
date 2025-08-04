@@ -23,6 +23,7 @@ public class DatabaseCleanUp implements InitializingBean {
     public void afterPropertiesSet() {
         entityManager.getMetamodel().getEntities().stream()
             .filter(entity -> entity.getJavaType().getAnnotation(Entity.class) != null)
+            .filter(entity -> entity.getJavaType().getAnnotation(Table.class) != null) // @Table 어노테이션이 있는 엔티티만 처리
             .map(entity -> entity.getJavaType().getAnnotation(Table.class).name())
             .forEach(tableNames::add);
     }

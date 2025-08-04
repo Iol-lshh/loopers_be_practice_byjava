@@ -21,6 +21,6 @@ public interface PointV1ApiSpec {
             description = "포인트 조회"
     )
     ApiResponse<PointV1Dto.PointsResponse> get(
-            @Schema(name = "요청", description = "포인트 조회할 사용자 정보 입력") String loginId
+            @Schema(name = "요청", description = "포인트 조회할 사용자 정보 입력") Long userId
     );
 }

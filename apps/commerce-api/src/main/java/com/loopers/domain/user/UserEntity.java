@@ -4,7 +4,9 @@ import com.loopers.domain.BaseEntity;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.loopers.domain.user.UserValidator.*;
@@ -13,6 +15,7 @@ import static com.loopers.domain.user.UserValidator.*;
 @Slf4j
 @Entity
 @Table(name = "member")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserEntity extends BaseEntity {
 
     private String loginId;
@@ -25,11 +28,6 @@ public class UserEntity extends BaseEntity {
 
     private String email;
 
-    @Embedded
-    private UserPointVo point;
-
-    protected UserEntity() {}
-
     public UserEntity(String loginId, Gender gender, String birthDate, String email) {
         super();
         validateLoginId(loginId);
@@ -39,15 +37,10 @@ public class UserEntity extends BaseEntity {
         this.gender = gender;
         this.birthDate = birthDate;
         this.email = email;
-        this.point = UserPointVo.init();
     }
 
     public static UserEntity of(UserCommand.Create command){
         return new UserEntity(command.loginId(), command.gender(), command.birthDate(), command.email());
-    }
-
-    public void charge(Long amount) {
-        this.point = UserPointVo.plus(this.point, amount);
     }
 
     @Getter

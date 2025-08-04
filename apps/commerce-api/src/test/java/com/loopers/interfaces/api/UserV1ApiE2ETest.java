@@ -79,7 +79,7 @@ class UserV1ApiE2ETest {
             assertEquals(request.email(), response.getBody().data().email());
         }
 
-        @DisplayName("회원 가입 시에 성별이 없을 경우, `400 Bad Request` 응답을 반환한다.")
+        @DisplayName("회원 가입 시에 성별이 없을 경우, `400 Bad Order` 응답을 반환한다.")
         @Test
         void throwsBadRequest_whenGenderIsInvalid() {
             // arrange
@@ -114,9 +114,10 @@ class UserV1ApiE2ETest {
             var signUpCommand = new UserCommand.Create(
                     "testuser", UserEntity.Gender.MALE, "1993-04-09", "test@gmail.com");
             var testUser = userService.create(signUpCommand);
+            assertTrue(userService.find(testUser.getId()).isPresent());
 
             // act
-            var headers = new MultiValueMapAdapter<>(Map.of("X-USER-ID", List.of(testUser.getLoginId())));
+            var headers = new MultiValueMapAdapter<>(Map.of("X-USER-ID", List.of(testUser.getId().toString())));
             ParameterizedTypeReference<ApiResponse<UserV1Dto.UsersResponse>> responseType = new ParameterizedTypeReference<>() {};
             ResponseEntity<ApiResponse<UserV1Dto.UsersResponse>> response =
                     testRestTemplate.exchange(
@@ -141,10 +142,11 @@ class UserV1ApiE2ETest {
         void throwsNotFound_whenUserDoesNotExist() {
             // arrange
             String requestUrl = ENDPOINT.apply("/me");
-            String nonExistentLoginId = "nonexistentuser";
-            var headers = new MultiValueMapAdapter<>(Map.of("X-USER-ID", List.of(nonExistentLoginId)));
+            long nonExistentUserId = 999L;
+            assertTrue(userService.find(nonExistentUserId).isEmpty());
 
             // act
+            var headers = new MultiValueMapAdapter<>(Map.of("X-USER-ID", List.of(Long.toString(nonExistentUserId))));
             ParameterizedTypeReference<ApiResponse<UserV1Dto.UsersResponse>> responseType =
                     new ParameterizedTypeReference<>() {};
             ResponseEntity<ApiResponse<UserV1Dto.UsersResponse>> response =
