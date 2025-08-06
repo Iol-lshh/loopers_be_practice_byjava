@@ -56,7 +56,8 @@ public class ProductService {
 
     @Transactional
     public List<ProductEntity> deduct(Map<Long, Long> orderQuantityList) {
-        List<ProductEntity> products= productRepository.findList(orderQuantityList.keySet().stream().toList());
+        var targetIds = orderQuantityList.keySet().stream().toList();
+        List<ProductEntity> products= productRepository.findListWithLock(targetIds);
         if( products.size() != orderQuantityList.size()) {
             throw new CoreException(ErrorType.NOT_FOUND, "주문할 상품이 존재하지 않습니다.");
         }

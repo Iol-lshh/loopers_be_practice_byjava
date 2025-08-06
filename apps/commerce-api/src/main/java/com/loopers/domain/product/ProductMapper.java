@@ -10,7 +10,10 @@ import java.util.stream.Collectors;
 public class ProductMapper {
     public Map<Long, Long> getProductPriceMap(List<ProductEntity> products) {
         return products.stream().collect(
-                Collectors.toMap(ProductEntity::getId, ProductEntity::getPrice)
+                Collectors.toMap(
+                        ProductEntity::getId,
+                        ProductEntity::getPrice
+                )
         );
     }
 }
