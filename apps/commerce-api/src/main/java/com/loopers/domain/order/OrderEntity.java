@@ -6,7 +6,10 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Getter
 @Entity
@@ -19,23 +22,42 @@ public class OrderEntity extends BaseEntity {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
     private List<OrderItemEntity> orderItems;
 
-    private OrderEntity(Long userId, List<OrderItemEntity> orderItems) {
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
+    private List<OrderCouponEntity> orderCoupons;
+
+    private OrderEntity(Long userId) {
         super();
         this.userId = userId;
-        this.orderItems = orderItems;
         this.state = State.PENDING;
+        this.orderItems = new ArrayList<>();
+        this.orderCoupons = new ArrayList<>();
     }
 
     public static OrderEntity from(OrderCommand.Order orderCommand) {
-        OrderEntity order = new OrderEntity(orderCommand.userId(), null);
-        order.orderItems = OrderItemEntity.from(order, orderCommand.orderItems());
+        OrderEntity order = new OrderEntity(orderCommand.userId());
+        order.addOrderItemsByCommand(orderCommand.orderItems());
+        order.addOrderCoupons(orderCommand.orderCoupons());
         return order;
     }
 
+    public void addOrderItemsByCommand(List<OrderCommand.Item> items){
+        List<OrderItemEntity> orderItems = OrderItemEntity.from(this, items);
+        this.orderItems.addAll(orderItems);
+    }
+
+    public void addOrderCoupons(List<OrderCommand.Coupon> coupons) {
+        List<OrderCouponEntity> orderCoupons = OrderCouponEntity.from(this, coupons);
+        this.orderCoupons.addAll(orderCoupons);
+    }
+
     public Long getTotalPrice() {
-        return orderItems.stream()
+        long price = orderItems.stream()
                 .mapToLong(item -> item.getPrice() * item.getQuantity())
                 .sum();
+        long couponDiscount = orderCoupons.stream()
+                .mapToLong(OrderCouponEntity::getValue)
+                .sum();
+        return price - couponDiscount;
     }
 
     public void complete() {
@@ -44,6 +66,28 @@ public class OrderEntity extends BaseEntity {
 
     public void cancel() {
         this.state = State.CANCELLED;
+    }
+
+    public List<Long> getOrderedProductIds() {
+        return getOrderItems().stream()
+                .map(OrderItemEntity::getProductId)
+                .toList();
+    }
+
+    public Map<Long, Long> getItemQuantityMap() {
+        return getOrderItems().stream()
+                .collect(Collectors.toMap(
+                        OrderItemEntity::getProductId,
+                        OrderItemEntity::getQuantity
+                ));
+    }
+
+    public Map<Long, Long> getAppliedCouponValueMap() {
+        return getOrderCoupons().stream()
+                .collect(Collectors.toMap(
+                        OrderCouponEntity::getCouponId,
+                        OrderCouponEntity::getValue
+                ));
     }
 
     public enum State {

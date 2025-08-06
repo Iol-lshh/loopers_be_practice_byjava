@@ -5,11 +5,13 @@ import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Getter
 @Entity
+@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @Table(name = "order_item")
 public class OrderItemEntity extends BaseEntity {
     @ManyToOne
@@ -20,7 +22,6 @@ public class OrderItemEntity extends BaseEntity {
     private Long price;
     private Long quantity;
 
-    protected OrderItemEntity() {}
     public OrderItemEntity(OrderEntity order, Long productId, Long price, Long quantity) {
         super();
         this.order = order;

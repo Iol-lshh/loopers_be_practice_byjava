@@ -1,6 +1,9 @@
 package com.loopers.application.order;
 
 import com.loopers.domain.brand.BrandService;
+import com.loopers.domain.coupon.CouponCommand;
+import com.loopers.domain.coupon.CouponEntity;
+import com.loopers.domain.coupon.CouponService;
 import com.loopers.domain.order.OrderStatement;
 import com.loopers.domain.order.OrderEntity;
 import com.loopers.domain.order.OrderService;
@@ -35,6 +38,8 @@ public class OrderUsecaseIntegrationTest {
     private PointService pointService;
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private CouponService couponService;
 
     @AfterEach
     void tearDown() {
@@ -115,7 +120,8 @@ public class OrderUsecaseIntegrationTest {
     private OrderEntity prepareOrder(UserEntity user, ProductEntity product, Long quantity) {
         var orderCriteria = new OrderCriteria.Order(
                 user.getId(),
-                List.of(new OrderCriteria.Item(product.getId(), quantity))
+                List.of(new OrderCriteria.Item(product.getId(), quantity)),
+                List.of()
         );
         var info = orderFacade.order(orderCriteria);
         assertNotNull(info.orderId());
@@ -123,7 +129,15 @@ public class OrderUsecaseIntegrationTest {
         assertTrue(orderOptional.isPresent());
         return orderOptional.get();
     }
-
+    private CouponEntity prepareCoupon(CouponEntity.Type type, long value) {
+        var couponCommand = new CouponCommand.Admin.Create(
+                type.name(),
+                value
+        );
+        CouponEntity coupon = couponService.register(couponCommand);
+        assertTrue(couponService.find(coupon.getId()).isPresent());
+        return coupon;
+    }
 
     @DisplayName("주문 등록")
     @Nested
@@ -137,7 +151,8 @@ public class OrderUsecaseIntegrationTest {
             UserEntity user = prepareUser(product.getPrice() * quantity);
             var orderCriteria = new OrderCriteria.Order(
                     user.getId(),
-                    List.of(new OrderCriteria.Item(product.getId(), quantity))
+                    List.of(new OrderCriteria.Item(product.getId(), quantity)),
+                    List.of()
             );
 
             // When
@@ -161,7 +176,8 @@ public class OrderUsecaseIntegrationTest {
             var result = assertThrows(CoreException.class, () -> {
                 var orderCriteria = new OrderCriteria.Order(
                         nonExistentUserId,
-                        List.of(new OrderCriteria.Item(product.getId(), 1L)) // 임의의 상품 ID 사용
+                        List.of(new OrderCriteria.Item(product.getId(), 1L)), // 임의의 상품 ID 사용,
+                        List.of()
                 );
                 orderFacade.order(orderCriteria);
             });
@@ -182,7 +198,8 @@ public class OrderUsecaseIntegrationTest {
             var result = assertThrows(CoreException.class, () -> {
                 var orderCriteria = new OrderCriteria.Order(
                         validUserId,
-                        List.of(new OrderCriteria.Item(nonExistentProductId, 1L))
+                        List.of(new OrderCriteria.Item(nonExistentProductId, 1L)),
+                        List.of()
                 );
                 orderFacade.order(orderCriteria);
             });
@@ -201,7 +218,8 @@ public class OrderUsecaseIntegrationTest {
             // When
             var orderCriteria = new OrderCriteria.Order(
                     user.getId(),
-                    List.of(new OrderCriteria.Item(product.getId(), product.getStock() + 1))
+                    List.of(new OrderCriteria.Item(product.getId(), product.getStock() + 1)),
+                    List.of()
             );
             var result = assertThrows(CoreException.class, () -> orderFacade.order(orderCriteria));
 
@@ -215,7 +233,7 @@ public class OrderUsecaseIntegrationTest {
             // Given
             Long userId = prepareUser().getId();
             List<OrderCriteria.Item> emptyProductList = List.of();
-            var emptyOrderCriteria = new OrderCriteria.Order(userId, emptyProductList);
+            var emptyOrderCriteria = new OrderCriteria.Order(userId, emptyProductList, List.of());
 
             // When
             var result = assertThrows(CoreException.class, () -> orderFacade.order(emptyOrderCriteria));
@@ -234,7 +252,8 @@ public class OrderUsecaseIntegrationTest {
             // When
             var orderCriteria = new OrderCriteria.Order(
                     user.getId(),
-                    List.of(new OrderCriteria.Item(product.getId(), 2L))
+                    List.of(new OrderCriteria.Item(product.getId(), 2L)),
+                    List.of()
             );
             var result = assertThrows(CoreException.class, () -> orderFacade.order(orderCriteria));
 
@@ -242,6 +261,58 @@ public class OrderUsecaseIntegrationTest {
             assertEquals(ErrorType.BAD_REQUEST, result.getErrorType());
         }
 
+    }
+
+    @DisplayName("쿠폰과 함께 주문")
+    @Nested
+    class OrderWithCoupon {
+        @DisplayName("유저가 쿠폰을 사용하여 주문시, 성공적으로 주문이 등록된다")
+        @Test
+        void returnsOrderInfo_whenUserExistsAndCouponsAreValid() {
+            // Given
+            UserEntity user = prepareUser(10000L); // 충분한 포인트를 가진 유저
+            ProductEntity product = prepareReleasedProduct(6000L, 10L);
+            CouponEntity coupon = prepareCoupon(CouponEntity.Type.FIXED, 5000L);
+            Long quantity = 2L;
+
+            var orderCriteria = new OrderCriteria.Order(
+                    user.getId(),
+                    List.of(new OrderCriteria.Item(product.getId(), quantity)),
+                    List.of(coupon.getId())
+            );
+
+            // When
+            OrderResult.Summary orderInfo = orderFacade.order(orderCriteria);
+
+            // Then
+            assertNotNull(orderInfo.orderId());
+            assertEquals(user.getId(), orderInfo.userId());
+            assertEquals(product.getPrice() * quantity - coupon.getAppliedValue(product.getPrice() * quantity), orderInfo.totalPrice());
+        }
+
+        @DisplayName("존재하지 않는 쿠폰으로 주문시, NOT_FOUND 예외가 발생한다")
+        @Test
+        void throwsNotFoundException_whenCouponDoesNotExist() {
+            // Given
+            UserEntity user = prepareUser(10000L);
+            ProductEntity product = prepareReleasedProduct(6000L, 10L);
+            Long nonExistentCouponId = 999L;
+            assertTrue(couponService.find(nonExistentCouponId).isEmpty());
+            Long quantity = 2L;
+
+            // When
+            var result = assertThrows(CoreException.class, () -> {
+                var orderCriteria = new OrderCriteria.Order(
+                        user.getId(),
+                        List.of(new OrderCriteria.Item(product.getId(), quantity)),
+                        List.of(nonExistentCouponId)
+                );
+                orderFacade.order(orderCriteria);
+            });
+
+            // Then
+            assertEquals(ErrorType.NOT_FOUND, result.getErrorType());
+        }
     }
 
     @DisplayName("주문 목록 조회")

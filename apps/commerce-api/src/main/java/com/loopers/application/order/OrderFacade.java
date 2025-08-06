@@ -1,5 +1,6 @@
 package com.loopers.application.order;
 
+import com.loopers.domain.coupon.CouponService;
 import com.loopers.domain.order.*;
 import com.loopers.domain.product.ProductEntity;
 import com.loopers.domain.product.ProductMapper;
@@ -8,6 +9,7 @@ import com.loopers.domain.user.UserEntity;
 import com.loopers.domain.user.UserService;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,35 +17,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Component
 public class OrderFacade {
     private final OrderService orderService;
     private final ProductService productService;
     private final UserService userService;
+    private final CouponService couponService;
     private final ProductMapper productMapper;
-
-    public OrderFacade(
-            OrderService orderService,
-            ProductService productService,
-            UserService userService,
-            ProductMapper productMapper
-    ) {
-        this.orderService = orderService;
-        this.productService = productService;
-        this.userService = userService;
-        this.productMapper = productMapper;
-    }
-
 
     @Transactional
     public OrderResult.Summary order(OrderCriteria.Order criteria) {
-        UserEntity user = userService.find(criteria.userId()).orElseThrow(() -> new CoreException(
+        userService.find(criteria.userId()).orElseThrow(() -> new CoreException(
                 ErrorType.NOT_FOUND, "User가 존재하지 않습니다: " + criteria.userId()));
 
-        List<ProductEntity> targetProducts = productService.assertDeductable(criteria.getOrderItemMap());
 
+        List<ProductEntity> targetProducts = productService.assertDeductable(criteria.getOrderItemMap());
         Map<Long, Long> productPriceMap = productMapper.getProductPriceMap(targetProducts);
-        var orderCommand = criteria.toCommandWithProductPriceList(productPriceMap);
+
+        Map<Long, Long> couponValueMap = couponService.getCouponValueMap(criteria.getCouponCommand(), criteria.getOrderItemMap(), productPriceMap);
+
+        var orderCommand = criteria.toCommandWithProductPriceList(productPriceMap, couponValueMap);
         OrderEntity order = orderService.register(orderCommand);
 
         return OrderResult.Summary.from(order);
@@ -73,9 +67,7 @@ public class OrderFacade {
             throw new CoreException(ErrorType.BAD_REQUEST, "해당 주문을 조회할 권한이 없습니다.");
         }
 
-        var productIds = order.getOrderItems().stream()
-                .map(OrderItemEntity::getProductId)
-                .toList();
+        var productIds = order.getOrderedProductIds();
         List<ProductEntity> products = productService.find(productIds);
 
         return OrderResult.Detail.from(order, products);

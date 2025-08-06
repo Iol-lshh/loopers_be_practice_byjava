@@ -104,7 +104,8 @@ public class OrderV1ApiE2ETest {
 
             var request = new OrderV1Dto.Request.Order(
                     user.getId(),
-                    List.of(new OrderV1Dto.Request.Item(product.getId(), 2L))
+                    List.of(new OrderV1Dto.Request.Item(product.getId(), 2L)),
+                    List.of()
             );
 
             // when
@@ -143,7 +144,8 @@ public class OrderV1ApiE2ETest {
 
             OrderCriteria.Order command = new OrderCriteria.Order(
                     user.getId(),
-                    List.of(new OrderCriteria.Item(product.getId(), 2L))
+                    List.of(new OrderCriteria.Item(product.getId(), 2L)),
+                    List.of()
             );
             var order = orderFacade.order(command);
             assertTrue(orderService.find(order.orderId()).isPresent());
@@ -188,7 +190,8 @@ public class OrderV1ApiE2ETest {
                     user.getId(),
                     List.of(
                             new OrderCriteria.Item(product.getId(), 2L),
-                            new OrderCriteria.Item(product2.getId(), 1L))
+                            new OrderCriteria.Item(product2.getId(), 1L)),
+                    List.of()
             );
             var order = orderFacade.order(command);
             assertTrue(orderService.find(order.orderId()).isPresent());

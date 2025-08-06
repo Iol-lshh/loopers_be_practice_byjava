@@ -19,7 +19,7 @@ class OrderModelTest {
         @Test
         void failsToCreateOrder_whenItemsAreEmpty() {
             // given
-            OrderCommand.Order command = new OrderCommand.Order(1L, List.of());
+            OrderCommand.Order command = new OrderCommand.Order(1L, List.of(), List.of());
 
             // when
             CoreException exception = assertThrows(CoreException.class, () -> OrderEntity.from(command));
@@ -32,7 +32,7 @@ class OrderModelTest {
         @Test
         void failsToCreateOrder_whenItemsAreNull() {
             // given
-            OrderCommand.Order command = new OrderCommand.Order(1L, null);
+            OrderCommand.Order command = new OrderCommand.Order(1L, null, List.of());
 
             // when
             CoreException exception = assertThrows(CoreException.class, () -> OrderEntity.from(command));
