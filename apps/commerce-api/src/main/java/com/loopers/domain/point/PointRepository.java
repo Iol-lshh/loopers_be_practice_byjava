@@ -6,4 +6,6 @@ public interface PointRepository {
     Optional<PointEntity> findByUserId(Long id);
 
     PointEntity save(PointEntity point);
+
+    Optional<PointEntity> findWithLockByUserId(Long userId);
 }
