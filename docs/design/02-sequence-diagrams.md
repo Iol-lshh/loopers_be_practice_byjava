@@ -87,7 +87,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    User->>+LikeUsecase: unlike(userId, productId)
+    User->>+LikeUsecase: dislike(userId, productId)
     LikeUsecase->>+UserService: find(userId): Optional<UserEntity>
     alt 사용자 조회 실패 시
         LikeUsecase->>User: ApiResponse<Metadata.fail(NotFound)>
@@ -136,8 +136,12 @@ sequenceDiagram
     alt 상품 조회 실패 시
         OrderUsecase->>User: ApiResponse<Metadata.fail(NotFound)>
     end
-    alt 상품 재고 부족으로 차감 실패 시
+    alt 상품 재고 부족 시
         OrderUsecase->>User: ApiResponse<Metadata.fail(BadRequest)>
+    end
+    OrderUsecase->>CouponService: 쿠폰 적용
+    alt 쿠폰 조회 실패 시
+        OrderUsecase->>User: ApiResponse<Metadata.fail(NotFound)>
     end
     OrderUsecase->>-User: ApiResponse<Metadata.success(OrderResponse)>
 ```
