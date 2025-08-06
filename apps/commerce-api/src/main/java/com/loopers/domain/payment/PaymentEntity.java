@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+import java.util.Map;
+
 @Getter
 @Entity
 @Table(name = "payment")
@@ -16,11 +19,15 @@ public class PaymentEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Type type;
 
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "payment")
+    private List<PaymentCouponEntity> coupons;
+
     public static PaymentEntity of(
             Long orderId,
             Long userId,
             Long amount,
-            String type
+            String type,
+            Map<Long, Long> couponMap
     ) {
         PaymentEntity payment = new PaymentEntity();
         payment.orderId = orderId;
@@ -33,5 +40,4 @@ public class PaymentEntity extends BaseEntity {
     public enum Type {
         POINT
     }
-
 }

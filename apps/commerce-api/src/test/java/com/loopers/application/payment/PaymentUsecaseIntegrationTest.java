@@ -83,7 +83,7 @@ public class PaymentUsecaseIntegrationTest {
         List<OrderCriteria.Item> items = products.entrySet().stream()
                 .map(entry -> new OrderCriteria.Item(entry.getKey().getId(), entry.getValue()))
                 .toList();
-        OrderCriteria.Order criteria = new OrderCriteria.Order(user.getId(), items);
+        OrderCriteria.Order criteria = new OrderCriteria.Order(user.getId(), items, List.of());
         return orderFacade.order(criteria);
     }
 
