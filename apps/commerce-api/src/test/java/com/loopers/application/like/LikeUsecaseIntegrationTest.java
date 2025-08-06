@@ -2,9 +2,7 @@ package com.loopers.application.like;
 
 import com.loopers.application.product.ProductFacade;
 import com.loopers.domain.brand.BrandService;
-import com.loopers.domain.like.LikeStatement;
-import com.loopers.domain.like.LikeEntity;
-import com.loopers.domain.like.LikeService;
+import com.loopers.domain.like.*;
 import com.loopers.domain.product.ProductCommand;
 import com.loopers.domain.product.ProductEntity;
 import com.loopers.domain.product.ProductService;
@@ -13,22 +11,42 @@ import com.loopers.domain.user.UserEntity;
 import com.loopers.domain.user.UserService;
 import com.loopers.support.error.CoreException;
 import com.loopers.utils.DatabaseCleanUp;
+import org.instancio.Instancio;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
 
 import static com.loopers.support.error.ErrorType.NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 
 @SpringBootTest
 public class LikeUsecaseIntegrationTest {
+    private static final Logger log = LoggerFactory.getLogger(LikeUsecaseIntegrationTest.class);
+    
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
     @Autowired
     private ProductFacade productFacade;
+
+    @MockitoSpyBean
+    private LikeCounter likeCounter;
 
     @AfterEach
     void tearDown() {
@@ -48,7 +66,8 @@ public class LikeUsecaseIntegrationTest {
     private LikeFacade likeFacade;
 
     private UserEntity prepareUser() {
-        var prepareUserCommand = UserCommand.Create.of("testUser", "남", "1993-04-05", "test@gmail.com");
+        String loginId = "user" + Instancio.create(Integer.class);
+        var prepareUserCommand = UserCommand.Create.of(loginId, "남", "1993-04-05", "test@gmail.com");
         UserEntity user = userService.create(prepareUserCommand);
         assertTrue(userService.find(user.getId()).isPresent());
         return user;
@@ -140,7 +159,7 @@ public class LikeUsecaseIntegrationTest {
 
     @DisplayName("상품 좋아요 취소")
     @Nested
-    class Unlike {
+    class Dislike {
         @DisplayName("존재하는 유저와 상품으로 좋아요를 취소할 때, 성공적으로 취소된다.")
         @Test
         public void returnLikeInfo_whenExistsUserAndProduct() {
@@ -153,7 +172,7 @@ public class LikeUsecaseIntegrationTest {
             assertEquals(1, productWithSignal.get().getLikeCount());
 
             // when
-            LikeResult.Result result = likeFacade.unlikeProduct(preparedUser.getId(), preparedProduct.getId());
+            LikeResult.Result result = likeFacade.dislikeProduct(preparedUser.getId(), preparedProduct.getId());
 
             // then
             assertNotNull(result);
@@ -172,7 +191,7 @@ public class LikeUsecaseIntegrationTest {
             ProductEntity preparedProduct = prepareProduct();
 
             // when
-            var result = assertThrows(CoreException.class, () -> likeFacade.unlikeProduct(nonExistentUserId, preparedProduct.getId()));
+            var result = assertThrows(CoreException.class, () -> likeFacade.dislikeProduct(nonExistentUserId, preparedProduct.getId()));
 
             // then
             assertEquals(NOT_FOUND, result.getErrorType());
@@ -187,7 +206,7 @@ public class LikeUsecaseIntegrationTest {
             assertTrue(productService.find(nonExistentProductId).isEmpty());
 
             // when
-            var result = assertThrows(CoreException.class, () -> likeFacade.unlikeProduct(preparedUser.getId(), nonExistentProductId));
+            var result = assertThrows(CoreException.class, () -> likeFacade.dislikeProduct(preparedUser.getId(), nonExistentProductId));
 
             // then
             assertEquals(NOT_FOUND, result.getErrorType());
@@ -200,11 +219,11 @@ public class LikeUsecaseIntegrationTest {
             UserEntity preparedUser = prepareUser();
             ProductEntity preparedProduct = prepareProduct();
 
-            LikeResult.Result preExecute = likeFacade.unlikeProduct(preparedUser.getId(), preparedProduct.getId());
+            LikeResult.Result preExecute = likeFacade.dislikeProduct(preparedUser.getId(), preparedProduct.getId());
             assertFalse(preExecute.isLike());
 
             // when
-            LikeResult.Result result = likeFacade.unlikeProduct(preparedUser.getId(), preparedProduct.getId());
+            LikeResult.Result result = likeFacade.dislikeProduct(preparedUser.getId(), preparedProduct.getId());
 
             // then
             assertNotNull(result);
@@ -217,14 +236,13 @@ public class LikeUsecaseIntegrationTest {
 
     @DisplayName("내가 좋아요 한 상품 목록 조회")
     @Nested
-    class List {
+    class ListLike {
         @DisplayName("존재하는 유저로 좋아요 한 상품 목록을 조회할 때, 성공적으로 목록이 반환된다.")
         @Test
         public void returnLikeList_whenExistsUser() {
             // given
             UserEntity preparedUser = prepareUser();
             ProductEntity preparedProductLike = prepareProduct();
-            ProductEntity preparedProductNotLike = prepareProduct();
 
             likeFacade.likeProduct(preparedUser.getId(), preparedProductLike.getId());
 
@@ -262,6 +280,180 @@ public class LikeUsecaseIntegrationTest {
 
             // then
             assertTrue(likeList.isEmpty());
+        }
+    }
+
+    @DisplayName("좋아요 동시성 처리")
+    @Nested
+    class Concurrency {
+        @DisplayName("동시에 좋아요를 등록할 때, 정상적으로 좋아요 등록된 만큼 좋아요 수가 조회된다")
+        @Test
+        public void returnLikeInfo_whenConcurrentLikes() throws InterruptedException {
+            // given
+            int threadCount = 5;
+
+            List<UserEntity> users = IntStream.range(0, threadCount)
+                    .mapToObj(i -> prepareUser()).toList();
+            ProductEntity product = prepareProduct();
+
+            CountDownLatch latch = new CountDownLatch(threadCount);
+            ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+
+            // when
+            for (int i = 0; i < threadCount; i++) {
+                final int threadIndex = i;
+                executor.submit(() -> {
+                    try {
+                        UserEntity user = users.get((int) (Math.random() * threadCount));
+                        log.info("스레드 {}: 사용자 {}가 상품 {}에 좋아요 등록 시작", threadIndex, user.getId(), product.getId());
+                        LikeResult.Result result = likeFacade.likeProduct(user.getId(), product.getId());
+                        log.info("스레드 {}: 사용자 {}가 상품 {}에 좋아요 등록 완료 - 결과: {}",
+                                threadIndex, user.getId(), product.getId(), result.isLike());
+                    } catch (Exception e) {
+                        log.error("스레드 {}: 좋아요 등록 실패", threadIndex, e);
+                    } finally {
+                        latch.countDown();
+                    }
+                });
+            }
+
+            latch.await();
+            log.info("=== 모든 스레드 작업 완료 ===");
+
+            // then
+            List<LikeEntity> likes = likeService.find(LikeStatement.builder()
+                    .likeTypeAndTargetId(LikeEntity.TargetType.PRODUCT, product.getId())
+                    .build());
+            LikeSummaryEntity summary = likeService.findSummary(product.getId(), LikeEntity.TargetType.PRODUCT).orElseThrow();
+
+            log.info("=== 테스트 결과 ===");
+            log.info("전체 좋아요 시도 수: {}", threadCount);
+            log.info("실제 좋아요 엔티티 수: {}", likes.size());
+            log.info("좋아요 카운트: {}", summary.getLikeCount());
+            assertEquals(likes.size(), summary.getLikeCount());
+        }
+
+        @DisplayName("동시에 좋아요를 취소할 때, 정상적으로 취소 처리된 만큼 좋아요 수가 조회된다")
+        @Test
+        public void returnLikeInfo_whenConcurrentDislikes() throws InterruptedException {
+            // given
+            int threadCount = 5;
+
+            List<UserEntity> users = IntStream.range(0, threadCount)
+                    .mapToObj(i -> prepareUser()).toList();
+            ProductEntity product = prepareProduct();
+            users.forEach(user -> {
+                likeFacade.likeProduct(user.getId(), product.getId());
+            });
+
+            CountDownLatch latch = new CountDownLatch(threadCount);
+            ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+
+            // when
+            for (int i = 0; i < threadCount; i++) {
+                final int threadIndex = i;
+                executor.submit(() -> {
+                    try {
+                        UserEntity user = users.get((int) (Math.random() * threadCount));
+                        log.info("스레드 {}: 사용자 {}가 상품 {}에 좋아요 취소 시작", threadIndex, user.getId(), product.getId());
+                        LikeResult.Result result = likeFacade.dislikeProduct(user.getId(), product.getId());
+                        log.info("스레드 {}: 사용자 {}가 상품 {}에 좋아요 취소 완료 - 결과: {}",
+                                threadIndex, user.getId(), product.getId(), result.isLike());
+                    } catch (Exception e) {
+                        log.error("스레드 {}: 좋아요 취소 실패", threadIndex, e);
+                    } finally {
+                        latch.countDown();
+                    }
+                });
+            }
+
+            latch.await();
+            log.info("=== 모든 스레드 작업 완료 ===");
+
+            // then
+            List<LikeEntity> likes = likeService.find(LikeStatement.builder()
+                    .likeTypeAndTargetId(LikeEntity.TargetType.PRODUCT, product.getId())
+                    .build());
+            LikeSummaryEntity summary = likeService.findSummary(product.getId(), LikeEntity.TargetType.PRODUCT).orElseThrow();
+
+            log.info("=== 테스트 결과 ===");
+            log.info("전체 좋아요 취소 시도 수: {}", threadCount);
+            log.info("실제 좋아요 엔티티 수: {}", likes.size());
+            log.info("좋아요 카운트: {}", summary.getLikeCount());
+            assertEquals(likes.size(), summary.getLikeCount());
+        }
+
+        @DisplayName("동시에 좋아요와 좋아요 취소를 섞어서 실행할 때, 정상적으로 처리된다")
+        @Test
+        public void returnLikeInfo_whenConcurrentLikesAndDislikes() throws InterruptedException {
+            // given
+            int threadCount = 5;
+
+            List<UserEntity> users = IntStream.range(0, threadCount)
+                    .mapToObj(i -> prepareUser()).toList();
+            ProductEntity product = prepareProduct();
+            likeFacade.likeProduct(users.get(0).getId(), product.getId());
+            likeFacade.likeProduct(users.get(1).getId(), product.getId());
+            likeFacade.likeProduct(users.get(2).getId(), product.getId());
+            likeFacade.likeProduct(users.get(3).getId(), product.getId());
+
+            CountDownLatch latch = new CountDownLatch(threadCount);
+            ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+
+            // when
+            for (int i = 0; i < threadCount; i++) {
+                final int threadIndex = i;
+                executor.submit(() -> {
+                    try {
+                        UserEntity user = users.get(threadIndex);
+                        if (threadIndex > 3) {
+                            log.info("스레드 {}: 사용자 {}가 상품 {}에 좋아요 등록 시작", threadIndex, user.getId(), product.getId());
+                            LikeResult.Result result = likeFacade.likeProduct(user.getId(), product.getId());
+                            log.info("스레드 {}: 사용자 {}가 상품 {}에 좋아요 등록 완료 - 결과: {}",
+                                    threadIndex, user.getId(), product.getId(), result.isLike());
+                        } else {
+                            log.info("스레드 {}: 사용자 {}가 상품 {}에 좋아요 취소 시작", threadIndex, user.getId(), product.getId());
+                            LikeResult.Result result = likeFacade.dislikeProduct(user.getId(), product.getId());
+                            log.info("스레드 {}: 사용자 {}가 상품 {}에 좋아요 취소 완료 - 결과: {}",
+                                    threadIndex, user.getId(), product.getId(), result.isLike());
+                        }
+                    } catch (Exception e) {
+                        log.error("스레드 {}: 좋아요/취소 작업 실패", threadIndex, e);
+                    } finally {
+                        latch.countDown();
+                    }
+                });
+            }
+
+            latch.await();
+            log.info("=== 모든 스레드 작업 완료 ===");
+
+            // then
+            List<LikeEntity> likes = likeService.find(LikeStatement.builder()
+                    .likeTypeAndTargetId(LikeEntity.TargetType.PRODUCT, product.getId())
+                    .build());
+            LikeSummaryEntity summary = likeService.findSummary(product.getId(), LikeEntity.TargetType.PRODUCT).orElseThrow();
+
+            ArgumentCaptor<Long> targetIdCaptor = ArgumentCaptor.forClass(Long.class);
+            ArgumentCaptor<LikeEntity.TargetType> targetTypeCaptor = ArgumentCaptor.forClass(LikeEntity.TargetType.class);
+
+            verify(likeCounter, atLeast(threadCount)).increaseLikeCount(targetIdCaptor.capture(), targetTypeCaptor.capture());
+            List<Long> capturedTargetIds = targetIdCaptor.getAllValues();
+            Set<Long> uniqueTargetIds = new HashSet<>(capturedTargetIds);
+
+            log.info("=== 테스트 결과 ===");
+            log.info("전체 좋아요/취소 시도 수: {}", threadCount);
+            log.info("전체 좋아요 시도 수: {}", 1);
+            log.info("전체 좋아요 취소 시도 수: {}", 4);
+            log.info("실제 좋아요 엔티티 수: {}", likes.size());
+            log.info("좋아요 카운트: {}", summary.getLikeCount());
+            log.info("increaseLikeCount 실제 호출 횟수: {}", capturedTargetIds.size());
+            log.info("예상 최소 호출 횟수: {}", threadCount);
+            log.info("재시도로 인한 추가 호출 횟수: {}", capturedTargetIds.size() - uniqueTargetIds.size());
+            assertTrue(likes.size() != 4);
+            assertTrue(summary.getLikeCount() >= 0);
+            assertEquals(likes.size(), summary.getLikeCount());
+            assertTrue(capturedTargetIds.size() >= threadCount);
         }
     }
 }

@@ -11,6 +11,7 @@ import java.util.Optional;
 @Component
 public class LikeService {
     private final LikeRepository likeRepository;
+    private final LikeCounter likeCounter;
 
     @Transactional
     public LikeEntity register(LikeCommand.Product command) {
@@ -20,10 +21,7 @@ public class LikeService {
                 .build();
         var existingLikes = likeRepository.findList(criteria);
         if(existingLikes.isEmpty()) {
-            LikeSummaryEntity summary = likeRepository.findSummary(command.targetId(), LikeEntity.TargetType.PRODUCT)
-                    .orElseGet(() -> LikeSummaryEntity.of(command.targetId(), LikeEntity.TargetType.PRODUCT));
-            summary.increaseCount();
-            likeRepository.save(summary);
+            likeCounter.increaseLikeCount(command.targetId(), LikeEntity.TargetType.PRODUCT);
         }
 
         LikeEntity like = LikeEntity.from(command);
@@ -40,10 +38,7 @@ public class LikeService {
         
         // 실제로 좋아요가 존재할 때만 카운트를 감소시킴
         if(!existingLikes.isEmpty()) {
-            LikeSummaryEntity summary = likeRepository.findSummary(command.targetId(), LikeEntity.TargetType.PRODUCT)
-                    .orElseGet(() -> LikeSummaryEntity.of(command.targetId(), LikeEntity.TargetType.PRODUCT));
-            summary.decreaseCount();
-            likeRepository.save(summary);
+            likeCounter.decreaseLikeCount(command.targetId(), LikeEntity.TargetType.PRODUCT);
         }
 
         LikeEntity like = LikeEntity.from(command);

@@ -34,12 +34,6 @@ public class LikeRepositoryImpl implements LikeRepository {
     }
 
     @Override
-    public Long count(LikeStatement likeStatement) {
-        var spec = LikeJpaSpecification.with(likeStatement);
-        return likeJpaRepository.count(spec);
-    }
-
-    @Override
     public LikeSummaryEntity save(LikeSummaryEntity summary) {
         return likeSummaryJpaRepository.save(summary);
     }
@@ -47,5 +41,10 @@ public class LikeRepositoryImpl implements LikeRepository {
     @Override
     public Optional<LikeSummaryEntity> findSummary(Long targetId, LikeEntity.TargetType targetType) {
         return likeSummaryJpaRepository.findByTargetIdAndTargetType(targetId, targetType);
+    }
+
+    @Override
+    public Optional<LikeSummaryEntity> findSummaryWithLock(Long targetId, LikeEntity.TargetType targetType) {
+        return likeSummaryJpaRepository.findWithLock(targetId, targetType);
     }
 }
