@@ -1,6 +1,8 @@
 package com.loopers.domain.order;
 
 import com.loopers.domain.BaseEntity;
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -18,6 +20,8 @@ import java.util.stream.Collectors;
 public class OrderEntity extends BaseEntity {
     private Long userId;
     private State state;
+    @Version
+    private Long version = 0L;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
     private List<OrderItemEntity> orderItems;
@@ -61,6 +65,9 @@ public class OrderEntity extends BaseEntity {
     }
 
     public void complete() {
+        if (state != State.PENDING) {
+            throw new CoreException(ErrorType.BAD_REQUEST, "주문 상태가 PENDING이 아닙니다. 현재 상태: " + state.getDescription());
+        }
         this.state = State.COMPLETED;
     }
 

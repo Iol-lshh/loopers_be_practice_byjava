@@ -1,6 +1,5 @@
 package com.loopers.domain.order;
 
-import com.loopers.application.order.OrderResult;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
@@ -32,13 +31,13 @@ public class OrderService {
         return orderRepository.find(orderStatement);
     }
 
-    public OrderResult.Summary complete(long orderId) {
+    @Transactional
+    public OrderEntity complete(long orderId) {
         OrderEntity order = orderRepository.find(orderId).orElseThrow(() -> new CoreException(
                 ErrorType.NOT_FOUND, "주문을 찾을 수 없습니다.: " + orderId));
 
         order.complete();
-        var result = orderRepository.save(order);
 
-        return OrderResult.Summary.from(result);
+        return orderRepository.saveAndFlush(order);
     }
 }

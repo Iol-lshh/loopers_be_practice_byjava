@@ -6,6 +6,8 @@ import java.util.Optional;
 public interface OrderRepository {
     OrderEntity save(OrderEntity order);
 
+    OrderEntity saveAndFlush(OrderEntity order);
+
     Optional<OrderEntity> find(Long id);
 
     List<OrderEntity> find(OrderStatement orderStatement);

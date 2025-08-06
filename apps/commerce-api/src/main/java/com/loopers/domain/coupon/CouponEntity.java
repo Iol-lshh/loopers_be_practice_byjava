@@ -1,9 +1,7 @@
 package com.loopers.domain.coupon;
 
 import com.loopers.domain.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,12 +12,11 @@ import lombok.NoArgsConstructor;
 @Entity
 public class CouponEntity extends BaseEntity {
 
+    @Enumerated(EnumType.STRING)
     private Type type;
     private Long value;
-    @Version private Long version;
 
     public CouponEntity(Type couponType, Long value) {
-        super();
         this.type = couponType;
         this.value = value;
     }

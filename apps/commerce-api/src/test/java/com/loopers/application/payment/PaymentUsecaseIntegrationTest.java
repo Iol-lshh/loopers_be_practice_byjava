@@ -3,6 +3,8 @@ package com.loopers.application.payment;
 import com.loopers.application.order.OrderCriteria;
 import com.loopers.application.order.OrderFacade;
 import com.loopers.application.order.OrderResult;
+import com.loopers.domain.coupon.CouponRepository;
+import com.loopers.domain.order.OrderRepository;
 import com.loopers.domain.point.PointService;
 import com.loopers.domain.brand.BrandService;
 import com.loopers.domain.order.OrderService;
@@ -26,17 +28,24 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 public class PaymentUsecaseIntegrationTest {
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
+    @Autowired
+    private OrderRepository orderRepository;
+    @Autowired
+    private CouponRepository couponRepository;
 
     @AfterEach
     void tearDown() {
@@ -201,6 +210,61 @@ public class PaymentUsecaseIntegrationTest {
 
             // then
             assertEquals(ErrorType.BAD_REQUEST ,result.getErrorType());
+        }
+    }
+
+    @Nested
+    @DisplayName("동시성 결제 처리")
+    class ConcurrentPayment {
+        @DisplayName("동시에 같은 주문에 대해 결제를 시도할 때, 낙관적 락으로 인해 OptimisticLockException이 발생한다.")
+        @Test
+        void throwOptimisticLockException_whenConcurrentPayment() throws InterruptedException {
+            // given
+            UserEntity user = prepareUser(100000L);
+            ProductEntity product = prepareProduct(1000L, 100L);
+            OrderResult.Summary orderResult = prepareOrder(user, Map.of(product, 1L));
+
+            // when
+            CountDownLatch startLatch = new CountDownLatch(1);
+            CountDownLatch endLatch = new CountDownLatch(2);
+            ExecutorService executorService = Executors.newFixedThreadPool(2);
+            AtomicInteger exceptionCount = new AtomicInteger(0);
+            AtomicInteger successCount = new AtomicInteger(0);
+
+            // 두 스레드가 정확히 동시에 시작하도록 설정
+            for (int i = 0; i < 2; i++) {
+                executorService.submit(() -> {
+                    try {
+                        startLatch.await(); // 모든 스레드가 준비될 때까지 대기
+                        var criteria = new PaymentCriteria.Pay(
+                                user.getId(),
+                                orderResult.orderId(),
+                                "POINT"
+                        );
+                        paymentFacade.pay(criteria);
+                        successCount.incrementAndGet();
+                    } catch (org.springframework.orm.ObjectOptimisticLockingFailureException e) {
+                        exceptionCount.incrementAndGet();
+                        System.out.println("OptimisticLockException 발생: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("다른 예외 발생: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+                    } finally {
+                        endLatch.countDown();
+                    }
+                });
+            }
+
+            startLatch.countDown(); // 모든 스레드 동시 시작
+            endLatch.await();
+            executorService.shutdown();
+
+            // then
+            System.out.println("성공한 결제 수: " + successCount.get());
+            System.out.println("낙관적 락 예외 수: " + exceptionCount.get());
+            
+            // 최소 하나는 성공하고, 최소 하나는 실패해야 함
+            assertTrue(successCount.get() >= 1, "최소 하나의 결제는 성공해야 합니다.");
+            assertTrue(exceptionCount.get() >= 1, "최소 하나의 OptimisticLockException이 발생해야 합니다.");
         }
     }
 }
