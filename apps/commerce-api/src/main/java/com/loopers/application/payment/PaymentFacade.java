@@ -1,5 +1,6 @@
 package com.loopers.application.payment;
 
+import com.loopers.domain.coupon.CouponService;
 import com.loopers.domain.payment.*;
 import com.loopers.domain.order.OrderEntity;
 import com.loopers.domain.order.OrderService;
@@ -11,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
-
 @RequiredArgsConstructor
 @Component
 public class PaymentFacade {
@@ -20,6 +19,7 @@ public class PaymentFacade {
     private final ProductService productService;
     private final OrderService orderService;
     private final PaymentService paymentService;
+    private final CouponService couponService;
 
     @Transactional
     public PaymentResult.Summary pay(PaymentCriteria.Pay criteria) {
@@ -29,9 +29,8 @@ public class PaymentFacade {
         OrderEntity order = orderService.find(criteria.orderId()).orElseThrow(()-> new CoreException(
                 ErrorType.NOT_FOUND, "주문을 찾을 수 없습니다: " + criteria.orderId()));
 
-        Map<Long, Long> itemQuantityMap = order.getItemQuantityMap();
-        productService.deduct(itemQuantityMap);
-
+        productService.deduct(order.getItemQuantityMap());
+        couponService.useCoupons(criteria.userId(), order.getCouponIds());
         orderService.complete(order.getId());
 
         PaymentCommand.Pay command = criteria.toCommand(order.getTotalPrice(), order.getAppliedCouponValueMap());

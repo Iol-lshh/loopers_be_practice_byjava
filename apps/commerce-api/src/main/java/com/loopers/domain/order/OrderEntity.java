@@ -44,12 +44,12 @@ public class OrderEntity extends BaseEntity {
         return order;
     }
 
-    public void addOrderItemsByCommand(List<OrderCommand.Item> items){
+    protected void addOrderItemsByCommand(List<OrderCommand.Item> items){
         List<OrderItemEntity> orderItems = OrderItemEntity.from(this, items);
         this.orderItems.addAll(orderItems);
     }
 
-    public void addOrderCoupons(List<OrderCommand.Coupon> coupons) {
+    protected void addOrderCoupons(List<OrderCommand.Coupon> coupons) {
         List<OrderCouponEntity> orderCoupons = OrderCouponEntity.from(this, coupons);
         this.orderCoupons.addAll(orderCoupons);
     }
@@ -61,7 +61,7 @@ public class OrderEntity extends BaseEntity {
         long couponDiscount = orderCoupons.stream()
                 .mapToLong(OrderCouponEntity::getValue)
                 .sum();
-        return price - couponDiscount;
+        return price > couponDiscount ? price - couponDiscount : 0;
     }
 
     public void complete() {
@@ -95,6 +95,12 @@ public class OrderEntity extends BaseEntity {
                         OrderCouponEntity::getCouponId,
                         OrderCouponEntity::getValue
                 ));
+    }
+
+    public List<Long> getCouponIds() {
+        return getOrderCoupons().stream()
+                .map(OrderCouponEntity::getCouponId)
+                .toList();
     }
 
     public enum State {

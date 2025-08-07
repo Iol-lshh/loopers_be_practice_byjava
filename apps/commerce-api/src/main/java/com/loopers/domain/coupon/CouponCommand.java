@@ -9,7 +9,7 @@ public class CouponCommand {
                 Long value
         ){
             public CouponEntity toEntity() {
-                CouponEntity.Type couponType = CouponEntity.Type.valueOf(type.toUpperCase());
+                CouponEntity.Type couponType = CouponEntity.Type.from(type);
                 return new CouponEntity(couponType, value);
             }
         }
@@ -17,6 +17,7 @@ public class CouponCommand {
 
     public static class User {
         public record Order(
+                Long userId,
                 List<Long> couponIds
         ){
         }

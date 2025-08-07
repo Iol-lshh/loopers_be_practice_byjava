@@ -35,7 +35,8 @@ public class OrderFacade {
         List<ProductEntity> targetProducts = productService.assertDeductable(criteria.getOrderItemMap());
         Map<Long, Long> productPriceMap = productMapper.getProductPriceMap(targetProducts);
 
-        Map<Long, Long> couponValueMap = couponService.getCouponValueMap(criteria.getCouponCommand(), criteria.getOrderItemMap(), productPriceMap);
+        Map<Long, Long> couponValueMap = couponService.getCouponValueMap(
+                criteria.getCouponCommand(), criteria.getOrderItemMap(), productPriceMap);
 
         var orderCommand = criteria.toCommandWithProductPriceList(productPriceMap, couponValueMap);
         OrderEntity order = orderService.register(orderCommand);

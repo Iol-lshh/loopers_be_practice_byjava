@@ -22,6 +22,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
@@ -66,6 +68,8 @@ public class PaymentUsecaseIntegrationTest {
     private PointService pointService;
     @Autowired
     private PaymentFacade paymentFacade;
+
+    private static final Logger log = LoggerFactory.getLogger(PaymentUsecaseIntegrationTest.class);
 
     private UserEntity prepareUser(Long point) {
         String loginId = "user" + Instancio.create(Integer.class);
@@ -245,9 +249,9 @@ public class PaymentUsecaseIntegrationTest {
                         successCount.incrementAndGet();
                     } catch (org.springframework.orm.ObjectOptimisticLockingFailureException e) {
                         exceptionCount.incrementAndGet();
-                        System.out.println("OptimisticLockException 발생: " + e.getMessage());
+                        log.info("OptimisticLockException 발생: " + e.getMessage());
                     } catch (Exception e) {
-                        System.out.println("다른 예외 발생: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+                        log.info("다른 예외 발생: " + e.getClass().getSimpleName() + " - " + e.getMessage());
                     } finally {
                         endLatch.countDown();
                     }
@@ -259,8 +263,8 @@ public class PaymentUsecaseIntegrationTest {
             executorService.shutdown();
 
             // then
-            System.out.println("성공한 결제 수: " + successCount.get());
-            System.out.println("낙관적 락 예외 수: " + exceptionCount.get());
+            log.info("성공한 결제 수: " + successCount.get());
+            log.info("낙관적 락 예외 수: " + exceptionCount.get());
             
             // 최소 하나는 성공하고, 최소 하나는 실패해야 함
             assertTrue(successCount.get() >= 1, "최소 하나의 결제는 성공해야 합니다.");

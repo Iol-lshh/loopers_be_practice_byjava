@@ -44,6 +44,7 @@ public class OrderCriteria {
 
         public CouponCommand.User.Order getCouponCommand() {
             return new CouponCommand.User.Order(
+                    userId,
                     orderCouponIds
             );
         }

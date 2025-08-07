@@ -28,15 +28,21 @@ public class CouponService {
         return couponRepository.find(ids);
     }
 
-    @Transactional(readOnly = true)
-    public Map<Long, Long> getCouponValueMap(CouponCommand.User.Order couponCommand, Map<Long, Long> orderItemMap, Map<Long, Long> productPriceMap) {
-        List<CouponEntity> coupons = couponRepository.find(couponCommand.couponIds());
+    @Transactional
+    public Map<Long, Long> getCouponValueMap(
+            CouponCommand.User.Order couponCommand, Map<Long, Long> orderItemMap, Map<Long, Long> productPriceMap
+    ) {
+        List<CouponEntity> coupons = couponRepository.findWithLock(couponCommand.couponIds());
         if(coupons.size() != couponCommand.couponIds().size()) {
             throw new CoreException(ErrorType.NOT_FOUND, "쿠폰이 존재하지 않습니다: " + couponCommand.couponIds());
         }
+        if(couponRepository.existsUsages(couponCommand.userId(), couponCommand.couponIds())){
+            throw new CoreException(ErrorType.CONFLICT, "이미 사용된 쿠폰이 있습니다");
+        }
         Long totalPrice = orderItemMap.entrySet()
                 .stream()
-                .mapToLong(entry -> entry.getValue() * productPriceMap.getOrDefault(entry.getKey(), 0L))
+                .mapToLong(entry ->
+                        entry.getValue() * productPriceMap.getOrDefault(entry.getKey(), 0L))
                 .sum();
         return coupons.stream()
                 .collect(Collectors.toMap(
@@ -45,5 +51,21 @@ public class CouponService {
                         (existing, replacement) -> existing,
                         LinkedHashMap::new
                 ));
+    }
+
+    @Transactional
+    public List<CouponEntity> useCoupons(Long userId, List<Long> couponIds) {
+        List<CouponEntity> coupons = couponRepository.findWithLock(couponIds);
+        if (coupons.size() != couponIds.size()) {
+            throw new CoreException(ErrorType.NOT_FOUND, "쿠폰이 존재하지 않습니다: " + couponIds);
+        }
+        if(couponRepository.existsUsages(userId, couponIds)) {
+            throw new CoreException(ErrorType.CONFLICT, "이미 사용된 쿠폰이 있습니다");
+        }
+        List<CouponUsageEntity> usages = coupons.stream()
+                .map(coupon -> coupon.issue(userId))
+                .toList();
+        couponRepository.saveUsages(usages);
+        return coupons;
     }
 }

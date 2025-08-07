@@ -68,7 +68,6 @@ class PointModelTest {
             point.add(1000L);
             assertEquals(1000L, point.getAmount());
 
-            System.out.println(overflowAmount);
             // act
             var result = assertThrows(CoreException.class, () -> point.add(overflowAmount));
 
