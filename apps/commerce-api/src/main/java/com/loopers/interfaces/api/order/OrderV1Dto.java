@@ -9,7 +9,8 @@ public class OrderV1Dto {
     public static class Request{
         public record Order(
                 Long userId,
-                List<Item> items
+                List<Item> items,
+                List<Long> coupons
         ) {
             public OrderCriteria.Order toCriteria() {
                 List<OrderCriteria.Item> items = this.items.stream()
@@ -17,7 +18,7 @@ public class OrderV1Dto {
                                 item.productId(),
                                 item.quantity()
                         )).toList();
-                return new OrderCriteria.Order(userId, items);
+                return new OrderCriteria.Order(userId, items, coupons);
             }
         }
 
@@ -56,7 +57,8 @@ public class OrderV1Dto {
                 Long userId,
                 String orderDate,
                 long totalPrice,
-                List<Item> items
+                List<Item> items,
+                List<Coupon> coupons
         ) {
             public static Detail from(OrderResult.Detail order) {
                 List<Item> itemInfos = order.items().stream()
@@ -65,12 +67,18 @@ public class OrderV1Dto {
                                 item.quantity(),
                                 item.price()
                         )).toList();
+                List<Coupon> couponInfos = order.coupons().stream()
+                        .map(coupon -> new Coupon(
+                                coupon.couponId(),
+                                coupon.value()
+                        )).toList();
                 return new Detail(
                         order.orderId(),
                         order.userId(),
                         order.orderDate(),
                         order.totalPrice(),
-                        itemInfos
+                        itemInfos,
+                        couponInfos
                 );
             }
         }
@@ -80,8 +88,17 @@ public class OrderV1Dto {
                 Long quantity,
                 Long price
         ) {
-            public Item(OrderResult.OrderItemInfo item) {
+            public Item(OrderResult.Item item) {
                 this(item.productId(), item.quantity(), item.price());
+            }
+        }
+
+        public record Coupon(
+                Long id,
+                Long value
+        ) {
+            public Coupon(OrderResult.Coupon coupon) {
+                this(coupon.couponId(), coupon.value());
             }
         }
     }

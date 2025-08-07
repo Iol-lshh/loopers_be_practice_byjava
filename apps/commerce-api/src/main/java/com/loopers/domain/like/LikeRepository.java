@@ -10,9 +10,9 @@ public interface LikeRepository {
 
     List<LikeEntity> findList(LikeStatement criteria);
 
-    Long count(LikeStatement likeStatement);
-
     LikeSummaryEntity save(LikeSummaryEntity summary);
 
     Optional<LikeSummaryEntity> findSummary(Long targetId, LikeEntity.TargetType targetType);
+
+    Optional<LikeSummaryEntity> findSummaryWithLock(Long targetId, LikeEntity.TargetType targetType);
 }

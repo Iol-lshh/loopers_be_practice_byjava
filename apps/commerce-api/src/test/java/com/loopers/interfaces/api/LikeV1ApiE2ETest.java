@@ -125,7 +125,7 @@ public class LikeV1ApiE2ETest {
 
     @DisplayName("DELETE /api/v1/like/products/{productId}")
     @Nested
-    class UnlikeProduct {
+    class DislikeProduct {
 
         @DisplayName("존재하는 상품 ID를 주면, 해당 상품에 대한 좋아요를 제거한다.")
         @Test

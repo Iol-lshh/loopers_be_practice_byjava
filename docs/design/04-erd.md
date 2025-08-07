@@ -57,10 +57,21 @@ erDiagram
         datetime updatedAt
         datetime deletedAt
     }
+    PAYMENT {
+        bigint id PK
+        bigint orderId FK
+        bigint userId FK
+        varchar type
+        bigint amount
+        datetime createdAt
+        datetime updatedAt
+        datetime deletedAt
+    }
     BRAND ||..o{ PRODUCT : brandId
     PRODUCT ||..o{ LIKES : productId
     PRODUCT ||..o{ ORDER_ITEM : productId
     ORDER ||..o{ ORDER_ITEM : orderId
     USER ||..o{ ORDER : userId
     USER ||..o{ LIKES : userId
+    PAYMENT |o..|| ORDER : orderId
 ```

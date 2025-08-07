@@ -17,7 +17,7 @@ public class OrderV1Controller {
     @PostMapping
     public ApiResponse<OrderV1Dto.Response.Summary> order(@RequestBody OrderV1Dto.Request.Order order) {
         OrderCriteria.Order criteria = order.toCriteria();
-        var result = orderFacade.orderByPoint(criteria);
+        var result = orderFacade.order(criteria);
         return ApiResponse.success(OrderV1Dto.Response.Summary.from(result));
     }
 

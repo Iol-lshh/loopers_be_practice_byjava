@@ -54,14 +54,12 @@ public class LikeEntity {
         PRODUCT
     } 
 
-    @Getter
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     @EqualsAndHashCode
     @Embeddable
     public static class LikeId implements Serializable {
         private Long userId;
         private Long targetId;
         private TargetType targetType;
-
-        protected LikeId() {}
     }
 }

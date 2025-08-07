@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Component
@@ -40,9 +39,25 @@ public class ProductService {
         return productRepository.findList(ids);
     }
 
+    @Transactional(readOnly = true)
+    public List<ProductEntity> assertDeductable(Map<Long, Long> orderQuantityList) {
+        List<ProductEntity> products = productRepository.findList(orderQuantityList.keySet().stream().toList());
+        if (products.size() != orderQuantityList.size()) {
+            throw new CoreException(ErrorType.NOT_FOUND, "주문할 상품이 존재하지 않습니다.");
+        }
+        for (ProductEntity product : products) {
+            Long quantity = orderQuantityList.get(product.getId());
+            if (product.getStock() < quantity) {
+                throw new CoreException(ErrorType.BAD_REQUEST, "재고가 부족합니다: " + product.getId());
+            }
+        }
+        return products;
+    }
+
     @Transactional
-    public Map<Long, Long> deduct(Map<Long, Long> orderQuantityList) {
-        List<ProductEntity> products= productRepository.findList(orderQuantityList.keySet().stream().toList());
+    public List<ProductEntity> deduct(Map<Long, Long> orderQuantityList) {
+        var targetIds = orderQuantityList.keySet().stream().toList();
+        List<ProductEntity> products= productRepository.findListWithLock(targetIds);
         if( products.size() != orderQuantityList.size()) {
             throw new CoreException(ErrorType.NOT_FOUND, "주문할 상품이 존재하지 않습니다.");
         }
@@ -50,9 +65,7 @@ public class ProductService {
             product.deductStock(orderQuantityList.get(product.getId()));
             productRepository.save(product);
         }
-        return products.stream().collect(
-                Collectors.toMap(ProductEntity::getId, ProductEntity::getPrice)
-        );
+        return products;
     }
 
     // ProductWithSignal 메서드들

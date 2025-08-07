@@ -18,6 +18,7 @@ import static com.loopers.domain.user.UserValidator.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserEntity extends BaseEntity {
 
+    @Column(unique = true, nullable = false, name = "login_id")
     private String loginId;
 
     @Enumerated(EnumType.STRING)
