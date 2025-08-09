@@ -1,6 +1,5 @@
 package com.loopers.domain.payment;
 
-import com.loopers.domain.point.PointEntity;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.Getter;
@@ -11,15 +10,13 @@ public interface PaymentWay<R> {
 
     @Getter
     enum Type {
-        POINT("POINT", PointEntity.class)
+        POINT("POINT")
         ;
 
         private final String value;
-        private final Class<?> classType;
 
-        Type(String value, Class<?> pointEntityClass) {
+        Type(String value) {
             this.value = value;
-            this.classType = pointEntityClass;
         }
 
         public static Type of(String type) {
