@@ -106,6 +106,11 @@ classDiagram
     }
     Coupon "1" *-- "*" CouponPolicy: 포함(쿠폰 정책)
 
+    class CouponUsage{
+        
+    }
+    Coupon "1" *-- "*" CouponUsage: 포함(쿠폰 사용 기록)
+
     class PaymentCoupon{
         - id: Long
         - couponId: Long
