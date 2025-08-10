@@ -11,9 +11,16 @@ public class OrderCommand {
     ) {
     }
 
+    public record Coupon(
+        Long id,
+        Long value
+    ) {
+    }
+
     public record Order(
         Long userId,
-        List<Item> orderItems
+        List<Item> orderItems,
+        List<Coupon> orderCoupons
     ) {
     }
 }

@@ -21,6 +21,11 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
+    public OrderEntity saveAndFlush(OrderEntity order) {
+        return jpaRepository.saveAndFlush(order);
+    }
+
+    @Override
     public Optional<OrderEntity> find(Long id) {
         return jpaRepository.findById(id);
     }

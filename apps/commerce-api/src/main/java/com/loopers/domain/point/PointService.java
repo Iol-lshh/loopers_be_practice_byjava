@@ -15,7 +15,7 @@ public class PointService {
 
     @Transactional
     public PointEntity charge(Long userId, Long amount) {
-        PointEntity point = pointRepository.findByUserId(userId)
+        PointEntity point = pointRepository.findWithLockByUserId(userId)
             .orElse(PointEntity.init(userId));
         point.add(amount);
         return pointRepository.save(point);
@@ -32,8 +32,8 @@ public class PointService {
     }
 
     @Transactional
-    public PointEntity deduct(Long userId, Long totalPrice) {
-        PointEntity point = pointRepository.findByUserId(userId).orElseThrow(() ->
+    public PointEntity pay(Long userId, Long totalPrice) {
+        PointEntity point = pointRepository.findWithLockByUserId(userId).orElseThrow(() ->
                 new CoreException(ErrorType.BAD_REQUEST, "포인트가 부족합니다."));
         point.subtract(totalPrice);
         return pointRepository.save(point);

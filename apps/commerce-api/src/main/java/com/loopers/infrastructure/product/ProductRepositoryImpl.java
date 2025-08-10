@@ -36,6 +36,11 @@ public class ProductRepositoryImpl implements ProductRepository, ProductReader {
         return productJpaRepository.findAllById(ids);
     }
 
+    @Override
+    public List<ProductEntity> findListWithLock(List<Long> ids) {
+        return productJpaRepository.lockAllById(ids);
+    }
+
     // ProductWithSignal 메서드 구현
     @Override
     public Optional<ProductWithSignalEntity> findWithSignal(Long id) {

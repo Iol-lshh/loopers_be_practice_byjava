@@ -26,10 +26,10 @@ public class LikeV1Controller {
     }
 
     @DeleteMapping("/products/{productId}")
-    public ApiResponse<LikeV1Dto.Response> unlikeProduct(
+    public ApiResponse<LikeV1Dto.Response> dislikeProduct(
             @RequestHeader("X-USER-ID") Long userId,
             @PathVariable Long productId) {
-        var result = likeFacade.unlikeProduct(userId, productId);
+        var result = likeFacade.dislikeProduct(userId, productId);
         return ApiResponse.success(LikeV1Dto.Response.from(result));
     }
 

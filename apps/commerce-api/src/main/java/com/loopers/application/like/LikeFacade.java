@@ -31,7 +31,7 @@ public class LikeFacade {
     }
 
     @Transactional
-    public LikeResult.Result unlikeProduct(Long userId, Long productId) {
+    public LikeResult.Result dislikeProduct(Long userId, Long productId) {
         userService.find(userId).orElseThrow(()-> new CoreException(
                 ErrorType.NOT_FOUND, "사용자를 찾을 수 없습니다 : " + userId));
         productService.find(productId).orElseThrow(()-> new CoreException(

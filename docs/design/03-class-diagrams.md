@@ -71,4 +71,55 @@ classDiagram
         - price: Long
     }
     Product "1" <.. "*" OrderItem: 참조
+    
+    class Payment {
+        - id: Long
+        - orderId: Long
+        - userId: Long
+        - amount: Long
+        - type: PaymentType
+    }
+    Payment "1" ..> "1" Order: 참조(결제)
 ```
+
+### 쿠폰 관련 클래스
+
+```mermaid
+classDiagram
+    class Coupon{
+        - id: Long
+        - type: Type
+        - value: Long
+        - policies: List<CouponPolicy>
+    }
+
+    class OrderCoupon{
+        - id: Long
+        - couponId: Long
+        - orderId: Long
+    }
+    Order "1" *-- "*" OrderCoupon: 포함(주문 쿠폰)
+    Coupon "1" <.. "*" OrderCoupon: 참조(주문 쿠폰)
+
+    class CouponPolicy{
+        - couponId: Long
+    }
+    Coupon "1" *-- "*" CouponPolicy: 포함(쿠폰 정책)
+
+    class CouponUsage{
+        
+    }
+    Coupon "1" *-- "*" CouponUsage: 포함(쿠폰 사용 기록)
+
+    class PaymentCoupon{
+        - id: Long
+        - couponId: Long
+        - paymentId: Long
+        - amount: Long
+    }
+    Payment "1" *-- "*" PaymentCoupon: 포함(결제 쿠폰)
+    Coupon "1" <.. "*" PaymentCoupon: 참조(결제 쿠폰)
+
+```
+
+- 쿠폰에 정책이 필요하다면, CouponPolicy (구현 x)

@@ -20,7 +20,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -93,6 +97,18 @@ public class ProductUsecaseIntegrationTest {
                 preparedBrand.getId(),
                 price,
                 1L
+        );
+        var result = productService.register(beforeRegister);
+        assertNotNull(result.getId());
+        return result;
+    }
+    private ProductEntity prepareProduct(long price, long stock) {
+        BrandEntity brand = prepareBrand();
+        ProductCommand.Register beforeRegister = new ProductCommand.Register(
+                "Test Product",
+                brand.getId(),
+                price,
+                stock
         );
         var result = productService.register(beforeRegister);
         assertNotNull(result.getId());
@@ -577,5 +593,66 @@ public class ProductUsecaseIntegrationTest {
 
             assertEquals(ErrorType.NOT_FOUND, result.getErrorType());
         }
+    }
+
+    @Nested
+    @DisplayName("상품 재고 차감")
+    class Deduct {
+        @DisplayName("존재하는 상품의 재고를 차감할 때, 재고가 차감된 상품 정보가 반환된다.")
+        @Test
+        void returnDeductedProduct_whenDeductStock() {
+            // given
+            long stock = 10L;
+            ProductEntity prepared = prepareProduct(10L, stock);
+            productService.release(prepared.getId());
+            assertEquals(stock, prepared.getStock());
+
+            // when
+            Map<Long, Long> orderQuantityList = Map.of(prepared.getId(), 1L);
+            var deductedProducts = productService.deduct(orderQuantityList);
+
+            // then
+            assertNotNull(deductedProducts);
+            assertEquals(1, deductedProducts.size());
+            ProductEntity updatedProduct = deductedProducts.get(0);
+            assertEquals(prepared.getId(), updatedProduct.getId());
+            assertEquals(stock - 1, updatedProduct.getStock());
+        }
+
+        @DisplayName("동시에 존재하는 상품의 재고를 차감할 때, 순차적으로 차감된다.")
+        @Test
+        void returnDeductedProduct_whenDeductStockByMultipleUsers() throws InterruptedException {
+            // given
+            long stock = 9L;
+            ProductEntity prepared = prepareProduct(10L, stock);
+            productService.release(prepared.getId());
+            assertEquals(stock, prepared.getStock());
+
+            // when
+            int threadCount = 10;
+            ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+            CountDownLatch latch = new CountDownLatch(threadCount);
+
+            for (int i = 0; i < threadCount; i++) {
+                executor.submit(() -> {
+                    try {
+                        Map<Long, Long> orderQuantityList = Map.of(prepared.getId(), 1L);
+                        productService.deduct(orderQuantityList);
+                    } catch (CoreException e) {
+                        assertEquals(ErrorType.BAD_REQUEST, e.getErrorType());
+                    } finally {
+                        latch.countDown();
+                    }
+                });
+            }
+
+            latch.await();
+
+            // then
+            ProductEntity updatedProduct = productService.find(prepared.getId())
+                    .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "상품을 찾을 수 없습니다."));
+            assertEquals(0L, updatedProduct.getStock());
+        }
+
     }
 }

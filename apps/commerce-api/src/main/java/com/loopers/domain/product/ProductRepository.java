@@ -15,4 +15,5 @@ public interface ProductRepository {
     List<ProductEntity> findList(List<Long> ids);
 
 
+    List<ProductEntity> findListWithLock(List<Long> ids);
 }
