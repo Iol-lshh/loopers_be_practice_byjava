@@ -12,7 +12,6 @@ public interface UserV1ApiSpec {
             description = "회원가입"
     )
     ApiResponse<UserV1Dto.UsersResponse> signUp(
-            @Schema(name = "요청", description = "회원가입할 사용자 정보 입력")
             UserV1Dto.UsersSignUpRequest request
     );
 
@@ -21,6 +20,6 @@ public interface UserV1ApiSpec {
             description = "내 정보 조회"
     )
     ApiResponse<UserV1Dto.UsersResponse> getMyInfo(
-            @Schema(name = "조회할 아이디", description = "X-USER-ID") Long userId
+            @Schema(name = "X-USER-ID") Long userId
     );
 }
