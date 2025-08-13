@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
         p.state,
         p.released_at,
         
-        ls.like_count
+        COALESCE(ls.like_count, 0) as like_count
     FROM product p
     LEFT JOIN like_summary ls ON p.id = ls.target_id AND ls.target_type = 'PRODUCT'
     """)
