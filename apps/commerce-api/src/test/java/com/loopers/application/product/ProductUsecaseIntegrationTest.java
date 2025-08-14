@@ -11,6 +11,7 @@ import com.loopers.infrastructure.product.ProductJpaRepository;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import com.loopers.utils.DatabaseCleanUp;
+import com.loopers.utils.RedisCleanUp;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.Map;
 import java.util.Optional;
@@ -27,24 +29,37 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 public class ProductUsecaseIntegrationTest {
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
     @Autowired
+    private RedisCleanUp redisCleanUp;
+
+    @Autowired
     private LikeFacade likeFacade;
     @Autowired
     private ProductRepository productRepository;
+    @MockitoSpyBean
+    private ProductCacheRepository productCacheRepository;
 
     @AfterEach
     void tearDown() {
         databaseCleanUp.truncateAllTables();
     }
+    @AfterEach
+    void tearDownCache() {
+        redisCleanUp.truncateAll();
+    }
 
     @Autowired
     private BrandService brandService;
-    @Autowired
+    @MockitoSpyBean
     private ProductService productService;
     @Autowired
     private ProductFacade productFacade;
@@ -520,9 +535,65 @@ public class ProductUsecaseIntegrationTest {
                 assertEquals(secondProduct.getId(), productList.get(1).id());
             }
         }
+
+        @DisplayName("상품 목록 조회 캐시")
+        @Nested
+        class ProductCacheTest {
+            @DisplayName("상품 목록을 조회할 때, 캐시가 적용되어 빠르게 응답한다.")
+            @Test
+            void returnCachedProductList_whenQuery() {
+                // given
+                BrandEntity preparedBrand = prepareBrand();
+                for (int i = 0; i < 20; i++) {
+                    prepareProduct(preparedBrand);
+                }
+                ProductStatement statement = ProductStatement.builder()
+                        .orderBy(new ProductStatement.CreatedAt(false))
+                        .build();
+                var list = productFacade.list(statement, Pageable.ofSize(20));
+                assertEquals(20, list.size());
+                verify(productService, times(1)).findWithSignals(any(ProductStatement.class), any(Pageable.class));
+                verify(productCacheRepository, times(1)).findIds(any(ProductStatement.class), any(Pageable.class));
+                verify(productCacheRepository, times(1)).save(any(ProductStatement.class), any(Pageable.class), anyList());
+
+                // when
+                var productList = productFacade.list(statement, Pageable.ofSize(20));
+
+                // then
+                assertFalse(productList.isEmpty());
+                assertEquals(20, productList.size());
+                verify(productService, times(1)).findWithSignals(anyList()); // 캐시된 ID로 조회
+                verify(productCacheRepository, times(2)).findIds(any(ProductStatement.class), any(Pageable.class)); // 총 2번 호출
+            }
+
+            @DisplayName("상품 목록을 조회할 때, 캐시가 적용되어 빠르게 응답한다. (브랜드 ID 필터링)")
+            @Test
+            void returnCachedProductListByBrandID_whenQuery() {
+                // given
+                BrandEntity preparedBrand = prepareBrand();
+                for (int i = 0; i < 20; i++) {
+                    prepareProduct(preparedBrand);
+                }
+                ProductStatement statement = ProductStatement.builder()
+                        .brandID(preparedBrand.getId())
+                        .orderBy(new ProductStatement.CreatedAt(false))
+                        .build();
+                var list = productFacade.list(statement, Pageable.ofSize(20));
+                assertEquals(20, list.size());
+                verify(productService, times(1)).findWithSignals(any(ProductStatement.class), any(Pageable.class));
+                verify(productCacheRepository, times(1)).findIds(any(ProductStatement.class), any(Pageable.class));
+                verify(productCacheRepository, times(1)).save(any(ProductStatement.class), any(Pageable.class), anyList());
+                // when
+                var productList = productFacade.list(statement, Pageable.ofSize(20));
+                // then
+                assertFalse(productList.isEmpty());
+                assertEquals(20, productList.size());
+                verify(productService, times(1)).findWithSignals(anyList()); // 캐시된
+                // ID로 조회
+                verify(productCacheRepository, times(2)).findIds(any(ProductStatement.class), any(Pageable.class)); // 총 2번 호출
+            }
+        }
     }
-
-
 
     @Nested
     @DisplayName("상품 정보 조회")
@@ -656,3 +727,4 @@ public class ProductUsecaseIntegrationTest {
 
     }
 }
+

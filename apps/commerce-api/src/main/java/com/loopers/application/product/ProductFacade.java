@@ -6,10 +6,7 @@ import com.loopers.domain.like.LikeEntity;
 import com.loopers.domain.like.LikeService;
 import com.loopers.domain.like.LikeStatement;
 import com.loopers.domain.like.LikeSummaryEntity;
-import com.loopers.domain.product.ProductStatement;
-import com.loopers.domain.product.ProductEntity;
-import com.loopers.domain.product.ProductService;
-import com.loopers.domain.product.ProductWithSignalEntity;
+import com.loopers.domain.product.*;
 import com.loopers.domain.user.UserService;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
@@ -28,9 +25,11 @@ public class ProductFacade {
     private final BrandService brandService;
     private final LikeService likeService;
     private final UserService userService;
+    private final ProductCacheRepository productCacheRepository;
 
     @Transactional(readOnly = true)
     public List<ProductResult.Summary> list(Pageable pageable) {
+
         ProductStatement criteria = ProductStatement.builder()
                 .orderBy(new ProductStatement.CreatedAt(false))
                 .build();
@@ -39,12 +38,20 @@ public class ProductFacade {
 
     @Transactional(readOnly = true)
     public List<ProductResult.Summary> list(ProductStatement criteria, Pageable pageable) {
-        List<ProductWithSignalEntity> productWithSignal = productService.findWithSignals(criteria, pageable);
+        List<Long> cacheKeys = productCacheRepository.findIds(criteria, pageable);
 
-        List<Long> brandIds = productWithSignal.stream().map(ProductWithSignalEntity::getBrandId).distinct().toList();
+        List<ProductWithSignalEntity> productWithSignals = !cacheKeys.isEmpty() ?
+                productService.findWithSignals(cacheKeys) :
+                productService.findWithSignals(criteria, pageable);
+
+        if (cacheKeys.isEmpty()) {
+            productCacheRepository.save(criteria, pageable, productWithSignals);
+        }
+
+        List<Long> brandIds = productWithSignals.stream().map(ProductWithSignalEntity::getBrandId).distinct().toList();
         List<BrandEntity> brands = brandService.find(brandIds);
 
-        return ProductResult.Summary.of(brands, productWithSignal);
+        return ProductResult.Summary.of(brands, productWithSignals);
     }
 
     @Transactional(readOnly = true)
