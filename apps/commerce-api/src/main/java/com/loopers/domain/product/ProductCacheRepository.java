@@ -7,5 +7,5 @@ import java.util.List;
 public interface ProductCacheRepository {
     List<Long> findIds(ProductStatement criteria, Pageable pageable);
 
-    List<Long> save(ProductStatement criteria, Pageable pageable, List<ProductWithSignalEntity> productWithSignals);
+    List<Long> save(ProductStatement criteria, Pageable pageable, List<ProductWithSignal> productWithSignals);
 }

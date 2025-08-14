@@ -40,7 +40,7 @@ public class ProductFacade {
     public List<ProductResult.Summary> list(ProductStatement criteria, Pageable pageable) {
         List<Long> cacheKeys = productCacheRepository.findIds(criteria, pageable);
 
-        List<ProductWithSignalEntity> productWithSignals = !cacheKeys.isEmpty() ?
+        List<ProductWithSignal> productWithSignals = !cacheKeys.isEmpty() ?
                 productService.findWithSignals(cacheKeys) :
                 productService.findWithSignals(criteria, pageable);
 
@@ -48,7 +48,7 @@ public class ProductFacade {
             productCacheRepository.save(criteria, pageable, productWithSignals);
         }
 
-        List<Long> brandIds = productWithSignals.stream().map(ProductWithSignalEntity::getBrandId).distinct().toList();
+        List<Long> brandIds = productWithSignals.stream().map(ProductWithSignal::getBrandId).distinct().toList();
         List<BrandEntity> brands = brandService.find(brandIds);
 
         return ProductResult.Summary.of(brands, productWithSignals);
@@ -56,7 +56,7 @@ public class ProductFacade {
 
     @Transactional(readOnly = true)
     public ProductResult.Detail get(Long id) {
-        ProductWithSignalEntity productWithSignal = productService.findWithSignal(id).orElseThrow(() -> new CoreException(
+        ProductWithSignal productWithSignal = productService.findWithSignal(id).orElseThrow(() -> new CoreException(
                 ErrorType.NOT_FOUND, "조회할 수 없는 상품입니다: " + id));
         BrandEntity brand = brandService.find(productWithSignal.getBrandId()).orElseThrow(() -> new CoreException(
                 ErrorType.NOT_FOUND, "조회할 수 없는 브랜드입니다: " + productWithSignal.getBrandId()));
@@ -84,9 +84,9 @@ public class ProductFacade {
         List<LikeEntity> likeList = likeService.find(likeStatement);
 
         var productIds = likeList.stream().map(LikeEntity::getTargetId).toList();
-        List<ProductWithSignalEntity> productWithSignals = productService.findWithSignals(productIds);
+        List<ProductWithSignal> productWithSignals = productService.findWithSignals(productIds);
 
-        var brandIds = productWithSignals.stream().map(ProductWithSignalEntity::getBrandId).distinct().toList();
+        var brandIds = productWithSignals.stream().map(ProductWithSignal::getBrandId).distinct().toList();
         List<BrandEntity> brandList = brandService.find(brandIds);
 
         return ProductResult.Summary.of(brandList, productWithSignals);

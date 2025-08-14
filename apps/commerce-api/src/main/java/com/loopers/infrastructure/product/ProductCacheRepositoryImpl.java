@@ -2,7 +2,7 @@ package com.loopers.infrastructure.product;
 
 import com.loopers.domain.product.ProductCacheRepository;
 import com.loopers.domain.product.ProductStatement;
-import com.loopers.domain.product.ProductWithSignalEntity;
+import com.loopers.domain.product.ProductWithSignal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -27,13 +27,13 @@ public class ProductCacheRepositoryImpl implements ProductCacheRepository {
     }
 
     @Override
-    public List<Long> save(ProductStatement criteria, Pageable pageable, List<ProductWithSignalEntity> productWithSignals) {
+    public List<Long> save(ProductStatement criteria, Pageable pageable, List<ProductWithSignal> productWithSignals) {
         if (pageable.getPageNumber() > 2) {
             return List.of();
         }
         String keyPattern = ProductCacheKeyGenerator.withSignalFrom(criteria, pageable);
         List<Long> ids = productWithSignals.stream()
-                .map(ProductWithSignalEntity::getId)
+                .map(ProductWithSignal::getId)
                 .toList();
         String serializedIds = ProductCacheSerializer.serializeIds(ids);
         redisTemplate.opsForValue().set(keyPattern, serializedIds);

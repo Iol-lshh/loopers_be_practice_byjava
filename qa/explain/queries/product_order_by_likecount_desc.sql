@@ -1,19 +1,9 @@
 -- MySQL 실행계획 확인
 EXPLAIN ANALYZE
-select pwse1_0.id,pwse1_0.brand_id,pwse1_0.created_at,pwse1_0.like_count,pwse1_0.name,pwse1_0.price,pwse1_0.released_at,pwse1_0.state,pwse1_0.stock,pwse1_0.updated_at from (
-SELECT
-      p.id,
-      p.name,
-      p.brand_id,
-      p.price,
-      p.stock,
-      p.created_at,
-      p.updated_at,
-      p.state,
-      p.released_at,
+select
+    pe1_0.id,pe1_0.brand_id,pe1_0.created_at,pe1_0.deleted_at,pe1_0.name,pe1_0.price,pe1_0.released_at,pe1_0.state,pe1_0.stock,pe1_0.updated_at,lse1_0.like_count
+from product pe1_0
+left join like_summary lse1_0 on pe1_0.id=lse1_0.target_id and lse1_0.target_type='PRODUCT'
+order by lse1_0.like_count desc,pe1_0.id
+limit 0 offset 20;
 
-      COALESCE(ls.like_count, 0) as like_count
-  FROM product p
-           LEFT JOIN like_summary ls ON p.id = ls.target_id AND ls.target_type = 'PRODUCT'
-) pwse1_0 where 1=1 order by pwse1_0.like_count desc
-LIMIT 20 OFFSET 0;

@@ -30,11 +30,6 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductEntity> find(ProductStatement criteria, Pageable pageable) {
-        return productRepository.findList(criteria, pageable);
-    }
-
-    @Transactional(readOnly = true)
     public List<ProductEntity> find(List<Long> ids) {
         return productRepository.findList(ids);
     }
@@ -70,17 +65,17 @@ public class ProductService {
 
     // ProductWithSignal 메서드들
     @Transactional(readOnly = true)
-    public Optional<ProductWithSignalEntity> findWithSignal(Long id) {
+    public Optional<ProductWithSignal> findWithSignal(Long id) {
         return productReader.findWithSignal(id);
     }
 
     @Transactional(readOnly = true)
-    public List<ProductWithSignalEntity> findWithSignals(ProductStatement criteria, Pageable pageable) {
+    public List<ProductWithSignal> findWithSignals(ProductStatement criteria, Pageable pageable) {
         return productReader.findWithSignals(criteria, pageable);
     }
 
     @Transactional(readOnly = true)
-    public List<ProductWithSignalEntity> findWithSignals(List<Long> ids) {
+    public List<ProductWithSignal> findWithSignals(List<Long> ids) {
         return productReader.findWithSignals(ids);
     }
 

@@ -1,6 +1,7 @@
 package com.loopers.interfaces.api;
 
 import com.loopers.application.like.LikeFacade;
+import com.loopers.application.product.ProductFacade;
 import com.loopers.domain.brand.BrandEntity;
 import com.loopers.domain.brand.BrandService;
 import com.loopers.domain.product.ProductCommand;
@@ -12,6 +13,7 @@ import com.loopers.domain.user.UserEntity;
 import com.loopers.domain.user.UserService;
 import com.loopers.interfaces.api.product.ProductV1Dto;
 import com.loopers.utils.DatabaseCleanUp;
+import com.loopers.utils.RedisCleanUp;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -34,10 +36,17 @@ public class ProductV1ApiE2ETest {
 
     private final TestRestTemplate testRestTemplate;
     private final DatabaseCleanUp databaseCleanUp;
+    private final RedisCleanUp redisCleanUp;
+    @Autowired
+    private ProductFacade productFacade;
 
     @AfterEach
     void tearDown() {
         databaseCleanUp.truncateAllTables();
+    }
+    @AfterEach
+    void tearDownRedis() {
+        redisCleanUp.truncateAll();
     }
 
     private final BrandService brandService;
@@ -84,9 +93,10 @@ public class ProductV1ApiE2ETest {
     }
 
     @Autowired
-    public ProductV1ApiE2ETest(TestRestTemplate testRestTemplate, DatabaseCleanUp databaseCleanUp, BrandService brandService, ProductService productService, UserService userService, ProductRepository productRepository, LikeFacade likeFacade) {
+    public ProductV1ApiE2ETest(TestRestTemplate testRestTemplate, DatabaseCleanUp databaseCleanUp, RedisCleanUp redisCleanUp, BrandService brandService, ProductService productService, UserService userService, ProductRepository productRepository, LikeFacade likeFacade) {
         this.testRestTemplate = testRestTemplate;
         this.databaseCleanUp = databaseCleanUp;
+        this.redisCleanUp = redisCleanUp;
         this.brandService = brandService;
         this.productService = productService;
         this.userService = userService;
@@ -152,15 +162,16 @@ public class ProductV1ApiE2ETest {
             // Given
             String endpoint = ENDPOINT.apply("");
             BrandEntity brand = prepareBrand();
+            
+            // 상품을 생성하고 즉시 출시 상태로 변경
             ProductEntity product1 = prepareProduct(brand, 10000L);
-            product1.release();
-            productRepository.save(product1);
+            productFacade.release(product1.getId());
+            
             ProductEntity product2 = prepareProduct(brand, 20000L);
-            product2.release();
-            productRepository.save(product2);
+            productFacade.release(product2.getId());
+            
             ProductEntity product3 = prepareProduct(brand, 30000L);
-            product3.release();
-            productRepository.save(product3);
+            productFacade.release(product3.getId());
 
             // When
             ParameterizedTypeReference<ApiResponse<List<ProductV1Dto.SummaryResponse>>> responseType = new ParameterizedTypeReference<>() {};
@@ -176,6 +187,7 @@ public class ProductV1ApiE2ETest {
             assertNotNull(response.getBody());
             assertNotNull(response.getBody().data());
             assertEquals(3, response.getBody().data().size());
+            // ReleasedAt DESC 순으로 정렬되므로 가장 최근에 출시된 상품이 먼저 나옴
             assertEquals(product3.getId(), response.getBody().data().get(0).id());
             assertEquals(product2.getId(), response.getBody().data().get(1).id());
             assertEquals(product1.getId(), response.getBody().data().get(2).id());
@@ -188,14 +200,11 @@ public class ProductV1ApiE2ETest {
             String endpoint = ENDPOINT.apply("");
             BrandEntity brand = prepareBrand();
             ProductEntity product1 = prepareProduct(brand, 10000L);
-            product1.release();
-            productRepository.save(product1);
+            productFacade.release(product1.getId());
             ProductEntity product2 = prepareProduct(brand, 20000L);
-            product2.release();
-            productRepository.save(product2);
+            productFacade.release(product2.getId());
             ProductEntity product3 = prepareProduct(brand, 30000L);
-            product3.release();
-            productRepository.save(product3);
+            productFacade.release(product3.getId());
 
             // When
             ParameterizedTypeReference<ApiResponse<List<ProductV1Dto.SummaryResponse>>> responseType = new ParameterizedTypeReference<>() {};
@@ -221,15 +230,12 @@ public class ProductV1ApiE2ETest {
             String endpoint = ENDPOINT.apply("");
             BrandEntity brand1 = prepareBrand();
             ProductEntity product1 = prepareProduct(brand1, 10000L);
-            product1.release();
-            productRepository.save(product1);
+            productFacade.release(product1.getId());
             BrandEntity brand2 = prepareBrand();
             ProductEntity product2 = prepareProduct(brand2, 20000L);
-            product2.release();
-            productRepository.save(product2);
+            productFacade.release(product2.getId());
             ProductEntity product3 = prepareProduct(brand1, 30000L);
-            product3.release();
-            productRepository.save(product3);
+            productFacade.release(product3.getId());
 
             // When
             ParameterizedTypeReference<ApiResponse<List<ProductV1Dto.SummaryResponse>>> responseType = new ParameterizedTypeReference<>() {};
@@ -255,14 +261,11 @@ public class ProductV1ApiE2ETest {
             String endpoint = ENDPOINT.apply("");
             BrandEntity brand = prepareBrand();
             ProductEntity product1 = prepareProduct(brand, 10000L);
-            product1.release();
-            productRepository.save(product1);
+            productFacade.release(product1.getId());
             ProductEntity product2 = prepareProduct(brand, 20000L);
-            product2.release();
-            productRepository.save(product2);
+            productFacade.release(product2.getId());
             ProductEntity product3 = prepareProduct(brand, 30000L);
-            product3.release();
-            productRepository.save(product3);
+            productFacade.release(product3.getId());
 
             // When
             ParameterizedTypeReference<ApiResponse<List<ProductV1Dto.SummaryResponse>>> responseType = new ParameterizedTypeReference<>() {};
@@ -290,14 +293,11 @@ public class ProductV1ApiE2ETest {
             String endpoint = ENDPOINT.apply("");
             BrandEntity brand = prepareBrand();
             ProductEntity product1 = prepareProduct(brand, 100L);
-            product1.release();
-            productRepository.save(product1);
+            productFacade.release(product1.getId());
             ProductEntity product2 = prepareProduct(brand, 10000L);
-            product2.release();
-            productRepository.save(product2);
+            productFacade.release(product2.getId());
             ProductEntity product3 = prepareProduct(brand, 20000L);
-            product3.release();
-            productRepository.save(product3);
+            productFacade.release(product3.getId());
 
             // When
             ParameterizedTypeReference<ApiResponse<List<ProductV1Dto.SummaryResponse>>> responseType = new ParameterizedTypeReference<>() {};
@@ -327,17 +327,14 @@ public class ProductV1ApiE2ETest {
             String endpoint = ENDPOINT.apply("");
             BrandEntity brand = prepareBrand();
             ProductEntity product1 = prepareProduct(brand, 10000L);
-            product1.release();
-            productRepository.save(product1);
+            productFacade.release(product1.getId());
             likeFacade.likeProduct(user.getId(), product1.getId());
             likeFacade.likeProduct(user2.getId(), product1.getId());
             ProductEntity product2 = prepareProduct(brand, 20000L);
-            product2.release();
-            productRepository.save(product2);
+            productFacade.release(product2.getId());
             likeFacade.likeProduct(user.getId(), product2.getId());
             ProductEntity product3 = prepareProduct(brand, 30000L);
-            product3.release();
-            productRepository.save(product3);
+            productFacade.release(product3.getId());
 
             // When
             ParameterizedTypeReference<ApiResponse<List<ProductV1Dto.SummaryResponse>>> responseType = new ParameterizedTypeReference<>() {};

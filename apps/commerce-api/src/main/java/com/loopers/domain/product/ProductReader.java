@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProductReader {
-    Optional<ProductWithSignalEntity> findWithSignal(Long id);
+    Optional<ProductWithSignal> findWithSignal(Long id);
 
-    List<ProductWithSignalEntity> findWithSignals(ProductStatement criteria, Pageable pageable);
+    List<ProductWithSignal> findWithSignals(ProductStatement criteria, Pageable pageable);
 
-    List<ProductWithSignalEntity> findWithSignals(List<Long> ids);
+    List<ProductWithSignal> findWithSignals(List<Long> ids);
 }

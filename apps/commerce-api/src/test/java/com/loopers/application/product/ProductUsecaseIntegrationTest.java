@@ -198,9 +198,11 @@ public class ProductUsecaseIntegrationTest {
             // given
             BrandEntity preparedBrand = prepareBrand();
             String nextPageProductName = "Oldest Next Page Product";
-            prepareProduct(nextPageProductName);
+            var productOldest =  prepareProduct(nextPageProductName);
+            productFacade.release(productOldest.getId());
             for (int i = 0; i < 10; i++) {
-                prepareProduct(preparedBrand);
+                var product = prepareProduct(preparedBrand);
+                productFacade.release(product.getId());
             }
             var list = jpaRepository.findAll();
             assertEquals(11, list.size());
@@ -222,7 +224,9 @@ public class ProductUsecaseIntegrationTest {
             void returnProductListOrderedByLatest_whenQuery() {
                 // given
                 ProductEntity firstProduct = prepareProduct("Product1");
+                productFacade.release(firstProduct.getId());
                 ProductEntity secondProduct = prepareProduct("Product2");
+                productFacade.release(secondProduct.getId());
 
                 // when
                 ProductStatement criteria = ProductStatement.builder()
@@ -336,7 +340,9 @@ public class ProductUsecaseIntegrationTest {
             void returnProductListOrderedByPriceDescending_whenQuery() {
                 // given
                 ProductEntity firstProduct = prepareProduct(1L);
+                productFacade.release(firstProduct.getId());
                 ProductEntity secondProduct = prepareProduct(10L);
+                productFacade.release(secondProduct.getId());
 
                 // when
                 ProductStatement criteria = ProductStatement.builder()
@@ -429,7 +435,9 @@ public class ProductUsecaseIntegrationTest {
                 // given
                 BrandEntity preparedBrand = prepareBrand();
                 ProductEntity firstProduct = prepareProduct(preparedBrand);
+                productFacade.release(firstProduct.getId());
                 ProductEntity secondProduct = prepareProduct(preparedBrand);
+                productFacade.release(secondProduct.getId());
 
                 // when
                 ProductStatement criteria = ProductStatement.builder()
@@ -495,7 +503,9 @@ public class ProductUsecaseIntegrationTest {
                 // given
                 BrandEntity preparedBrand = prepareBrand();
                 ProductEntity firstProduct = prepareProduct(preparedBrand, 1L);
+                productFacade.release(firstProduct.getId());
                 ProductEntity secondProduct = prepareProduct(preparedBrand, 10L);
+                productFacade.release(secondProduct.getId());
 
                 // when
                 ProductStatement criteria = ProductStatement.builder()
