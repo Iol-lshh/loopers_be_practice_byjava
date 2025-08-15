@@ -5,5 +5,8 @@ select
     pe1_0.released_at,pe1_0.state,pe1_0.stock,pe1_0.updated_at,lse1_0.like_count
 from product pe1_0
 left join like_summary lse1_0 on pe1_0.id=lse1_0.target_id and lse1_0.target_type='PRODUCT'
+where pe1_0.state = 'OPEN'
 order by pe1_0.released_at desc,pe1_0.id
 limit 0 offset 20;
+
+

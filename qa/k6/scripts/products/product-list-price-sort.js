@@ -24,7 +24,7 @@ export const options = {
   }
 };
 
-const REQUEST_DURATION = 2000; // 동시 요청 고려하여 임계값 증가
+const REQUEST_DURATION = 300; // 동시 요청 고려하여 임계값 증가
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:8080';
 
 // 상품 목록 가격순 정렬 테스트 시나리오

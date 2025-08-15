@@ -31,6 +31,8 @@ const BASE_URL = __ENV.BASE_URL || 'http://localhost:8080';
 export default function () {
   // 시나리오 1: 좋아요 내림차순 정렬 (기본)
   const likesDescResponse = http.get(`${BASE_URL}/api/v1/products?sort=likes_desc`);
+  console.log(`[VU: ${__VU}] Response time - Total: ${likesDescResponse.timings.duration}ms, Waiting: ${likesDescResponse.timings.waiting}ms, Connecting: ${likesDescResponse.timings.connecting}ms`);
+
   check(likesDescResponse, {
     '좋아요 내림차순 정렬 조회 성공': (r) => r.status === 200,
     '좋아요 내림차순 응답 시간 체크': (r) => r.timings.duration < REQUEST_DURATION,

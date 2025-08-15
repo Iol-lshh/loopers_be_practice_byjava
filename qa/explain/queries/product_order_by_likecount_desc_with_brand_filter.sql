@@ -4,5 +4,6 @@ select pe1_0.id,pe1_0.brand_id,pe1_0.created_at,pe1_0.deleted_at,pe1_0.name,pe1_
 from product pe1_0
 left join like_summary lse1_0 on pe1_0.id=lse1_0.target_id and lse1_0.target_type='PRODUCT'
 where pe1_0.brand_id=1
+and pe1_0.state = 'OPEN'
 order by lse1_0.like_count desc,pe1_0.id
-limit 0 offset 20;
+limit 20 offset 0;

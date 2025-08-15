@@ -24,7 +24,7 @@ export const options = {
   }
 };
 
-const REQUEST_DURATION = 2000; // 동시 요청 고려하여 임계값 증가
+const REQUEST_DURATION = 300; // 동시 요청 고려하여 임계값 증가
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:8080';
 
 // 상품 목록 기본 조회 테스트 시나리오
@@ -33,7 +33,7 @@ export default function () {
   const basicResponse = http.get(`${BASE_URL}/api/v1/products?sort=latest`);
   
   // 응답 시간 상세 로깅
-  console.log(`[VU: ${__VU}] Response time - Total: ${basicResponse.timings.duration}ms, Waiting: ${basicResponse.timings.waiting}ms, Connecting: ${basicResponse.timings.connecting}ms`);
+  // console.log(`[VU: ${__VU}] Response time - Total: ${basicResponse.timings.duration}ms, Waiting: ${basicResponse.timings.waiting}ms, Connecting: ${basicResponse.timings.connecting}ms`);
   
   check(basicResponse, {
     '기본 상품 목록 조회 성공': (r) => r.status === 200,
