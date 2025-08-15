@@ -1,0 +1,10 @@
+EXPLAIN
+-> Limit: 20 row(s)  (actual time=714..714 rows=20 loops=1)
+    -> Sort: lse1_0.like_count DESC, pe1_0.id, limit input to 20 row(s) per chunk  (actual time=714..714 rows=20 loops=1)
+        -> Stream results  (cost=31697 rows=304333) (actual time=0.26..621 rows=721838 loops=1)
+            -> Left hash join (lse1_0.target_id = pe1_0.id)  (cost=31697 rows=304333) (actual time=0.227..348 rows=721838 loops=1)
+                -> Filter: (pe1_0.state = 'OPEN')  (cost=91300 rows=304333) (actual time=0.0615..287 rows=721838 loops=1)
+                    -> Table scan on pe1_0  (cost=91300 rows=913000) (actual time=0.058..219 rows=913000 loops=1)
+                -> Hash
+                    -> Filter: (lse1_0.target_type = 'PRODUCT')  (cost=0.00415 rows=1) (actual time=0.148..0.148 rows=0 loops=1)
+                        -> Table scan on lse1_0  (cost=0.00415 rows=1) (actual time=0.147..0.147 rows=0 loops=1)
