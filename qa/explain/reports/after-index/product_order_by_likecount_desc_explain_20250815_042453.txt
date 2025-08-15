@@ -1,0 +1,8 @@
+EXPLAIN
+-> Limit: 20 row(s)  (actual time=3561..3561 rows=20 loops=1)
+    -> Sort: lse1_0.like_count DESC, pe1_0.id, limit input to 20 row(s) per chunk  (actual time=3561..3561 rows=20 loops=1)
+        -> Stream results  (cost=212188 rows=455977) (actual time=0.933..3462 rows=721838 loops=1)
+            -> Nested loop left join  (cost=212188 rows=455977) (actual time=0.916..3184 rows=721838 loops=1)
+                -> Index lookup on pe1_0 using idx_product_state_price_id (state='OPEN'), with index condition: (pe1_0.state = 'OPEN')  (cost=52596 rows=455977) (actual time=0.901..2735 rows=721838 loops=1)
+                -> Filter: (lse1_0.target_type = 'PRODUCT')  (cost=0.25 rows=1) (actual time=522e-6..522e-6 rows=0 loops=721838)
+                    -> Single-row index lookup on lse1_0 using PRIMARY (target_id=pe1_0.id, target_type='PRODUCT')  (cost=0.25 rows=1) (actual time=437e-6..437e-6 rows=0 loops=721838)

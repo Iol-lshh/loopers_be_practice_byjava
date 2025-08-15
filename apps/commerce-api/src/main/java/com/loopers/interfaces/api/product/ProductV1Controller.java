@@ -31,7 +31,7 @@ public class ProductV1Controller {
     ) {
         var cirteriaBuilder = ProductStatement.builder();
         if(brandId != null) {
-            cirteriaBuilder.brandID(brandId);
+            cirteriaBuilder.brandId(brandId);
         }
         if(sort != null) {
             switch (sort) {

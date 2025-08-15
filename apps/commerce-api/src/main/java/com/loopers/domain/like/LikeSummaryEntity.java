@@ -12,7 +12,10 @@ import java.io.Serializable;
 
 @Getter
 @Entity
-@Table(name = "like_summary")
+@Table(name = "like_summary", indexes = {
+    @Index(name = "idx_ls_type_like_tid", columnList = "targetType, likeCount DESC, targetId"),
+    @Index(name = "idx_ls_type_tid", columnList = "targetType, targetId")
+})
 @IdClass(LikeSummaryEntity.LikeSummaryId.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LikeSummaryEntity {

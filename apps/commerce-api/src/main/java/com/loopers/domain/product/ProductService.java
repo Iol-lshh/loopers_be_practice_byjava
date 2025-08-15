@@ -17,6 +17,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final ProductReader productReader;
+    private final ProductCacheRepository productCacheRepository;
 
     @Transactional
     public ProductEntity register(ProductCommand.Register command) {
@@ -27,11 +28,6 @@ public class ProductService {
     @Transactional(readOnly = true)
     public Optional<ProductEntity> find(Long id) {
         return productRepository.find(id);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ProductEntity> find(ProductStatement criteria, Pageable pageable) {
-        return productRepository.findList(criteria, pageable);
     }
 
     @Transactional(readOnly = true)
@@ -70,17 +66,22 @@ public class ProductService {
 
     // ProductWithSignal 메서드들
     @Transactional(readOnly = true)
-    public Optional<ProductWithSignalEntity> findWithSignal(Long id) {
+    public Optional<ProductInfo.ProductWithSignal> findWithSignal(Long id) {
         return productReader.findWithSignal(id);
     }
 
     @Transactional(readOnly = true)
-    public List<ProductWithSignalEntity> findWithSignals(ProductStatement criteria, Pageable pageable) {
-        return productReader.findWithSignals(criteria, pageable);
+    public List<ProductInfo.ProductWithSignal> findWithSignals(ProductStatement statement, Pageable pageable) {
+        List <ProductInfo.ProductWithSignal> cached = productCacheRepository.findWithSignal(statement, pageable);
+        if (!cached.isEmpty()) {
+            return cached;
+        }
+        List<ProductInfo.ProductWithSignal> productWithSignals = productReader.findWithSignals(statement, pageable);
+        return  productCacheRepository.save(statement, pageable, productWithSignals);
     }
 
     @Transactional(readOnly = true)
-    public List<ProductWithSignalEntity> findWithSignals(List<Long> ids) {
+    public List<ProductInfo.ProductWithSignal> findWithSignals(List<Long> ids) {
         return productReader.findWithSignals(ids);
     }
 

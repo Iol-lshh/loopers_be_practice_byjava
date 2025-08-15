@@ -13,7 +13,6 @@ import java.util.Optional;
 public class ProductRepositoryImpl implements ProductRepository, ProductReader {
 
     private final ProductJpaRepository productJpaRepository;
-    private final ProductWithSignalJpaRepository withSignalJpaRepository;
 
     @Override
     public ProductEntity save(ProductEntity product) {
@@ -43,19 +42,47 @@ public class ProductRepositoryImpl implements ProductRepository, ProductReader {
 
     // ProductWithSignal 메서드 구현
     @Override
-    public Optional<ProductWithSignalEntity> findWithSignal(Long id) {
-        return withSignalJpaRepository.findById(id);
+    public Optional<ProductInfo.ProductWithSignal> findWithSignal(Long id) {
+        return productJpaRepository.findWithSignal(id);
     }
 
     @Override
-    public List<ProductWithSignalEntity> findWithSignals(ProductStatement criteria, Pageable pageable) {
-        var spec = ProductJpaSpecification.withSignalFrom(criteria);
-        return withSignalJpaRepository.findAll(spec, pageable).getContent();
+    public List<ProductInfo.ProductWithSignal> findWithSignals(ProductStatement statement, Pageable pageable) {
+        if(statement.getBrandId() != null) {
+            if (statement.getOrderBy() instanceof ProductStatement.LikeCount) {
+                return productJpaRepository.findAllWithSignalByBrandIdOrderByLikeCountDesc(statement.getBrandId(), pageable);
+            } else if (statement.getOrderBy() instanceof ProductStatement.Price(boolean ascending)) {
+                return ascending ? productJpaRepository.findAllWithSignalByBrandIdOrderByPriceAsc(statement.getBrandId(), pageable)
+                        : productJpaRepository.findAllWithSignalByBrandIdOrderByPriceDesc(statement.getBrandId(), pageable);
+            } else if (statement.getOrderBy() instanceof ProductStatement.ReleasedAt(boolean ascending)) {
+                return ascending ? productJpaRepository.findAllWithSignalByBrandIdOrderByReleasedAtAsc(statement.getBrandId(), pageable)
+                        : productJpaRepository.findAllWithSignalByBrandIdOrderByReleasedAtDesc(statement.getBrandId(), pageable);
+            } else {
+                // 기본 정렬 (ReleasedAt DESC)
+                return productJpaRepository.findAllWithSignalByBrandIdOrderByReleasedAtDesc(statement.getBrandId(), pageable);
+            }
+        }
+
+        if (statement.getOrderBy() instanceof ProductStatement.LikeCount) {
+            List<ProductWithSignalRow> view = productJpaRepository.findAllWithSignalOrderByLikeCountDesc(pageable);
+            return view.stream()
+                    .map(ProductInfo.ProductWithSignal::from)
+                    .toList();
+        } else if (statement.getOrderBy() instanceof ProductStatement.Price(boolean ascending)) {
+            return ascending ? productJpaRepository.findAllWithSignalOrderByPriceAsc(pageable)
+                    : productJpaRepository.findAllWithSignalOrderByPriceDesc(pageable);
+        } else if (statement.getOrderBy() instanceof ProductStatement.ReleasedAt(boolean ascending)) {
+            return ascending ? productJpaRepository.findAllWithSignalOrderByReleasedAtAsc(pageable)
+                    : productJpaRepository.findAllWithSignalOrderByReleasedAtDesc(pageable);
+        } else {
+            // 기본 정렬 (ReleasedAt DESC)
+            return productJpaRepository.findAllWithSignalOrderByReleasedAtDesc(pageable);
+        }
     }
 
     @Override
-    public List<ProductWithSignalEntity> findWithSignals(List<Long> ids) {
-        return withSignalJpaRepository.findAllById(ids);
+    public List<ProductInfo.ProductWithSignal> findWithSignals(List<Long> ids) {
+        return productJpaRepository.findAllWithSignal(ids);
     }
 
 }

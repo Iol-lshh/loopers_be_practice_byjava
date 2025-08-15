@@ -2,7 +2,6 @@ package com.loopers.infrastructure.product;
 
 import com.loopers.domain.product.ProductStatement;
 import com.loopers.domain.product.ProductEntity;
-import com.loopers.domain.product.ProductWithSignalEntity;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -51,43 +50,6 @@ public class ProductJpaSpecification {
                 }
             }
             
-            return predicate;
-        };
-    }
-
-    public static Specification<ProductWithSignalEntity> withSignalFrom(ProductStatement criteria) {
-        return (root, query, criteriaBuilder) -> {
-            Predicate predicate = criteriaBuilder.conjunction();
-
-            for(var criterion: criteria.criteria()) {
-                if (criterion instanceof ProductStatement.ReleasedAt(boolean ascending)) {
-                    if (ascending) {
-                        query.orderBy(criteriaBuilder.asc(root.get("state").get("releasedAt")));
-                    } else {
-                        query.orderBy(criteriaBuilder.desc(root.get("state").get("releasedAt")));
-                    }
-                } else if (criterion instanceof ProductStatement.CreatedAt(boolean ascending)) {
-                    if (ascending){
-                        query.orderBy(criteriaBuilder.asc(root.get("createdAt")));
-                    } else {
-                        query.orderBy(criteriaBuilder.desc(root.get("createdAt")));
-                    }
-                } else if (criterion instanceof ProductStatement.Price(boolean ascending)) {
-                    if (ascending) {
-                        query.orderBy(criteriaBuilder.asc(root.get("price")));
-                    } else {
-                        query.orderBy(criteriaBuilder.desc(root.get("price")));
-                    }
-                } else if (criterion instanceof ProductStatement.LikeCount()) {
-                    // 직접 likeCount 필드에 접근
-                    query.orderBy(criteriaBuilder.desc(root.get("likeCount")));
-                }
-                if (criterion instanceof ProductStatement.BrandID(Long brandId)) {
-                    predicate = criteriaBuilder.and(predicate,
-                            criteriaBuilder.equal(root.get("brandId"), brandId));
-                }
-            }
-
             return predicate;
         };
     }

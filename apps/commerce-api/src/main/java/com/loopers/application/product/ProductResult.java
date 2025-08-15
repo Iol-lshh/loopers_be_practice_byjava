@@ -4,7 +4,7 @@ package com.loopers.application.product;
 import com.loopers.domain.brand.BrandEntity;
 import com.loopers.domain.like.LikeSummaryEntity;
 import com.loopers.domain.product.ProductEntity;
-import com.loopers.domain.product.ProductWithSignalEntity;
+import com.loopers.domain.product.ProductInfo;
 
 import java.util.*;
 
@@ -32,9 +32,9 @@ public class ProductResult {
             private String releasedAt;
         }
 
-        public static List<Summary> of(List<BrandEntity> brandList, List<ProductWithSignalEntity> productSignalList) {
+        public static List<Summary> of(List<BrandEntity> brandList, List<ProductInfo.ProductWithSignal> productSignalList) {
             SequencedMap<Long, SummaryBuilder> sbList = new LinkedHashMap<>();
-            for(ProductWithSignalEntity productSignal: productSignalList) {
+            for(ProductInfo.ProductWithSignal productSignal: productSignalList) {
                 SummaryBuilder sb = new SummaryBuilder();
                 sb.id = productSignal.getId();
                 sb.name = productSignal.getName();
@@ -42,6 +42,8 @@ public class ProductResult {
                 sb.price = productSignal.getPrice();
                 sb.stock = productSignal.getStock();
                 sb.likeCount = productSignal.getLikeCount();
+                sb.state = productSignal.getState().getValue().name();
+                sb.releasedAt = productSignal.getState().getReleasedAt() != null ? productSignal.getState().getReleasedAt().toString() : "";
                 sbList.put(productSignal.getId(), sb);
             }
             for(BrandEntity brand: brandList) {
@@ -76,7 +78,7 @@ public class ProductResult {
             String state,
             String releasedAt
     ) {
-        public static Detail of(BrandEntity brand, ProductWithSignalEntity productWithSignal) {
+        public static Detail of(BrandEntity brand, ProductInfo.ProductWithSignal productWithSignal) {
             return new Detail(
                     productWithSignal.getId(),
                     productWithSignal.getName(),
