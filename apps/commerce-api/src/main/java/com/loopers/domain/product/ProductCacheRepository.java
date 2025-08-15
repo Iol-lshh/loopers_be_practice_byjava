@@ -5,7 +5,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface ProductCacheRepository {
-    List<Long> findIds(ProductStatement criteria, Pageable pageable);
+    List<ProductInfo.ProductWithSignal> findWithSignal(ProductStatement criteria, Pageable pageable);
 
-    List<Long> save(ProductStatement criteria, Pageable pageable, List<ProductWithSignal> productWithSignals);
+    List<ProductInfo.ProductWithSignal> save(ProductStatement criteria, Pageable pageable, List<ProductInfo.ProductWithSignal> productWithSignals);
 }

@@ -1,5 +1,6 @@
 package com.loopers.domain.product;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.loopers.domain.BaseEntity;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
@@ -12,7 +13,14 @@ import java.time.ZonedDateTime;
 
 @Getter
 @Entity
-@Table(name = "product")
+@Table(name = "product", indexes = {
+    @Index(name = "idx_product_state_price_id", columnList = "state, price, id"),
+    @Index(name = "idx_product_state_brand_price_id", columnList = "state, brandId, price, id"),
+    @Index(name = "idx_product_state_rel_id", columnList = "state, releasedAt DESC, id"),
+    @Index(name = "idx_product_state_brand_rel_id", columnList = "state, brandId, releasedAt DESC, id"),
+    @Index(name = "idx_product_state_brand_id", columnList = "state, brandId, id"),
+    @Index(name = "idx_product_state_id", columnList = "state, id")
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProductEntity extends BaseEntity {
     private String name;
@@ -20,6 +28,10 @@ public class ProductEntity extends BaseEntity {
     private Long price;
     private Long stock;
     @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "value", column = @Column(name = "state")),
+        @AttributeOverride(name = "releasedAt", column = @Column(name = "released_at"))
+    })
     private State state;
 
     public ProductEntity(String name, Long brandId, Long price, Long stock) {
@@ -79,10 +91,12 @@ public class ProductEntity extends BaseEntity {
     @Getter
     @Embeddable
     public static class State {
+        @JsonProperty
         @Enumerated(EnumType.STRING)
         @Column(name = "state", nullable = false)
         private StateType value;
 
+        @JsonProperty
         @Column(name = "released_at")
         private ZonedDateTime releasedAt;
 
@@ -109,6 +123,21 @@ public class ProductEntity extends BaseEntity {
 
         public static State outOfStock() {
             return new State(StateType.OUT_OF_STOCK);
+        }
+
+        public static State of(String state, ZonedDateTime releasedAt) {
+            if (state == null || state.isBlank()) {
+                throw new CoreException(ErrorType.BAD_REQUEST, "상품 상태가 비어있습니다.");
+            }
+            StateType stateType;
+            try {
+                stateType = StateType.valueOf(state.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new CoreException(ErrorType.BAD_REQUEST, "잘못된 상품 상태입니다: " + state);
+            }
+            State productState = new State(stateType);
+            productState.releasedAt = releasedAt;
+            return productState;
         }
 
         public enum StateType {

@@ -56,7 +56,7 @@ public record ProductStatement(
             return this;
         }
 
-        public Builder brandID(Long brandId) {
+        public Builder brandId(Long brandId) {
             this.criteria.add(new BrandID(brandId));
             return this;
         }

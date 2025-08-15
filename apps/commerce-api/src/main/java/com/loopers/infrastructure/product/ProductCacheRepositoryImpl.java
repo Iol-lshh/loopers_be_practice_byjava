@@ -1,8 +1,8 @@
 package com.loopers.infrastructure.product;
 
 import com.loopers.domain.product.ProductCacheRepository;
+import com.loopers.domain.product.ProductInfo;
 import com.loopers.domain.product.ProductStatement;
-import com.loopers.domain.product.ProductWithSignal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -15,29 +15,28 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class ProductCacheRepositoryImpl implements ProductCacheRepository {
     private final RedisTemplate<String, String> redisTemplate;
+    private final ProductCacheSerializer.Serializer serializer;
+    private final ProductCacheSerializer.Deserializer deserializer;
 
     @Override
-    public List<Long> findIds(ProductStatement statement, Pageable pageable) {
+    public List<ProductInfo.ProductWithSignal> findWithSignal(ProductStatement statement, Pageable pageable) {
         if (pageable.getPageNumber() > 2) {
             return List.of();
         }
         String keyPattern = ProductCacheKeyGenerator.withSignalFrom(statement, pageable);
         String targetIds = redisTemplate.opsForValue().get(keyPattern);
-        return ProductCacheDeserializer.deserializeIds(targetIds);
+        return deserializer.deserializeWithSignal(targetIds);
     }
 
     @Override
-    public List<Long> save(ProductStatement criteria, Pageable pageable, List<ProductWithSignal> productWithSignals) {
+    public List<ProductInfo.ProductWithSignal> save(ProductStatement criteria, Pageable pageable, List<ProductInfo.ProductWithSignal> productWithSignals) {
         if (pageable.getPageNumber() > 2) {
             return List.of();
         }
         String keyPattern = ProductCacheKeyGenerator.withSignalFrom(criteria, pageable);
-        List<Long> ids = productWithSignals.stream()
-                .map(ProductWithSignal::getId)
-                .toList();
-        String serializedIds = ProductCacheSerializer.serializeIds(ids);
-        redisTemplate.opsForValue().set(keyPattern, serializedIds);
-        redisTemplate.expire(keyPattern, 600, TimeUnit.SECONDS);
-        return ids;
+        String serialized = serializer.serializeWithSignal(productWithSignals);
+        redisTemplate.opsForValue().set(keyPattern, serialized);
+        redisTemplate.expire(keyPattern, 60, TimeUnit.SECONDS);
+        return productWithSignals;
     }
 }

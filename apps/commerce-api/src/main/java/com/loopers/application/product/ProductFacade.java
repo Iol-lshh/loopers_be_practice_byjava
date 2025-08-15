@@ -25,7 +25,6 @@ public class ProductFacade {
     private final BrandService brandService;
     private final LikeService likeService;
     private final UserService userService;
-    private final ProductCacheRepository productCacheRepository;
 
     @Transactional(readOnly = true)
     public List<ProductResult.Summary> list(Pageable pageable) {
@@ -37,18 +36,11 @@ public class ProductFacade {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductResult.Summary> list(ProductStatement criteria, Pageable pageable) {
-        List<Long> cacheKeys = productCacheRepository.findIds(criteria, pageable);
+    public List<ProductResult.Summary> list(ProductStatement statement, Pageable pageable) {
 
-        List<ProductWithSignal> productWithSignals = !cacheKeys.isEmpty() ?
-                productService.findWithSignals(cacheKeys) :
-                productService.findWithSignals(criteria, pageable);
+        List<ProductInfo.ProductWithSignal> productWithSignals = productService.findWithSignals(statement, pageable);
 
-        if (cacheKeys.isEmpty()) {
-            productCacheRepository.save(criteria, pageable, productWithSignals);
-        }
-
-        List<Long> brandIds = productWithSignals.stream().map(ProductWithSignal::getBrandId).distinct().toList();
+        List<Long> brandIds = productWithSignals.stream().map(ProductInfo.ProductWithSignal::getBrandId).distinct().toList();
         List<BrandEntity> brands = brandService.find(brandIds);
 
         return ProductResult.Summary.of(brands, productWithSignals);
@@ -56,7 +48,7 @@ public class ProductFacade {
 
     @Transactional(readOnly = true)
     public ProductResult.Detail get(Long id) {
-        ProductWithSignal productWithSignal = productService.findWithSignal(id).orElseThrow(() -> new CoreException(
+        ProductInfo.ProductWithSignal productWithSignal = productService.findWithSignal(id).orElseThrow(() -> new CoreException(
                 ErrorType.NOT_FOUND, "조회할 수 없는 상품입니다: " + id));
         BrandEntity brand = brandService.find(productWithSignal.getBrandId()).orElseThrow(() -> new CoreException(
                 ErrorType.NOT_FOUND, "조회할 수 없는 브랜드입니다: " + productWithSignal.getBrandId()));
@@ -84,9 +76,9 @@ public class ProductFacade {
         List<LikeEntity> likeList = likeService.find(likeStatement);
 
         var productIds = likeList.stream().map(LikeEntity::getTargetId).toList();
-        List<ProductWithSignal> productWithSignals = productService.findWithSignals(productIds);
+        List<ProductInfo.ProductWithSignal> productWithSignals = productService.findWithSignals(productIds);
 
-        var brandIds = productWithSignals.stream().map(ProductWithSignal::getBrandId).distinct().toList();
+        var brandIds = productWithSignals.stream().map(ProductInfo.ProductWithSignal::getBrandId).distinct().toList();
         List<BrandEntity> brandList = brandService.find(brandIds);
 
         return ProductResult.Summary.of(brandList, productWithSignals);

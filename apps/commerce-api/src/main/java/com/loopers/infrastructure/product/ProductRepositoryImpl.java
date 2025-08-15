@@ -42,20 +42,21 @@ public class ProductRepositoryImpl implements ProductRepository, ProductReader {
 
     // ProductWithSignal 메서드 구현
     @Override
-    public Optional<ProductWithSignal> findWithSignal(Long id) {
+    public Optional<ProductInfo.ProductWithSignal> findWithSignal(Long id) {
         return productJpaRepository.findWithSignal(id);
     }
 
     @Override
-    public List<ProductWithSignal> findWithSignals(ProductStatement statement, Pageable pageable) {
+    public List<ProductInfo.ProductWithSignal> findWithSignals(ProductStatement statement, Pageable pageable) {
         if(statement.getBrandId() != null) {
             if (statement.getOrderBy() instanceof ProductStatement.LikeCount) {
                 return productJpaRepository.findAllWithSignalByBrandIdOrderByLikeCountDesc(statement.getBrandId(), pageable);
             } else if (statement.getOrderBy() instanceof ProductStatement.Price(boolean ascending)) {
                 return ascending ? productJpaRepository.findAllWithSignalByBrandIdOrderByPriceAsc(statement.getBrandId(), pageable)
                         : productJpaRepository.findAllWithSignalByBrandIdOrderByPriceDesc(statement.getBrandId(), pageable);
-            } else if (statement.getOrderBy() instanceof ProductStatement.ReleasedAt) {
-                return productJpaRepository.findAllWithSignalByBrandIdOrderByReleasedAtDesc(statement.getBrandId(), pageable);
+            } else if (statement.getOrderBy() instanceof ProductStatement.ReleasedAt(boolean ascending)) {
+                return ascending ? productJpaRepository.findAllWithSignalByBrandIdOrderByReleasedAtAsc(statement.getBrandId(), pageable)
+                        : productJpaRepository.findAllWithSignalByBrandIdOrderByReleasedAtDesc(statement.getBrandId(), pageable);
             } else {
                 // 기본 정렬 (ReleasedAt DESC)
                 return productJpaRepository.findAllWithSignalByBrandIdOrderByReleasedAtDesc(statement.getBrandId(), pageable);
@@ -63,12 +64,16 @@ public class ProductRepositoryImpl implements ProductRepository, ProductReader {
         }
 
         if (statement.getOrderBy() instanceof ProductStatement.LikeCount) {
-            return productJpaRepository.findAllWithSignalOrderByLikeCountDesc(pageable);
+            List<ProductWithSignalRow> view = productJpaRepository.findAllWithSignalOrderByLikeCountDesc(pageable);
+            return view.stream()
+                    .map(ProductInfo.ProductWithSignal::from)
+                    .toList();
         } else if (statement.getOrderBy() instanceof ProductStatement.Price(boolean ascending)) {
             return ascending ? productJpaRepository.findAllWithSignalOrderByPriceAsc(pageable)
                     : productJpaRepository.findAllWithSignalOrderByPriceDesc(pageable);
-        } else if (statement.getOrderBy() instanceof ProductStatement.ReleasedAt) {
-            return productJpaRepository.findAllWithSignalOrderByReleasedAtDesc(pageable);
+        } else if (statement.getOrderBy() instanceof ProductStatement.ReleasedAt(boolean ascending)) {
+            return ascending ? productJpaRepository.findAllWithSignalOrderByReleasedAtAsc(pageable)
+                    : productJpaRepository.findAllWithSignalOrderByReleasedAtDesc(pageable);
         } else {
             // 기본 정렬 (ReleasedAt DESC)
             return productJpaRepository.findAllWithSignalOrderByReleasedAtDesc(pageable);
@@ -76,7 +81,7 @@ public class ProductRepositoryImpl implements ProductRepository, ProductReader {
     }
 
     @Override
-    public List<ProductWithSignal> findWithSignals(List<Long> ids) {
+    public List<ProductInfo.ProductWithSignal> findWithSignals(List<Long> ids) {
         return productJpaRepository.findAllWithSignal(ids);
     }
 
