@@ -43,7 +43,7 @@ WITH
         WHERE ls.target_type = 'PRODUCT'
           AND p.state = 'OPEN'
         ORDER BY ls.like_count DESC, ls.target_id
-        LIMIT 100
+        LIMIT :#{#pageable.pageSize} OFFSET :#{#pageable.offset}
     ),
     cold AS (
         SELECT p.id
@@ -53,8 +53,8 @@ WITH
         WHERE p.state = 'OPEN'
           AND ls.target_id IS NULL
         ORDER BY p.id
-        LIMIT 100
-    )
+        LIMIT :#{#pageable.pageSize} OFFSET :#{#pageable.offset}
+        )
 SELECT
     u.id, p.brand_id, p.created_at, p.name, p.price,
     p.released_at, p.state, p.stock, p.updated_at, u.like_count
