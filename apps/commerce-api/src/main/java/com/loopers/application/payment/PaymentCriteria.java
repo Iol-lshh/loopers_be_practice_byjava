@@ -1,9 +1,6 @@
 package com.loopers.application.payment;
 
 import com.loopers.domain.order.OrderCommand;
-import com.loopers.domain.payment.PaymentCommand;
-
-import java.util.Map;
 
 public class PaymentCriteria {
     public record Pay(

@@ -20,9 +20,8 @@ public class PaymentAdaptor {
         private final PointService pointService;
 
         @Override
-        public PointEntity request(Long userId, Long orderId, Long totalPrice) {
+        public void request(Long userId, Long orderId, Long totalPrice) {
             // do nothing
-            return null;
         }
 
         @Override
@@ -43,9 +42,13 @@ public class PaymentAdaptor {
         private final PaymentService paymentService;
 
         @Override
-        public PaymentEntity request(Long userId, Long orderId, Long totalPrice) {
-            // todo
-            return null;
+        public void request(Long userId, Long orderId, Long totalPrice) {
+            PaymentCommand.Request requestCommand = new PaymentCommand.Request(
+                    userId,
+                    orderId,
+                    totalPrice
+            );
+            paymentService.request(requestCommand);
         }
 
         @Override
@@ -55,7 +58,6 @@ public class PaymentAdaptor {
                     orderId,
                     totalPrice
             );
-
             return paymentService.pay(paymentCommand);
         }
 

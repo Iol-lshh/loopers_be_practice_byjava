@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.Map;
 
 @Getter
 @Entity
@@ -30,5 +29,11 @@ public class PaymentEntity extends BaseEntity {
         payment.userId = userId;
         payment.amount = amount;
         return payment;
+    }
+
+    public enum TransactionStatus {
+        PENDING,
+        SUCCESS,
+        FAILED
     }
 }

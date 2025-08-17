@@ -1,7 +1,5 @@
 package com.loopers.domain.payment;
 
-import java.util.Map;
-
 public class PaymentCommand {
     public record Pay(
             Long userId,
@@ -15,5 +13,12 @@ public class PaymentCommand {
                     totalPrice
             );
         }
+    }
+
+    public record Request(
+            Long userId,
+            Long orderId,
+            Long totalPrice
+    ){
     }
 }
