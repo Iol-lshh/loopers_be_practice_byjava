@@ -31,7 +31,6 @@ public class OrderFacade {
         userService.find(criteria.userId()).orElseThrow(() -> new CoreException(
                 ErrorType.NOT_FOUND, "User가 존재하지 않습니다: " + criteria.userId()));
 
-
         List<ProductEntity> targetProducts = productService.assertDeductable(criteria.getOrderItemMap());
         Map<Long, Long> productPriceMap = productMapper.getProductPriceMap(targetProducts);
 

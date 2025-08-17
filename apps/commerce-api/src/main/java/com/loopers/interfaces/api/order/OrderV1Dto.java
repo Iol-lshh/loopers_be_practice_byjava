@@ -9,6 +9,7 @@ public class OrderV1Dto {
     public static class Request{
         public record Order(
                 Long userId,
+                String paymentType,
                 List<Item> items,
                 List<Long> coupons
         ) {
@@ -18,7 +19,7 @@ public class OrderV1Dto {
                                 item.productId(),
                                 item.quantity()
                         )).toList();
-                return new OrderCriteria.Order(userId, items, coupons);
+                return new OrderCriteria.Order(userId, paymentType, items, coupons);
             }
         }
 

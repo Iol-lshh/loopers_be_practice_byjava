@@ -9,6 +9,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.loopers.domain.user.UserValidator.*;
 
 @Getter
@@ -28,6 +31,9 @@ public class UserEntity extends BaseEntity {
     private String birthDate;
 
     private String email;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
+    private List<UserCardEntity> cards = new ArrayList<>();
 
     public UserEntity(String loginId, Gender gender, String birthDate, String email) {
         super();
@@ -68,4 +74,5 @@ public class UserEntity extends BaseEntity {
             };
         }
     }
+
 }

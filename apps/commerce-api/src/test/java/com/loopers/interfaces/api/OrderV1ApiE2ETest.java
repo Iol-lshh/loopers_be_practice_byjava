@@ -104,6 +104,7 @@ public class OrderV1ApiE2ETest {
 
             var request = new OrderV1Dto.Request.Order(
                     user.getId(),
+                    "POINT",
                     List.of(new OrderV1Dto.Request.Item(product.getId(), 2L)),
                     List.of()
             );
@@ -144,6 +145,7 @@ public class OrderV1ApiE2ETest {
 
             OrderCriteria.Order command = new OrderCriteria.Order(
                     user.getId(),
+                    "POINT",
                     List.of(new OrderCriteria.Item(product.getId(), 2L)),
                     List.of()
             );
@@ -188,6 +190,7 @@ public class OrderV1ApiE2ETest {
             pointService.charge(user.getId(), 100000000L);
             OrderCriteria.Order command = new OrderCriteria.Order(
                     user.getId(),
+                    "POINT",
                     List.of(
                             new OrderCriteria.Item(product.getId(), 2L),
                             new OrderCriteria.Item(product2.getId(), 1L)),

@@ -1,6 +1,8 @@
 package com.loopers.application.payment;
 
 import com.loopers.domain.coupon.CouponService;
+import com.loopers.domain.order.OrderCommand;
+import com.loopers.domain.order.OrderInfo;
 import com.loopers.domain.payment.*;
 import com.loopers.domain.order.OrderEntity;
 import com.loopers.domain.order.OrderService;
@@ -18,7 +20,6 @@ public class PaymentFacade {
     private final UserService userService;
     private final ProductService productService;
     private final OrderService orderService;
-    private final PaymentService paymentService;
     private final CouponService couponService;
 
     @Transactional
@@ -31,10 +32,10 @@ public class PaymentFacade {
 
         productService.deduct(order.getItemQuantityMap());
         couponService.useCoupons(criteria.userId(), order.getCouponIds());
-        orderService.complete(order.getId());
 
-        PaymentCommand.Pay command = criteria.toCommand(order.getTotalPrice(), order.getAppliedCouponValueMap());
-        PaymentEntity payment = paymentService.pay(command);
-        return PaymentResult.Summary.from(payment);
+        OrderCommand.Pay command = criteria.toCommand(order.getTotalPrice());
+        OrderInfo.PaymentInfo paymentInfo = orderService.pay(command);
+
+        return PaymentResult.Summary.from(paymentInfo);
     }
 }

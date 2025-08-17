@@ -14,7 +14,6 @@ public class PaymentV1Dto {
 
     public static class Response {
         public record Summary(
-                Long paymentId,
                 Long userId,
                 Long orderId,
                 String paymentType,
@@ -22,7 +21,6 @@ public class PaymentV1Dto {
         ) {
             public static Summary from(PaymentResult.Summary payment) {
                 return new Summary(
-                        payment.paymentId(),
                         payment.userId(),
                         payment.orderId(),
                         payment.paymentType(),

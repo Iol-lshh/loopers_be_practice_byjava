@@ -22,6 +22,8 @@ public class OrderEntity extends BaseEntity {
     private State state;
     @Version
     private Long version = 0L;
+    @Enumerated(EnumType.STRING)
+    private PaymentType paymentType;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
     private List<OrderItemEntity> orderItems;
@@ -116,6 +118,32 @@ public class OrderEntity extends BaseEntity {
 
         public String getDescription() {
             return description;
+        }
+
+        public String getValue() {
+            return this.name();
+        }
+    }
+
+    @Getter
+    public enum PaymentType {
+        POINT("POINT"),
+        PG("PG")
+        ;
+
+        private final String value;
+
+        PaymentType(String value) {
+            this.value = value;
+        }
+
+        public static PaymentType of(String type) {
+            for (PaymentType t : PaymentType.values()) {
+                if (t.value.equalsIgnoreCase(type)) {
+                    return t;
+                }
+            }
+            throw new CoreException(ErrorType.BAD_REQUEST, "존재하지 않는 타입: " + type);
         }
     }
 }

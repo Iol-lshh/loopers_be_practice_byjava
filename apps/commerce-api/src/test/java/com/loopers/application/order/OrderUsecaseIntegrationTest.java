@@ -117,9 +117,10 @@ public class OrderUsecaseIntegrationTest {
         assertEquals(ProductEntity.State.StateType.OPEN, result.get().getState().getValue());
         return product;
     }
-    private OrderEntity prepareOrder(UserEntity user, ProductEntity product, Long quantity) {
+    private OrderEntity prepareOrderByPoint(UserEntity user, ProductEntity product, Long quantity) {
         var orderCriteria = new OrderCriteria.Order(
                 user.getId(),
+                "POINT",
                 List.of(new OrderCriteria.Item(product.getId(), quantity)),
                 List.of()
         );
@@ -151,6 +152,7 @@ public class OrderUsecaseIntegrationTest {
             UserEntity user = prepareUser(product.getPrice() * quantity);
             var orderCriteria = new OrderCriteria.Order(
                     user.getId(),
+                    "POINT",
                     List.of(new OrderCriteria.Item(product.getId(), quantity)),
                     List.of()
             );
@@ -176,6 +178,7 @@ public class OrderUsecaseIntegrationTest {
             var result = assertThrows(CoreException.class, () -> {
                 var orderCriteria = new OrderCriteria.Order(
                         nonExistentUserId,
+                        "POINT",
                         List.of(new OrderCriteria.Item(product.getId(), 1L)), // 임의의 상품 ID 사용,
                         List.of()
                 );
@@ -198,6 +201,7 @@ public class OrderUsecaseIntegrationTest {
             var result = assertThrows(CoreException.class, () -> {
                 var orderCriteria = new OrderCriteria.Order(
                         validUserId,
+                        "POINT",
                         List.of(new OrderCriteria.Item(nonExistentProductId, 1L)),
                         List.of()
                 );
@@ -218,6 +222,7 @@ public class OrderUsecaseIntegrationTest {
             // When
             var orderCriteria = new OrderCriteria.Order(
                     user.getId(),
+                    "POINT",
                     List.of(new OrderCriteria.Item(product.getId(), product.getStock() + 1)),
                     List.of()
             );
@@ -233,7 +238,7 @@ public class OrderUsecaseIntegrationTest {
             // Given
             Long userId = prepareUser().getId();
             List<OrderCriteria.Item> emptyProductList = List.of();
-            var emptyOrderCriteria = new OrderCriteria.Order(userId, emptyProductList, List.of());
+            var emptyOrderCriteria = new OrderCriteria.Order(userId, "POINT", emptyProductList, List.of());
 
             // When
             var result = assertThrows(CoreException.class, () -> orderFacade.order(emptyOrderCriteria));
@@ -252,6 +257,7 @@ public class OrderUsecaseIntegrationTest {
             // When
             var orderCriteria = new OrderCriteria.Order(
                     user.getId(),
+                    "POINT",
                     List.of(new OrderCriteria.Item(product.getId(), 2L)),
                     List.of()
             );
@@ -277,6 +283,7 @@ public class OrderUsecaseIntegrationTest {
 
             var orderCriteria = new OrderCriteria.Order(
                     user.getId(),
+                    "POINT",
                     List.of(new OrderCriteria.Item(product.getId(), quantity)),
                     List.of(coupon.getId())
             );
@@ -304,6 +311,7 @@ public class OrderUsecaseIntegrationTest {
             var result = assertThrows(CoreException.class, () -> {
                 var orderCriteria = new OrderCriteria.Order(
                         user.getId(),
+                        "POINT",
                         List.of(new OrderCriteria.Item(product.getId(), quantity)),
                         List.of(nonExistentCouponId)
                 );
@@ -324,7 +332,7 @@ public class OrderUsecaseIntegrationTest {
             // Given
             UserEntity preparedUser = prepareUser();
             ProductEntity preparedProduct = prepareReleasedProduct();
-            OrderEntity preparedOrder = prepareOrder(preparedUser, preparedProduct, 1L);
+            OrderEntity preparedOrder = prepareOrderByPoint(preparedUser, preparedProduct, 1L);
 
             // When
             List<OrderResult.Summary> orderList = orderFacade.list(preparedUser.getId());
@@ -374,7 +382,7 @@ public class OrderUsecaseIntegrationTest {
             // Given
             UserEntity user = prepareUser();
             ProductEntity product = prepareReleasedProduct();
-            OrderEntity order = prepareOrder(user, product, 1L);
+            OrderEntity order = prepareOrderByPoint(user, product, 1L);
 
             // When
             OrderResult.Detail orderDetail = orderFacade.detail(user.getId(), order.getId());
@@ -405,7 +413,7 @@ public class OrderUsecaseIntegrationTest {
             // Given
             UserEntity user = prepareUser();
             ProductEntity product = prepareReleasedProduct();
-            OrderEntity order = prepareOrder(user, product, 1L);
+            OrderEntity order = prepareOrderByPoint(user, product, 1L);
             UserEntity otherUser = prepareUser(); // 다른 유저를 준비
 
             // When

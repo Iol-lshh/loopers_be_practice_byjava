@@ -88,7 +88,7 @@ public class PaymentV1ApiE2ETest {
         List<OrderCriteria.Item> items = products.entrySet().stream()
                 .map(entry -> new OrderCriteria.Item(entry.getKey().getId(), entry.getValue()))
                 .toList();
-        OrderCriteria.Order criteria = new OrderCriteria.Order(user.getId(), items, List.of());
+        OrderCriteria.Order criteria = new OrderCriteria.Order(user.getId(), "POINT", items, List.of());
         return orderFacade.order(criteria);
     }
 
@@ -125,7 +125,6 @@ public class PaymentV1ApiE2ETest {
             assertTrue(response.getStatusCode().is2xxSuccessful());
             assertNotNull(response.getBody());
             assertNotNull(response.getBody().data());
-            assertNotNull(response.getBody().data().paymentId());
         }
     }
 

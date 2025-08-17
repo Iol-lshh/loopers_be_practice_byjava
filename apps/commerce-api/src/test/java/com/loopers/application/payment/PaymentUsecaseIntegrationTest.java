@@ -4,6 +4,7 @@ import com.loopers.application.order.OrderCriteria;
 import com.loopers.application.order.OrderFacade;
 import com.loopers.application.order.OrderResult;
 import com.loopers.domain.coupon.CouponRepository;
+import com.loopers.domain.order.OrderCommand;
 import com.loopers.domain.order.OrderRepository;
 import com.loopers.domain.point.PointService;
 import com.loopers.domain.brand.BrandService;
@@ -96,7 +97,7 @@ public class PaymentUsecaseIntegrationTest {
         List<OrderCriteria.Item> items = products.entrySet().stream()
                 .map(entry -> new OrderCriteria.Item(entry.getKey().getId(), entry.getValue()))
                 .toList();
-        OrderCriteria.Order criteria = new OrderCriteria.Order(user.getId(), items, List.of());
+        OrderCriteria.Order criteria = new OrderCriteria.Order(user.getId(), "POINT", items, List.of());
         return orderFacade.order(criteria);
     }
 
@@ -120,10 +121,10 @@ public class PaymentUsecaseIntegrationTest {
             PaymentResult.Summary result = paymentFacade.pay(criteria);
 
             // then
-            assertNotNull(result.paymentId());
+            assertEquals("COMPLETED", result.state());
             verify(pointService, times(1)).pay(anyLong(), anyLong());
             verify(productService, times(1)).deduct(anyMap());
-            verify(orderService, times(1)).complete(anyLong());
+            verify(orderService, times(1)).pay(any(OrderCommand.Pay.class));
         }
 
         @DisplayName("결제 요청 시, 주문이 존재하지 않으면 NOT_FOUND 예외가 발생한다.")

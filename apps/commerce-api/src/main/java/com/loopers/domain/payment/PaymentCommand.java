@@ -6,17 +6,13 @@ public class PaymentCommand {
     public record Pay(
             Long userId,
             Long orderId,
-            Long totalPrice,
-            String paymentType,
-            Map<Long, Long> couponMap
+            Long totalPrice
             ) {
         public PaymentEntity toEntity() {
             return PaymentEntity.of(
                     orderId,
                     userId,
-                    totalPrice,
-                    paymentType,
-                    couponMap
+                    totalPrice
             );
         }
     }

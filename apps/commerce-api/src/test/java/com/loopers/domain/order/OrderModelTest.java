@@ -19,7 +19,7 @@ class OrderModelTest {
         @Test
         void failsToCreateOrder_whenItemsAreEmpty() {
             // given
-            OrderCommand.Order command = new OrderCommand.Order(1L, List.of(), List.of());
+            OrderCommand.Order command = new OrderCommand.Order(1L, "POINT", List.of(), List.of());
 
             // when
             CoreException exception = assertThrows(CoreException.class, () -> OrderEntity.from(command));
@@ -32,7 +32,7 @@ class OrderModelTest {
         @Test
         void failsToCreateOrder_whenItemsAreNull() {
             // given
-            OrderCommand.Order command = new OrderCommand.Order(1L, null, List.of());
+            OrderCommand.Order command = new OrderCommand.Order(1L, "POINT", null, List.of());
 
             // when
             CoreException exception = assertThrows(CoreException.class, () -> OrderEntity.from(command));
@@ -50,7 +50,7 @@ class OrderModelTest {
         void returnsTotalPriceOfOrderItems() {
             // given
             OrderCommand.Item item1 = new OrderCommand.Item(1L, 1000L, 2L);
-            OrderCommand.Order command = new OrderCommand.Order(1L, List.of(item1), List.of());
+            OrderCommand.Order command = new OrderCommand.Order(1L, "POINT", List.of(item1), List.of());
             OrderEntity order = OrderEntity.from(command);
 
             // when
@@ -66,7 +66,7 @@ class OrderModelTest {
             // given
             OrderCommand.Item item1 = new OrderCommand.Item(1L, 1000L, 2L);
             OrderCommand.Coupon coupon = new OrderCommand.Coupon(1L, 5000L);
-            OrderCommand.Order command = new OrderCommand.Order(1L, List.of(item1), List.of(coupon));
+            OrderCommand.Order command = new OrderCommand.Order(1L, "POINT", List.of(item1), List.of(coupon));
             OrderEntity order = OrderEntity.from(command);
 
             // when
