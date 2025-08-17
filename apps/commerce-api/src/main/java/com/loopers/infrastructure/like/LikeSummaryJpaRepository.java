@@ -9,7 +9,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.Optional;
 
-public interface LikeSummaryJpaRepository extends CrudRepository<LikeSummaryEntity, Long> {
+public interface LikeSummaryJpaRepository extends CrudRepository<LikeSummaryEntity, LikeSummaryEntity.LikeSummaryId> {
     Optional<LikeSummaryEntity> findByTargetIdAndTargetType(Long targetId, LikeEntity.TargetType targetType);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

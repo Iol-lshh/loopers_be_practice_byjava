@@ -21,6 +21,23 @@ public record ProductStatement(
     public record State(ProductEntity.State.StateType state) implements Where {}
     public record UserId(Long userId) implements Where {}
 
+    public OrderBy getOrderBy() {
+        return criteria.stream()
+                .filter(OrderBy.class::isInstance)
+                .map(OrderBy.class::cast)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public Long getBrandId() {
+        return criteria.stream()
+                .filter(BrandID.class::isInstance)
+                .map(BrandID.class::cast)
+                .map(BrandID::brandId)
+                .findFirst()
+                .orElse(null);
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -39,7 +56,7 @@ public record ProductStatement(
             return this;
         }
 
-        public Builder brandID(Long brandId) {
+        public Builder brandId(Long brandId) {
             this.criteria.add(new BrandID(brandId));
             return this;
         }

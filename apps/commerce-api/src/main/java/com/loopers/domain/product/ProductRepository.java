@@ -16,4 +16,6 @@ public interface ProductRepository {
 
 
     List<ProductEntity> findListWithLock(List<Long> ids);
+
+    Optional<ProductInfo.ProductWithSignal> findWithSignal(Long id);
 }

@@ -1,0 +1,6 @@
+EXPLAIN
+-> Limit/Offset: 0/20 row(s)  (cost=10819 rows=0) (actual time=0.492..0.492 rows=0 loops=1)
+    -> Nested loop left join  (cost=10819 rows=13592) (actual time=0.476..0.491 rows=20 loops=1)
+        -> Index lookup on pe1_0 using idx_product_state_brand_rel_id (state='OPEN', brand_id=1), with index condition: (pe1_0.state = 'OPEN')  (cost=6062 rows=13592) (actual time=0.466..0.468 rows=20 loops=1)
+        -> Filter: (lse1_0.target_type = 'PRODUCT')  (cost=0.25 rows=1) (actual time=913e-6..913e-6 rows=0 loops=20)
+            -> Single-row index lookup on lse1_0 using PRIMARY (target_id=pe1_0.id, target_type='PRODUCT')  (cost=0.25 rows=1) (actual time=809e-6..809e-6 rows=0 loops=20)

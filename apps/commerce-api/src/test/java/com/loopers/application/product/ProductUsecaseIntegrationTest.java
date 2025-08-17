@@ -11,6 +11,7 @@ import com.loopers.infrastructure.product.ProductJpaRepository;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import com.loopers.utils.DatabaseCleanUp;
+import com.loopers.utils.RedisCleanUp;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.Map;
 import java.util.Optional;
@@ -33,18 +35,27 @@ public class ProductUsecaseIntegrationTest {
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
     @Autowired
+    private RedisCleanUp redisCleanUp;
+
+    @Autowired
     private LikeFacade likeFacade;
     @Autowired
     private ProductRepository productRepository;
+    @MockitoSpyBean
+    private ProductCacheRepository productCacheRepository;
 
     @AfterEach
     void tearDown() {
         databaseCleanUp.truncateAllTables();
     }
+    @AfterEach
+    void tearDownCache() {
+        redisCleanUp.truncateAll();
+    }
 
     @Autowired
     private BrandService brandService;
-    @Autowired
+    @MockitoSpyBean
     private ProductService productService;
     @Autowired
     private ProductFacade productFacade;
@@ -64,6 +75,7 @@ public class ProductUsecaseIntegrationTest {
                 1L
         );
         var result = productService.register(beforeRegister);
+        productFacade.release(result.getId());
         assertNotNull(result.getId());
         return result;
     }
@@ -76,6 +88,7 @@ public class ProductUsecaseIntegrationTest {
                 1L
         );
         var result = productService.register(beforeRegister);
+        productFacade.release(result.getId());
         assertNotNull(result.getId());
         return result;
     }
@@ -88,6 +101,7 @@ public class ProductUsecaseIntegrationTest {
                 1L
         );
         var result = productService.register(beforeRegister);
+        productFacade.release(result.getId());
         assertNotNull(result.getId());
         return result;
     }
@@ -99,6 +113,7 @@ public class ProductUsecaseIntegrationTest {
                 1L
         );
         var result = productService.register(beforeRegister);
+        productFacade.release(result.getId());
         assertNotNull(result.getId());
         return result;
     }
@@ -111,6 +126,7 @@ public class ProductUsecaseIntegrationTest {
                 stock
         );
         var result = productService.register(beforeRegister);
+        productFacade.release(result.getId());
         assertNotNull(result.getId());
         return result;
     }
@@ -183,9 +199,11 @@ public class ProductUsecaseIntegrationTest {
             // given
             BrandEntity preparedBrand = prepareBrand();
             String nextPageProductName = "Oldest Next Page Product";
-            prepareProduct(nextPageProductName);
+            var productOldest =  prepareProduct(nextPageProductName);
+            productFacade.release(productOldest.getId());
             for (int i = 0; i < 10; i++) {
-                prepareProduct(preparedBrand);
+                var product = prepareProduct(preparedBrand);
+                productFacade.release(product.getId());
             }
             var list = jpaRepository.findAll();
             assertEquals(11, list.size());
@@ -199,51 +217,6 @@ public class ProductUsecaseIntegrationTest {
         }
 
         @Nested
-        @DisplayName("Order by Created")
-        class OrderByCreated {
-
-            @DisplayName("최신순으로 상품 목록을 조회할 때, 가장 최신 생성순으로 상품이 반환된다.")
-            @Test
-            void returnProductListOrderedByLatest_whenQuery() {
-                // given
-                ProductEntity firstProduct = prepareProduct("Product1");
-                ProductEntity secondProduct = prepareProduct("Product2");
-
-                // when
-                ProductStatement criteria = ProductStatement.builder()
-                        .orderBy(new ProductStatement.CreatedAt(false))
-                        .build();
-                var productList = productFacade.list(criteria, Pageable.ofSize(10));
-
-                // then
-                assertFalse(productList.isEmpty());
-                assertEquals(2, productList.size());
-                assertEquals(secondProduct.getId(), productList.get(0).id());
-                assertEquals(firstProduct.getId(), productList.get(1).id());
-            }
-
-            @DisplayName("최신순으로 상품 목록을 조회할 때, 가장 오래된 생성순으로 상품이 반환된다.")
-            @Test
-            void returnProductListOrderedByOldest_whenQuery() {
-                // given
-                ProductEntity firstProduct = prepareProduct("Product1");
-                ProductEntity secondProduct = prepareProduct("Product2");
-
-                // when
-                ProductStatement criteria = ProductStatement.builder()
-                        .orderBy(new ProductStatement.CreatedAt(true))
-                        .build();
-                var productList = productFacade.list(criteria, Pageable.ofSize(10));
-
-                // then
-                assertFalse(productList.isEmpty());
-                assertEquals(2, productList.size());
-                assertEquals(firstProduct.getId(), productList.get(0).id());
-                assertEquals(secondProduct.getId(), productList.get(1).id());
-            }
-        }
-
-        @Nested
         @DisplayName("Order by Released")
         class OrderByReleased {
 
@@ -252,11 +225,7 @@ public class ProductUsecaseIntegrationTest {
             void returnProductListOrderedByLatest_whenQuery() {
                 // given
                 ProductEntity firstProduct = prepareProduct("Product1");
-                firstProduct.release();
-                productRepository.save(firstProduct);
                 ProductEntity secondProduct = prepareProduct("Product2");
-                secondProduct.release();
-                productRepository.save(secondProduct);
 
                 // when
                 ProductStatement criteria = ProductStatement.builder()
@@ -321,7 +290,9 @@ public class ProductUsecaseIntegrationTest {
             void returnProductListOrderedByPriceDescending_whenQuery() {
                 // given
                 ProductEntity firstProduct = prepareProduct(1L);
+                productFacade.release(firstProduct.getId());
                 ProductEntity secondProduct = prepareProduct(10L);
+                productFacade.release(secondProduct.getId());
 
                 // when
                 ProductStatement criteria = ProductStatement.builder()
@@ -378,7 +349,7 @@ public class ProductUsecaseIntegrationTest {
 
                 // when
                 ProductStatement criteria = ProductStatement.builder()
-                        .brandID(preparedBrand.getId())
+                        .brandId(preparedBrand.getId())
                         .build();
                 var productList = productFacade.list(criteria, Pageable.ofSize(10));
 
@@ -398,7 +369,7 @@ public class ProductUsecaseIntegrationTest {
 
                 // when
                 ProductStatement criteria = ProductStatement.builder()
-                        .brandID(preparedBrand.getId())
+                        .brandId(preparedBrand.getId())
                         .build();
                 var productList = productFacade.list(criteria, Pageable.ofSize(10));
 
@@ -418,8 +389,8 @@ public class ProductUsecaseIntegrationTest {
 
                 // when
                 ProductStatement criteria = ProductStatement.builder()
-                        .brandID(preparedBrand.getId())
-                        .orderBy(new ProductStatement.CreatedAt(false))
+                        .brandId(preparedBrand.getId())
+                        .orderBy(new ProductStatement.ReleasedAt(false))
                         .build();
                 var productList = productFacade.list(criteria, Pageable.ofSize(10));
 
@@ -440,8 +411,8 @@ public class ProductUsecaseIntegrationTest {
 
                 // when
                 ProductStatement criteria = ProductStatement.builder()
-                        .brandID(preparedBrand.getId())
-                        .orderBy(new ProductStatement.CreatedAt(true))
+                        .brandId(preparedBrand.getId())
+                        .orderBy(new ProductStatement.ReleasedAt(true))
                         .build();
                 var productList = productFacade.list(criteria, Pageable.ofSize(10));
 
@@ -462,7 +433,7 @@ public class ProductUsecaseIntegrationTest {
 
                 // when
                 ProductStatement criteria = ProductStatement.builder()
-                        .brandID(preparedBrand.getId())
+                        .brandId(preparedBrand.getId())
                         .orderBy(new ProductStatement.Price(true))
                         .build();
                 var productList = productFacade.list(criteria, Pageable.ofSize(10));
@@ -484,7 +455,7 @@ public class ProductUsecaseIntegrationTest {
 
                 // when
                 ProductStatement criteria = ProductStatement.builder()
-                        .brandID(preparedBrand.getId())
+                        .brandId(preparedBrand.getId())
                         .orderBy(new ProductStatement.Price(false))
                         .build();
                 var productList = productFacade.list(criteria, Pageable.ofSize(10));
@@ -508,7 +479,7 @@ public class ProductUsecaseIntegrationTest {
 
                 // when
                 ProductStatement criteria = ProductStatement.builder()
-                        .brandID(preparedBrand.getId())
+                        .brandId(preparedBrand.getId())
                         .orderBy(new ProductStatement.LikeCount())
                         .build();
                 var productList = productFacade.list(criteria, Pageable.ofSize(10));
@@ -521,8 +492,6 @@ public class ProductUsecaseIntegrationTest {
             }
         }
     }
-
-
 
     @Nested
     @DisplayName("상품 정보 조회")
@@ -656,3 +625,4 @@ public class ProductUsecaseIntegrationTest {
 
     }
 }
+
