@@ -4,34 +4,34 @@ WITH
     hot AS (
         SELECT ls.target_id, ls.like_count
         FROM like_summary ls FORCE INDEX (idx_ls_type_like_tid)
-                 JOIN product p FORCE INDEX (idx_product_state_brand_id)
-                      ON p.id = ls.target_id
+        LEFT JOIN product p FORCE INDEX (idx_product_state_brand_id)
+            ON p.id = ls.target_id
         WHERE ls.target_type = 'PRODUCT'
-          AND p.state = 'OPEN'
-        ORDER BY ls.like_count DESC
+            AND p.state = 'OPEN'
+        ORDER BY ls.like_count DESC, ls.target_id
         LIMIT 20
     ),
     cold AS (
         SELECT p.id
         FROM product p FORCE INDEX (idx_product_state_brand_id)
-        LEFT JOIN like_summary ls ON ls.target_id = p.id AND ls.target_type = 'PRODUCT'
+        LEFT JOIN like_summary ls
+            ON ls.target_id = p.id AND ls.target_type = 'PRODUCT'
         WHERE p.state = 'OPEN'
-          AND ls.target_id IS NULL
-        ORDER BY p.released_at DESC
+            AND ls.target_id IS NULL
+        ORDER BY p.id
         LIMIT 20
-    )
+        )
 SELECT
-    u.id, p.brand_id, p.created_at, p.deleted_at, p.name, p.price,
+    u.id, p.brand_id, p.created_at, p.name, p.price,
     p.released_at, p.state, p.stock, p.updated_at, u.like_count
-FROM (
+FROM product p
+         INNER JOIN (
     SELECT 0 b, h.target_id id, h.like_count FROM hot h
     UNION ALL
     SELECT 1 b, c.id, 0 FROM cold c
-) u
-JOIN product p ON p.id = u.id
+) u ON p.id = u.id
 ORDER BY u.b, u.like_count DESC, p.id
-    LIMIT 20;
-
+limit 20 offset 0;
 
 
 
