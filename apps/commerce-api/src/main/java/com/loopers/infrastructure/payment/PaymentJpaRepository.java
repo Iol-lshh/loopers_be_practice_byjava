@@ -1,8 +1,11 @@
 package com.loopers.infrastructure.payment;
 
-import com.loopers.domain.payment.PaymentEntity;
+import com.loopers.domain.payment.PaymentOrderEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PaymentJpaRepository extends JpaRepository<PaymentEntity, Long> {
+import java.util.Optional;
 
+public interface PaymentJpaRepository extends JpaRepository<PaymentOrderEntity, Long> {
+
+    Optional<PaymentOrderEntity> findByOrderId(Long orderId);
 }

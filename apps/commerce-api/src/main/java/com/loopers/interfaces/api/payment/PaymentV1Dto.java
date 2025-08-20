@@ -10,6 +10,17 @@ public class PaymentV1Dto {
                 String paymentType
         ) {
         }
+
+        public record Transaction(
+                String transactionKey,
+                String orderId,
+                String cardType,
+                String cardNo,
+                String amount,
+                String status,
+                String reason
+        ) {
+        }
     }
 
     public static class Response {

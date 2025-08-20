@@ -1,0 +1,27 @@
+package com.loopers.infrastructure.payment;
+
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+@SpringBootTest
+public class PgClientTest {
+
+    @Autowired
+    private PgActuatorV1FeignClient pgActuatorV1FeignClient;
+    @Autowired
+    private PgV1FeignClient pgV1FeignClient;
+
+    private static final Logger log = LoggerFactory.getLogger(PgClientTest.class);
+
+    @Test
+    public void connectionTest(){
+        var response = pgActuatorV1FeignClient.health();
+        log.info(response);
+        assertFalse(response.isEmpty());
+    }
+}

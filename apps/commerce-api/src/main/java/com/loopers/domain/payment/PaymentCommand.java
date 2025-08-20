@@ -1,17 +1,33 @@
 package com.loopers.domain.payment;
 
+import com.loopers.application.payment.PaymentCriteria;
+import com.loopers.domain.order.OrderEntity;
+
 public class PaymentCommand {
-    public record Pay(
+    public record Transaction(
             Long userId,
             Long orderId,
-            Long totalPrice
+            String orderKey,
+            String transactionKey,
+            String cardType,
+            String cardNo,
+            String amount,
+            String status,
+            String reason
             ) {
-        public PaymentEntity toEntity() {
-            return PaymentEntity.of(
-                    orderId,
-                    userId,
-                    totalPrice
+        public static Transaction of(PaymentCriteria.Transaction criteria, OrderEntity order){
+            return new Transaction(
+                    order.getUserId(),
+                    order.getId(),
+                    criteria.orderKey(),
+                    criteria.transactionKey(),
+                    criteria.cardType(),
+                    criteria.cardNo(),
+                    criteria.amount(),
+                    criteria.status(),
+                    criteria.reason()
             );
+
         }
     }
 
@@ -20,5 +36,13 @@ public class PaymentCommand {
             Long orderId,
             Long totalPrice
     ){
+    }
+
+    public record RegisterOrder(
+            Long userId,
+            Long orderId,
+            Long totalPrice
+    ){
+
     }
 }

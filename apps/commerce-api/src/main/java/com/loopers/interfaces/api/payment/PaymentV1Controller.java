@@ -16,12 +16,27 @@ public class PaymentV1Controller {
 
     private final PaymentFacade paymentFacade;
 
-    @PostMapping
-    public ApiResponse<PaymentV1Dto.Response.Summary> pay(@RequestBody PaymentV1Dto.Request.Pay request) {
-        PaymentCriteria.Pay criteria = new PaymentCriteria.Pay(
+    @PostMapping("/point")
+    public ApiResponse<PaymentV1Dto.Response.Summary> point(@RequestBody PaymentV1Dto.Request.Pay request) {
+        PaymentCriteria.Point criteria = new PaymentCriteria.Point(
                 request.userId(),
                 request.orderId(),
                 request.paymentType()
+        );
+        var result = paymentFacade.pay(criteria);
+        return ApiResponse.success(PaymentV1Dto.Response.Summary.from(result));
+    }
+
+    @PostMapping("/transaction")
+    public ApiResponse<PaymentV1Dto.Response.Summary> transaction(@RequestBody PaymentV1Dto.Request.Transaction transaction) {
+        PaymentCriteria.Transaction criteria = new PaymentCriteria.Transaction(
+                transaction.transactionKey(),
+                transaction.orderId(),
+                transaction.cardType(),
+                transaction.cardNo(),
+                transaction.amount(),
+                transaction.status(),
+                transaction.reason()
         );
         var result = paymentFacade.pay(criteria);
         return ApiResponse.success(PaymentV1Dto.Response.Summary.from(result));

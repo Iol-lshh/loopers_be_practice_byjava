@@ -2,6 +2,8 @@ package com.loopers.application.order;
 
 import com.loopers.domain.coupon.CouponService;
 import com.loopers.domain.order.*;
+import com.loopers.domain.payment.PaymentCommand;
+import com.loopers.domain.payment.PaymentService;
 import com.loopers.domain.product.ProductEntity;
 import com.loopers.domain.product.ProductMapper;
 import com.loopers.domain.product.ProductService;
@@ -25,6 +27,7 @@ public class OrderFacade {
     private final UserService userService;
     private final CouponService couponService;
     private final ProductMapper productMapper;
+    private final PaymentService paymentService;
 
     @Transactional
     public OrderResult.Summary order(OrderCriteria.Order criteria) {
@@ -39,6 +42,11 @@ public class OrderFacade {
 
         var orderCommand = criteria.toCommandWithProductPriceList(productPriceMap, couponValueMap);
         OrderEntity order = orderService.register(orderCommand);
+
+        if(criteria.paymentType().equals(OrderEntity.PaymentType.PG.getValue())){
+            var paymentCommand = new PaymentCommand.RegisterOrder(criteria.userId(), order.getId(), order.getTotalPrice());
+            paymentService.register(paymentCommand);
+        }
 
         return OrderResult.Summary.from(order);
     }

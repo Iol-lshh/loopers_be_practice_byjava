@@ -93,13 +93,13 @@ class OrderServiceIntegrationTest {
             OrderEntity order = orderService.register(orderCommand);
 
             // when
-            OrderCommand.Pay payCommand = new OrderCommand.Pay(
+            OrderCommand.Complete payCommand = new OrderCommand.Complete(
                     order.getUserId(),
                     order.getId(),
                     order.getTotalPrice(),
                     "POINT"
             );
-            OrderInfo.PaymentInfo completedOrder = orderService.pay(payCommand);
+            OrderInfo.Pay completedOrder = orderService.complete(payCommand);
 
             // then
             assertNotNull(completedOrder);
@@ -132,13 +132,13 @@ class OrderServiceIntegrationTest {
             for (int i = 0; i < threadCount; i++) {
                 executorService.submit(() -> {
                     try {
-                        OrderCommand.Pay payCommand = new OrderCommand.Pay(
+                        OrderCommand.Complete payCommand = new OrderCommand.Complete(
                                 order.getUserId(),
                                 orderId,
                                 order.getTotalPrice(),
                                 "POINT"
                         );
-                        orderService.pay(payCommand);
+                        orderService.complete(payCommand);
                         completedCount.incrementAndGet();
                     } finally {
                         latch.countDown();

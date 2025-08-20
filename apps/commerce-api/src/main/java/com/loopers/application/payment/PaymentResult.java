@@ -10,7 +10,7 @@ public class PaymentResult {
             String paymentType,
             String state
     ){
-        public static Summary from(OrderInfo.PaymentInfo payment) {
+        public static Summary from(OrderInfo.Pay payment) {
             return new Summary(
                     payment.userId(),
                     payment.orderId(),

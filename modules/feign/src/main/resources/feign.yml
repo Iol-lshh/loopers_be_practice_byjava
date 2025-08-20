@@ -1,8 +1,6 @@
 feign:
   httpclient:
     enabled: true
-  okhttp:
-    enabled: false
   client:
     config:
       default:
@@ -19,18 +17,8 @@ feign:
     response:
       enabled: true # 압축 응답 받아줌
 
-# 회로차단기 연동
-feign.circuitbreaker.enabled: true
-resilience4j:
-  circuitbreaker:
-    instances:
-      pgClient:
-        slidingWindowSize: 20
-        failureRateThreshold: 50
-        waitDurationInOpenState: 10s
-
 ---
-spring.config.activate.on-profile: local
+spring.config.activate.on-profile: prd
 
 feign:
   client:

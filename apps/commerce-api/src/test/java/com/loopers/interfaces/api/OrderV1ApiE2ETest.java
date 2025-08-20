@@ -172,7 +172,7 @@ public class OrderV1ApiE2ETest {
         }
     }
 
-    @DisplayName("GET /api/v1/orders/{orderId}")
+    @DisplayName("GET /api/v1/orders/{orderKey}")
     @Nested
     class GetOrder {
         @DisplayName("존재하는 유저 ID를 주면, 해당 유저의 모든 주문 정보를 반환한다.")

@@ -25,12 +25,31 @@ public class OrderCommand {
     ) {
     }
 
-    public record Pay(
+    public record Complete(
         Long userId,
         Long orderId,
         Long totalPrice,
         String paymentType
     ){
 
+    }
+
+    public record RequestPayment(
+        Long userId,
+        Long orderId,
+        Long totalPrice,
+        String paymentType
+    ) {
+    }
+
+    public record Transaction(
+        String transactionKey,
+        String orderId,
+        String cardType,
+        String cardNo,
+        Long amount,
+        String status,
+        String reason
+    ) {
     }
 }

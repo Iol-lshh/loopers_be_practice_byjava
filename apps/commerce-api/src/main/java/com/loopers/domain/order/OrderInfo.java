@@ -2,7 +2,7 @@ package com.loopers.domain.order;
 
 public class OrderInfo {
 
-    public record PaymentInfo(
+    public record Pay(
             Long orderId,
             Long userId,
             Long amount,

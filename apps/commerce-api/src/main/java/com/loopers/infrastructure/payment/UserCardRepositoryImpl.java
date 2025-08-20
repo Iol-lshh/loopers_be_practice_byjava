@@ -13,8 +13,8 @@ public class UserCardRepositoryImpl implements UserCardRepository {
     private final UserCardJpaRepository jpaRepository;
 
     @Override
-    public Optional<UserCardEntity> find(Long aLong) {
-        return jpaRepository.findById(aLong);
+    public Optional<UserCardEntity> findByUserId(Long userId) {
+        return jpaRepository.findByUserId(userId);
     }
 
     @Override

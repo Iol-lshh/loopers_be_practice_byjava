@@ -9,6 +9,7 @@ include(
     ":supports:jackson",
     ":supports:logging",
     ":supports:monitoring",
+    ":supports:uuid",
 )
 
 // configurations

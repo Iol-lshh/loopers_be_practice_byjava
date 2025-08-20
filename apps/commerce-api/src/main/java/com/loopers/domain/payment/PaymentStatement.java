@@ -1,9 +1,10 @@
 package com.loopers.domain.payment;
 
-public class PgStatement {
+public class PaymentStatement {
 
     public record Request(
-            Long orderId,
+            String orderKey,
+            Long userId,
             Long totalPrice,
             String cardNumber,
             String cardType
