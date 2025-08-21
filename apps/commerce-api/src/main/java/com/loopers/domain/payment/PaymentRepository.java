@@ -3,9 +3,9 @@ package com.loopers.domain.payment;
 import java.util.Optional;
 
 public interface PaymentRepository {
-    PaymentOrderEntity save(PaymentOrderEntity payment);
+    PaymentEntity save(PaymentEntity payment);
 
-    Optional<PaymentOrderEntity> findByOrderId(Long orderId);
+    Optional<PaymentEntity> findByOrderId(Long orderId);
 
-    PaymentOrderEntity saveAndFlush(PaymentOrderEntity payment);
+    PaymentEntity saveAndFlush(PaymentEntity payment);
 }

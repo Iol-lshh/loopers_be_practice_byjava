@@ -13,7 +13,7 @@ import java.util.Optional;
 @Entity
 @Table(name = "payment_order")
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
-public class PaymentOrderEntity extends BaseEntity {
+public class PaymentEntity extends BaseEntity {
     private Long orderId;
     private Long userId;
     private String orderKey;
@@ -23,7 +23,7 @@ public class PaymentOrderEntity extends BaseEntity {
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "paymentOrder")
     private List<PaymentTransactionEntity> transactions;
 
-    public PaymentOrderEntity(Long orderId, Long userId, String orderKey, Long amount) {
+    public PaymentEntity(Long orderId, Long userId, String orderKey, Long amount) {
         this.orderId = orderId;
         this.userId = userId;
         this.orderKey = orderKey;
@@ -32,19 +32,19 @@ public class PaymentOrderEntity extends BaseEntity {
         this.transactions = new ArrayList<>();
     }
 
-    public static PaymentOrderEntity from(PaymentCommand.RegisterOrder paymentCommand) {
+    public static PaymentEntity from(PaymentCommand.RegisterOrder paymentCommand) {
         String orderKey = PaymentKeyGenerator.generateOrderKey();
-        return new PaymentOrderEntity(
+        return new PaymentEntity(
                 paymentCommand.orderId(), paymentCommand.userId(), orderKey, paymentCommand.totalPrice()
         );
     }
 
-    public PaymentOrderEntity update(PaymentInfo.Order orderInfo) {
+    public PaymentEntity update(PaymentInfo.Order orderInfo) {
         updateTransactions(orderInfo.transactions());
         return this;
     }
 
-    public PaymentOrderEntity updateTransaction(PaymentInfo.Transaction transaction) {
+    public PaymentEntity updateTransaction(PaymentInfo.Transaction transaction) {
         Optional<PaymentTransactionEntity> existingTransaction = this.transactions.stream()
                 .filter(t -> t.getTransactionKey().equals(transaction.transactionKey()))
                 .findFirst();
@@ -67,7 +67,7 @@ public class PaymentOrderEntity extends BaseEntity {
         FAILED
     }
 
-    public PaymentOrderEntity updateTransactions(List<PaymentInfo.Transaction> transactions) {
+    public PaymentEntity updateTransactions(List<PaymentInfo.Transaction> transactions) {
         transactions.forEach(this::updateTransaction);
         return this;
     }

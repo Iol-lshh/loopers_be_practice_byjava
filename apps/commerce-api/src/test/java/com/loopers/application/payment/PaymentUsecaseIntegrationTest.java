@@ -328,7 +328,7 @@ public class PaymentUsecaseIntegrationTest {
                     )));
             
             OrderResult.Summary order = prepareOrderByPg(user, Map.of(product, 10L));
-            PaymentOrderEntity paymentOrder = paymentService.findByOrderId(order.orderId()).get();
+            PaymentEntity paymentOrder = paymentService.findByOrderId(order.orderId()).get();
             assertNotNull(paymentOrder);
 
             // when

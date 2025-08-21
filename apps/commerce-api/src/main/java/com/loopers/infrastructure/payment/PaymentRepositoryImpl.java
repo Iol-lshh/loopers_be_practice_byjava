@@ -1,6 +1,6 @@
 package com.loopers.infrastructure.payment;
 
-import com.loopers.domain.payment.PaymentOrderEntity;
+import com.loopers.domain.payment.PaymentEntity;
 import com.loopers.domain.payment.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -13,17 +13,17 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     private final PaymentJpaRepository jpaRepository;
 
     @Override
-    public PaymentOrderEntity save(PaymentOrderEntity payment) {
+    public PaymentEntity save(PaymentEntity payment) {
         return jpaRepository.save(payment);
     }
 
     @Override
-    public Optional<PaymentOrderEntity> findByOrderId(Long orderId) {
+    public Optional<PaymentEntity> findByOrderId(Long orderId) {
         return jpaRepository.findByOrderId(orderId);
     }
 
     @Override
-    public PaymentOrderEntity saveAndFlush(PaymentOrderEntity payment) {
+    public PaymentEntity saveAndFlush(PaymentEntity payment) {
         return jpaRepository.saveAndFlush(payment);
     }
 }

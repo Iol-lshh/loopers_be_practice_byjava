@@ -130,12 +130,12 @@ class PaymentServiceIntegrationTest {
             UserEntity user = prepareUser();
             ProductEntity product = prepareProduct(10000L, 10L);
             OrderResult.Summary order = prepareOrderByPg(user, Map.of(product, 1L));
-            PaymentOrderEntity paymentOrder = paymentService.findByOrderId(order.orderId()).get();
+            PaymentEntity paymentOrder = paymentService.findByOrderId(order.orderId()).get();
             PaymentInfo.Order orderInfo = new PaymentInfo.Order(
                     paymentOrder.getOrderKey(),
                     List.of(new PaymentInfo.Transaction(
                             "transactionKey1234",
-                            PaymentOrderEntity.State.SUCCESS.name(),
+                            PaymentEntity.State.SUCCESS.name(),
                             "정상 승인되었습니다."
                     ))
             );
@@ -154,10 +154,10 @@ class PaymentServiceIntegrationTest {
                     "SUCCESS",
                     "정상 승인되었습니다."
             );
-            PaymentOrderEntity paymentOrderEntity = paymentService.pay(transaction);
+            PaymentEntity paymentEntity = paymentService.pay(transaction);
 
             // then
-            assertNotNull(paymentOrderEntity);
+            assertNotNull(paymentEntity);
             verify(mockPaymentGateway, atLeastOnce()).findOrder(anyLong(), anyString());
         }
     }

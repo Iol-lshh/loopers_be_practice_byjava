@@ -8,7 +8,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class PaymentOrderEntityTest {
+class PaymentModelTest {
 
     @DisplayName("생성자 테스트")
     @Nested
@@ -24,15 +24,15 @@ class PaymentOrderEntityTest {
                     1000L // totalPrice
             );
             // when
-            PaymentOrderEntity paymentOrderEntity = PaymentOrderEntity.from(paymentCommand);
+            PaymentEntity paymentEntity = PaymentEntity.from(paymentCommand);
 
             // then
-            assertEquals(paymentCommand.userId(), paymentOrderEntity.getUserId());
-            assertEquals(paymentCommand.orderId(), paymentOrderEntity.getOrderId());
-            assertEquals(paymentCommand.totalPrice(), paymentOrderEntity.getAmount());
-            assertNotNull(paymentOrderEntity.getOrderKey());
-            assertTrue(paymentOrderEntity.getTransactions().isEmpty());
-            assertEquals(PaymentOrderEntity.State.PENDING, paymentOrderEntity.getState());
+            assertEquals(paymentCommand.userId(), paymentEntity.getUserId());
+            assertEquals(paymentCommand.orderId(), paymentEntity.getOrderId());
+            assertEquals(paymentCommand.totalPrice(), paymentEntity.getAmount());
+            assertNotNull(paymentEntity.getOrderKey());
+            assertTrue(paymentEntity.getTransactions().isEmpty());
+            assertEquals(PaymentEntity.State.PENDING, paymentEntity.getState());
         }
     }
 
@@ -43,25 +43,25 @@ class PaymentOrderEntityTest {
         @Test
         void returnSuccess_whenUpdateSuccessTransaction(){
             // given
-            PaymentOrderEntity paymentOrderEntity = new PaymentOrderEntity(1L, 1L, "orderKey", 1000L);
+            PaymentEntity paymentEntity = new PaymentEntity(1L, 1L, "orderKey", 1000L);
             PaymentInfo.Transaction transaction = new PaymentInfo.Transaction(
                     "transactionKey", "SUCCESS", "좋아요"
             );
 
             // when
-            paymentOrderEntity.updateTransaction(transaction);
+            paymentEntity.updateTransaction(transaction);
 
             // then
-            assertEquals(1, paymentOrderEntity.getTransactions().size());
-            assertEquals("transactionKey", paymentOrderEntity.getTransactions().getFirst().getTransactionKey());
-            assertEquals(PaymentOrderEntity.State.SUCCESS, paymentOrderEntity.getState());
+            assertEquals(1, paymentEntity.getTransactions().size());
+            assertEquals("transactionKey", paymentEntity.getTransactions().getFirst().getTransactionKey());
+            assertEquals(PaymentEntity.State.SUCCESS, paymentEntity.getState());
         }
 
         @DisplayName("update 메소드가 성공 트랜잭션이 포함된 리스트에 올바르게 성공 상태로 업데이트한다.")
         @Test
         void returnSuccess_whenUpdateSuccessTransactionList(){
             // given
-            PaymentOrderEntity paymentOrderEntity = new PaymentOrderEntity(1L, 1L, "orderKey", 1000L);
+            PaymentEntity paymentEntity = new PaymentEntity(1L, 1L, "orderKey", 1000L);
             PaymentInfo.Transaction transaction = new PaymentInfo.Transaction(
                     "transactionKey", "FAIL", "좋아요"
             );
@@ -73,29 +73,29 @@ class PaymentOrderEntityTest {
             );
 
             // when
-            paymentOrderEntity.updateTransactions(List.of(transaction, transaction1, transaction2));
+            paymentEntity.updateTransactions(List.of(transaction, transaction1, transaction2));
 
             // then
-            assertEquals(3, paymentOrderEntity.getTransactions().size());
-            assertEquals(PaymentOrderEntity.State.SUCCESS, paymentOrderEntity.getState());
+            assertEquals(3, paymentEntity.getTransactions().size());
+            assertEquals(PaymentEntity.State.SUCCESS, paymentEntity.getState());
         }
 
         @DisplayName("update 메소드가 실패 트랜잭션에 올바르게 트랜잭션 갯수가 증가한다.")
         @Test
         void returnFail_whenUpdateFailTransaction(){
             // given
-            PaymentOrderEntity paymentOrderEntity = new PaymentOrderEntity(1L, 1L, "orderKey", 1000L);
+            PaymentEntity paymentEntity = new PaymentEntity(1L, 1L, "orderKey", 1000L);
             PaymentInfo.Transaction transaction = new PaymentInfo.Transaction(
                     "transactionKey", "FAIL", "좋아요"
             );
 
             // when
-            paymentOrderEntity.updateTransaction(transaction);
+            paymentEntity.updateTransaction(transaction);
 
             // then
-            assertEquals(1, paymentOrderEntity.getTransactions().size());
-            assertEquals("transactionKey", paymentOrderEntity.getTransactions().getFirst().getTransactionKey());
-            assertEquals(PaymentOrderEntity.State.PENDING, paymentOrderEntity.getState());
+            assertEquals(1, paymentEntity.getTransactions().size());
+            assertEquals("transactionKey", paymentEntity.getTransactions().getFirst().getTransactionKey());
+            assertEquals(PaymentEntity.State.PENDING, paymentEntity.getState());
         }
 
 

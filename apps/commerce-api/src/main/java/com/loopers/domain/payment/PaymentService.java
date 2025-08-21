@@ -16,15 +16,15 @@ public class PaymentService {
     private final PaymentGateway paymentGateway;
     private final UserCardRepository userCardRepository;
 
-    public Optional<PaymentOrderEntity> findByOrderId(Long orderId) {
+    public Optional<PaymentEntity> findByOrderId(Long orderId) {
         return paymentRepository.findByOrderId(orderId);
     }
 
-    public PaymentOrderEntity pay(PaymentCommand.Transaction command) {
+    public PaymentEntity pay(PaymentCommand.Transaction command) {
         PaymentInfo.Order orderInfo = paymentGateway.findOrder(command.userId(), command.orderKey()).orElseThrow(() -> new CoreException(
                 ErrorType.NOT_FOUND, "결제 정보를 찾을 수 없습니다. userId: " + command.userId() + ", orderId: " + command.orderId()
         ));
-        PaymentOrderEntity payment = paymentRepository.findByOrderId(command.orderId()).orElseThrow(() -> new CoreException(
+        PaymentEntity payment = paymentRepository.findByOrderId(command.orderId()).orElseThrow(() -> new CoreException(
                 ErrorType.NOT_FOUND, "결제 주문을 찾을 수 없습니다. orderId: " + command.orderId()
         ));
         payment.update(orderInfo);
@@ -35,7 +35,7 @@ public class PaymentService {
         UserCardEntity cardEntity = userCardRepository.findByUserId(requestCommand.userId()).orElseThrow(() -> new CoreException(
                 ErrorType.BAD_REQUEST, "사용자의 카드 정보를 찾을 수 없습니다. userId: " + requestCommand.userId())
         );
-        PaymentOrderEntity payment = paymentRepository.findByOrderId(requestCommand.orderId()).orElseThrow(() -> new CoreException(
+        PaymentEntity payment = paymentRepository.findByOrderId(requestCommand.orderId()).orElseThrow(() -> new CoreException(
                 ErrorType.NOT_FOUND, "결제 주문을 찾을 수 없습니다. orderId: " + requestCommand.orderId()
         ));
 
@@ -56,8 +56,8 @@ public class PaymentService {
         return userCardRepository.save(userCardEntity);
     }
 
-    public PaymentOrderEntity register(PaymentCommand.RegisterOrder paymentCommand) {
-        PaymentOrderEntity paymentOrderEntity = PaymentOrderEntity.from(paymentCommand);
-        return paymentRepository.save(paymentOrderEntity);
+    public PaymentEntity register(PaymentCommand.RegisterOrder paymentCommand) {
+        PaymentEntity paymentEntity = PaymentEntity.from(paymentCommand);
+        return paymentRepository.save(paymentEntity);
     }
 }

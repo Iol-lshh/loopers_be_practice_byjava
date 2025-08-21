@@ -23,9 +23,9 @@ public class PaymentTransactionEntity extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "payment_id")
-    private PaymentOrderEntity paymentOrder;
+    private PaymentEntity paymentOrder;
 
-    public PaymentTransactionEntity(PaymentOrderEntity paymentOrder, String transactionKey, String status, String reason) {
+    public PaymentTransactionEntity(PaymentEntity paymentOrder, String transactionKey, String status, String reason) {
         if(transactionKey == null || transactionKey.isBlank()) {
             throw new CoreException(ErrorType.BAD_REQUEST, "Transaction key cannot be null or blank");
         }
@@ -38,13 +38,13 @@ public class PaymentTransactionEntity extends BaseEntity {
         this.reason = reason;
     }
 
-    public static List<PaymentTransactionEntity> of(PaymentOrderEntity order, List<PaymentInfo.Transaction> transactions) {
+    public static List<PaymentTransactionEntity> of(PaymentEntity order, List<PaymentInfo.Transaction> transactions) {
         return transactions.stream()
                 .map(transaction -> from(order, transaction))
                 .toList();
     }
 
-    public static PaymentTransactionEntity from(PaymentOrderEntity order, PaymentInfo.Transaction transaction) {
+    public static PaymentTransactionEntity from(PaymentEntity order, PaymentInfo.Transaction transaction) {
         return new PaymentTransactionEntity(
                 order,
                 transaction.transactionKey(),
