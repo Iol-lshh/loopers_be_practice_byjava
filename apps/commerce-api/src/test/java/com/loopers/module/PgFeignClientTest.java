@@ -1,7 +1,6 @@
 package com.loopers.module;
 
 import com.loopers.infrastructure.payment.PgActuatorV1FeignClient;
-import com.loopers.infrastructure.payment.PgClientTest;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

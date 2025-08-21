@@ -23,6 +23,33 @@ spring:
       - redis.yml
       - logging.yml
       - monitoring.yml
+      - feign.yml
+      - resilience.yml
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      pgFindCircuitBreaker:
+        baseConfig: default
+      pgFindRequestCircuitBreaker:
+        baseConfig: default
+      pgRequestCircuitBreaker:
+        baseConfig: shared
+  timelimiter:
+    instances:
+      pgFindTimeLimiter:
+        baseConfig: default
+      pgRequestTimeLimiter:
+        baseConfig: default
+  retry:
+    instances:
+      pgRequestRt:
+        maxAttempts: 3
+        waitDuration: 100
+        retryExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.util.concurrent.TimeoutException
+          - java.io.IOException
 
 springdoc:
   use-fqn: true

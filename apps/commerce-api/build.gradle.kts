@@ -3,6 +3,7 @@ dependencies {
     implementation(project(":modules:jpa"))
     implementation(project(":modules:redis"))
     implementation(project(":modules:feign"))
+    implementation(project(":modules:resilience"))
     implementation(project(":supports:jackson"))
     implementation(project(":supports:logging"))
     implementation(project(":supports:monitoring"))
@@ -20,5 +21,6 @@ dependencies {
     testImplementation(testFixtures(project(":modules:jpa")))
     testImplementation(testFixtures(project(":modules:redis")))
     testImplementation(testFixtures(project(":modules:feign")))
+    testImplementation(testFixtures(project(":modules:resilience")))
 
 }
