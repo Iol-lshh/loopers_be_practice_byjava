@@ -13,6 +13,7 @@ import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -79,5 +80,12 @@ public class OrderFacade {
         List<ProductEntity> products = productService.find(productIds);
 
         return OrderResult.Detail.from(order, products);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void complete(OrderCommand.Complete command) {
+        OrderEntity orderEntity = orderService.complete(command);
+        productService.deduct(orderEntity.getItemQuantityMap());
+        couponService.useCoupons(orderEntity.getUserId(), orderEntity.getCouponIds());
     }
 }

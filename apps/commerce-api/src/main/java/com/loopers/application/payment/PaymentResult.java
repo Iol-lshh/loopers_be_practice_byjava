@@ -1,7 +1,6 @@
 package com.loopers.application.payment;
 
 import com.loopers.domain.order.OrderEntity;
-import com.loopers.domain.order.OrderInfo;
 
 public class PaymentResult {
     public record Summary(

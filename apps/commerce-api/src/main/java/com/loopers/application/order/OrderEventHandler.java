@@ -15,6 +15,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class OrderEventHandler {
     private final OrderPaymentSelector orderPaymentSelector;
     private final OrderService orderService;
+    private final OrderFacade orderFacade;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handle(OrderCommand.RequestPayment command) {
@@ -48,5 +49,12 @@ public class OrderEventHandler {
                 command.orderId());
         OrderCommand.Cancel orderCommand = new OrderCommand.Cancel(command.orderId());
         orderService.cancel(orderCommand);
+    }
+
+    @EventListener
+    public void handle(OrderCommand.Complete command) {
+        log.info("OrderEventHandler.handle 주문 완료 시작 - orderId: {}",
+                command.orderId());
+        orderFacade.complete(command);
     }
 }

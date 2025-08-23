@@ -11,6 +11,7 @@ import com.loopers.domain.user.UserService;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ public class PaymentFacade {
     private final CouponService couponService;
     private final PointService pointService;
     private final PaymentService paymentService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public PaymentResult.Summary pay(PaymentCriteria.Point criteria) {
@@ -52,10 +54,10 @@ public class PaymentFacade {
         paymentService.pay(paymentCommand);
 
         OrderCommand.Complete command = criteria.toCommand(payment.getUserId(), payment.getOrderId(), payment.getAmount());
-        OrderEntity orderEntity = orderService.complete(command);
-        productService.deduct(orderEntity.getItemQuantityMap());
-        couponService.useCoupons(orderEntity.getUserId(), orderEntity.getCouponIds());
-
+        eventPublisher.publishEvent(command);
+        OrderEntity orderEntity = orderService.find(command.orderId()).orElseThrow(
+                () -> new CoreException(ErrorType.NOT_FOUND, "주문을 찾을 수 없습니다: " + command.orderId())
+        );
         return PaymentResult.Summary.from(orderEntity);
     }
 }
