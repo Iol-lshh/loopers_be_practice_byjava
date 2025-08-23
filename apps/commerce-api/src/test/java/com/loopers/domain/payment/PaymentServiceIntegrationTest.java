@@ -128,7 +128,14 @@ class PaymentServiceIntegrationTest {
         void savePayment_whenPgStateSuccess() {
             // given
             UserEntity user = prepareUser();
+            prepareUserCard(user.getId());
             ProductEntity product = prepareProduct(10000L, 10L);
+            when(mockPaymentGateway.request(any(PaymentStatement.Request.class)))
+                    .thenReturn(new PaymentInfo.Transaction(
+                            "transactionKey1234",
+                            "PENDING",
+                            "결제 대기중"
+                    ));
             OrderResult.Summary order = prepareOrderByPg(user, Map.of(product, 1L));
             PaymentEntity paymentOrder = paymentService.findByOrderId(order.orderId()).get();
             PaymentInfo.Order orderInfo = new PaymentInfo.Order(

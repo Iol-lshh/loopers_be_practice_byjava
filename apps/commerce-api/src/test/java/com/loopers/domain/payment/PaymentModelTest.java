@@ -44,12 +44,16 @@ class PaymentModelTest {
         void returnSuccess_whenUpdateSuccessTransaction(){
             // given
             PaymentEntity paymentEntity = new PaymentEntity(1L, 1L, "orderKey", 1000L);
-            PaymentInfo.Transaction transaction = new PaymentInfo.Transaction(
-                    "transactionKey", "SUCCESS", "좋아요"
+            PaymentCommand.UpdateTransaction updateTransaction = new PaymentCommand.UpdateTransaction(
+                    1L, // userId
+                    paymentEntity.getId(), // paymentId
+                    "transactionKey", // transactionKey
+                    "SUCCESS", // status
+                    "좋아요" // reason
             );
 
             // when
-            paymentEntity.updateTransaction(transaction);
+            paymentEntity.updateTransaction(updateTransaction);
 
             // then
             assertEquals(1, paymentEntity.getTransactions().size());
@@ -85,8 +89,12 @@ class PaymentModelTest {
         void returnFail_whenUpdateFailTransaction(){
             // given
             PaymentEntity paymentEntity = new PaymentEntity(1L, 1L, "orderKey", 1000L);
-            PaymentInfo.Transaction transaction = new PaymentInfo.Transaction(
-                    "transactionKey", "FAIL", "좋아요"
+            PaymentCommand.UpdateTransaction transaction = new PaymentCommand.UpdateTransaction(
+                    1L, // userId
+                    paymentEntity.getId(), // paymentId
+                    "transactionKey", // transactionKey
+                    "SUCCESS", // status
+                    "좋아요" // reason
             );
 
             // when
@@ -95,7 +103,7 @@ class PaymentModelTest {
             // then
             assertEquals(1, paymentEntity.getTransactions().size());
             assertEquals("transactionKey", paymentEntity.getTransactions().getFirst().getTransactionKey());
-            assertEquals(PaymentEntity.State.PENDING, paymentEntity.getState());
+            assertEquals(PaymentEntity.State.SUCCESS, paymentEntity.getState());
         }
 
 

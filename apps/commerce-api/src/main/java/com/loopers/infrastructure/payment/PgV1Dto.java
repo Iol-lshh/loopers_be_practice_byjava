@@ -14,6 +14,12 @@ public class PgV1Dto {
                 Long amount,
                 String callbackUrl
         ) {
+            // cardNo는 xxxx-xxxx-xxxx-xxxx 형태로 입력받아야 함
+            public Transaction {
+                if (!cardNo.matches("\\d{4}-\\d{4}-\\d{4}-\\d{4}")) {
+                    throw new IllegalArgumentException("카드 번호는 xxxx-xxxx-xxxx-xxxx 형식이어야 합니다.");
+                }
+            }
         }
     }
 

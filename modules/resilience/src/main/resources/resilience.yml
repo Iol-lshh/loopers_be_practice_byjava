@@ -24,11 +24,3 @@ resilience4j:
         eventConsumerBufferSize: 10
         ignoreExceptions:
           - com.loopers.support.error.CoreException
-  timelimiter:
-    configs:
-      default:
-        cancelRunningFuture: true
-        timeoutDuration: 300
-      shared:
-        cancelRunningFuture: true
-        timeoutDuration: 1000

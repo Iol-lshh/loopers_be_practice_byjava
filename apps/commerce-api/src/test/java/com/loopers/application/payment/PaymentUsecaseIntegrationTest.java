@@ -5,6 +5,7 @@ import com.loopers.application.order.OrderFacade;
 import com.loopers.application.order.OrderResult;
 import com.loopers.domain.coupon.CouponRepository;
 import com.loopers.domain.order.OrderCommand;
+import com.loopers.domain.order.OrderEntity;
 import com.loopers.domain.order.OrderRepository;
 import com.loopers.domain.payment.*;
 import com.loopers.domain.point.PointService;
@@ -347,6 +348,28 @@ public class PaymentUsecaseIntegrationTest {
             assertEquals("COMPLETED", result.state());
             verify(productService, times(1)).deduct(anyMap());
             verify(orderService, times(1)).register(any(OrderCommand.Order.class));
+        }
+
+        @DisplayName("결제 요청이 PG로 부터 실패되었을 때, 주문이 취소된다.")
+        @Test
+        void cancelOrder_whenPaymentFailed() throws InterruptedException {
+            // given
+            UserEntity user = prepareUser(10000L);
+            prepareUserCard(user.getId());
+            ProductEntity product = prepareProduct(1000L, 10L);
+            when(mockPaymentGateway.request(any(PaymentStatement.Request.class)))
+                    .thenThrow(new CoreException(ErrorType.INTERNAL_ERROR));
+
+            OrderCriteria.Order criteria = new OrderCriteria.Order(user.getId(), "PG", List.of(new OrderCriteria.Item(product.getId(), 1L)), List.of());
+
+            //when
+            orderFacade.order(criteria);
+
+            // then
+            Thread.sleep(1000); // PG 요청이 비동기로 처리되므로 잠시 대기
+            var orderList = orderFacade.list(user.getId());
+            assertEquals(1, orderList.size());
+            assertEquals("CANCELLED", orderList.getFirst().state());
         }
     }
 }

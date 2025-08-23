@@ -99,12 +99,12 @@ class OrderServiceIntegrationTest {
                     order.getTotalPrice(),
                     "POINT"
             );
-            OrderInfo.Pay completedOrder = orderService.complete(payCommand);
+            OrderEntity completedOrder = orderService.complete(payCommand);
 
             // then
             assertNotNull(completedOrder);
-            assertEquals(OrderEntity.State.COMPLETED, completedOrder.state());
-            var monitor = orderService.find(completedOrder.orderId()).orElseThrow();
+            assertEquals(OrderEntity.State.COMPLETED, completedOrder.getState());
+            var monitor = orderService.find(completedOrder.getId()).orElseThrow();
             assertEquals(OrderEntity.State.COMPLETED, monitor.getState());
         }
 

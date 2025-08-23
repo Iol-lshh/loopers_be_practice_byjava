@@ -4,11 +4,9 @@ feign:
   client:
     config:
       default:
-        connectTimeout: 2000
+        connectTimeout: 1000
         readTimeout: 3000
         loggerLevel: FULL
-      pgClient:
-        readTimeout: 5000
   compression:
     request:
       enabled: true # 요청 압축

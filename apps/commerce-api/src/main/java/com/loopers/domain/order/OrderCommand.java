@@ -31,7 +31,6 @@ public class OrderCommand {
         Long totalPrice,
         String paymentType
     ){
-
     }
 
     public record RequestPayment(
@@ -50,6 +49,11 @@ public class OrderCommand {
         Long amount,
         String status,
         String reason
+    ) {
+    }
+
+    public record Cancel(
+        Long orderId
     ) {
     }
 }

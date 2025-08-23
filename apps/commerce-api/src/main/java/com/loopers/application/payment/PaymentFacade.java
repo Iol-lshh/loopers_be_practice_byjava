@@ -3,6 +3,7 @@ package com.loopers.application.payment;
 import com.loopers.domain.coupon.CouponService;
 import com.loopers.domain.order.*;
 import com.loopers.domain.payment.PaymentCommand;
+import com.loopers.domain.payment.PaymentEntity;
 import com.loopers.domain.payment.PaymentService;
 import com.loopers.domain.point.PointService;
 import com.loopers.domain.product.ProductService;
@@ -35,32 +36,26 @@ public class PaymentFacade {
         couponService.useCoupons(criteria.userId(), order.getCouponIds());
 
         OrderCommand.Complete command = criteria.toCommand(order.getTotalPrice());
-        OrderInfo.Pay paymentInfo = orderService.complete(command);
-        pointService.pay(criteria.userId(), paymentInfo.amount());
+        OrderEntity orderEntity = orderService.complete(command);
+        pointService.pay(criteria.userId(), orderEntity.getTotalPrice());
 
-        return PaymentResult.Summary.from(paymentInfo);
+        return PaymentResult.Summary.from(orderEntity);
     }
 
-    @Transactional
     public PaymentResult.Summary pay(PaymentCriteria.Transaction criteria) {
-        OrderStatement orderStatement = OrderStatement.pgOrderId(criteria.orderKey());
+        PaymentEntity payment = paymentService.findByOrderKey(criteria.orderKey()).orElseThrow(() -> new CoreException(
+                ErrorType.NOT_FOUND, "결제 정보를 찾을 수 없습니다: " + criteria.orderKey()));
+        userService.find(payment.getUserId()).orElseThrow(() -> new CoreException(
+                ErrorType.NOT_FOUND, "User가 존재하지 않습니다: " + payment.getUserId()));
 
-        OrderEntity order = orderService.find(orderStatement).getFirst();
-        if (order == null) {
-            throw new CoreException(ErrorType.NOT_FOUND, "주문을 찾을 수 없습니다: " + criteria.orderKey());
-        }
-
-        userService.find(order.getUserId()).orElseThrow(() -> new CoreException(
-                ErrorType.NOT_FOUND, "User가 존재하지 않습니다: " + order.getUserId()));
-
-        PaymentCommand.Transaction paymentCommand = PaymentCommand.Transaction.of(criteria, order);
+        PaymentCommand.Transaction paymentCommand = PaymentCommand.Transaction.of(criteria, payment);
         paymentService.pay(paymentCommand);
 
-        OrderCommand.Complete command = criteria.toCommand(order.getUserId(), order.getId(), order.getTotalPrice());
-        OrderInfo.Pay paymentInfo = orderService.complete(command);
-        productService.deduct(order.getItemQuantityMap());
-        couponService.useCoupons(order.getUserId(), order.getCouponIds());
+        OrderCommand.Complete command = criteria.toCommand(payment.getUserId(), payment.getOrderId(), payment.getAmount());
+        OrderEntity orderEntity = orderService.complete(command);
+        productService.deduct(orderEntity.getItemQuantityMap());
+        couponService.useCoupons(orderEntity.getUserId(), orderEntity.getCouponIds());
 
-        return PaymentResult.Summary.from(paymentInfo);
+        return PaymentResult.Summary.from(orderEntity);
     }
 }

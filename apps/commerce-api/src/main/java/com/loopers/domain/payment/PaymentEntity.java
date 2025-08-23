@@ -11,16 +11,17 @@ import java.util.Optional;
 
 @Getter
 @Entity
-@Table(name = "payment_order")
+@Table(name = "payments")
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 public class PaymentEntity extends BaseEntity {
     private Long orderId;
     private Long userId;
     private String orderKey;
     private Long amount;
+    @Enumerated(EnumType.STRING)
     private State state;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "paymentOrder")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "paymentOrder")
     private List<PaymentTransactionEntity> transactions;
 
     public PaymentEntity(Long orderId, Long userId, String orderKey, Long amount) {
@@ -44,7 +45,7 @@ public class PaymentEntity extends BaseEntity {
         return this;
     }
 
-    public PaymentEntity updateTransaction(PaymentInfo.Transaction transaction) {
+    public PaymentEntity updateTransaction(PaymentCommand.UpdateTransaction transaction) {
         Optional<PaymentTransactionEntity> existingTransaction = this.transactions.stream()
                 .filter(t -> t.getTransactionKey().equals(transaction.transactionKey()))
                 .findFirst();
@@ -68,7 +69,11 @@ public class PaymentEntity extends BaseEntity {
     }
 
     public PaymentEntity updateTransactions(List<PaymentInfo.Transaction> transactions) {
-        transactions.forEach(this::updateTransaction);
+        transactions.forEach(transaction -> {
+            PaymentCommand.UpdateTransaction command = PaymentCommand.UpdateTransaction
+                    .from(transaction, this.userId, super.getId());
+            this.updateTransaction(command);
+        });
         return this;
     }
 }

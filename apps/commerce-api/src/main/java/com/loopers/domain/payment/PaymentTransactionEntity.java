@@ -38,13 +38,7 @@ public class PaymentTransactionEntity extends BaseEntity {
         this.reason = reason;
     }
 
-    public static List<PaymentTransactionEntity> of(PaymentEntity order, List<PaymentInfo.Transaction> transactions) {
-        return transactions.stream()
-                .map(transaction -> from(order, transaction))
-                .toList();
-    }
-
-    public static PaymentTransactionEntity from(PaymentEntity order, PaymentInfo.Transaction transaction) {
+    public static PaymentTransactionEntity from(PaymentEntity order, PaymentCommand.UpdateTransaction transaction) {
         return new PaymentTransactionEntity(
                 order,
                 transaction.transactionKey(),
@@ -53,7 +47,7 @@ public class PaymentTransactionEntity extends BaseEntity {
         );
     }
 
-    public PaymentTransactionEntity update(PaymentInfo.Transaction transaction) {
+    public PaymentTransactionEntity update(PaymentCommand.UpdateTransaction transaction) {
         if (transaction == null) {
             throw new CoreException(ErrorType.BAD_REQUEST, "Transaction cannot be null");
         }

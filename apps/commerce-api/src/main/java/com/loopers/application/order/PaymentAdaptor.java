@@ -6,6 +6,7 @@ import com.loopers.domain.payment.PaymentCommand;
 import com.loopers.domain.payment.PaymentService;
 import com.loopers.domain.point.PointService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +29,7 @@ public class PaymentAdaptor {
         }
     }
 
+    @Slf4j
     @RequiredArgsConstructor
     @Component
     public static class PGAdaptor implements OrderPaymentWay {
@@ -36,12 +38,20 @@ public class PaymentAdaptor {
 
         @Override
         public void request(Long userId, Long orderId, Long totalPrice) {
-            PaymentCommand.Request requestCommand = new PaymentCommand.Request(
-                    userId,
-                    orderId,
-                    totalPrice
-            );
-            paymentService.request(requestCommand);
+            log.info("PGAdaptor.request 시작 - userId: {}, orderId: {}, totalPrice: {}", userId, orderId, totalPrice);
+            
+            try {
+                PaymentCommand.Request requestCommand = new PaymentCommand.Request(
+                        userId,
+                        orderId,
+                        totalPrice
+                );
+                paymentService.request(requestCommand);
+                log.info("PaymentService.request 호출 완료");
+            } catch (Exception e) {
+                log.error("PGAdaptor.request 실패", e);
+                throw e;
+            }
         }
 
         @Override

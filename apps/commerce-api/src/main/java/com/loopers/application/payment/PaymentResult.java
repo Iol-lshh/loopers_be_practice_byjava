@@ -1,5 +1,6 @@
 package com.loopers.application.payment;
 
+import com.loopers.domain.order.OrderEntity;
 import com.loopers.domain.order.OrderInfo;
 
 public class PaymentResult {
@@ -10,13 +11,13 @@ public class PaymentResult {
             String paymentType,
             String state
     ){
-        public static Summary from(OrderInfo.Pay payment) {
+        public static Summary from(OrderEntity order) {
             return new Summary(
-                    payment.userId(),
-                    payment.orderId(),
-                    payment.amount(),
-                    payment.type().getValue(),
-                    payment.state().getValue()
+                    order.getUserId(),
+                    order.getId(),
+                    order.getTotalPrice(),
+                    order.getPaymentType().getValue(),
+                    order.getState().getValue()
             );
         }
     }

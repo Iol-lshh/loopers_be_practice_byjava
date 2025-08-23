@@ -26,4 +26,14 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     public PaymentEntity saveAndFlush(PaymentEntity payment) {
         return jpaRepository.saveAndFlush(payment);
     }
+
+    @Override
+    public Optional<PaymentEntity> findById(Long id) {
+        return jpaRepository.findById(id);
+    }
+
+    @Override
+    public Optional<PaymentEntity> findByOrderKey(String orderKey) {
+        return jpaRepository.findByOrderKey(orderKey);
+    }
 }

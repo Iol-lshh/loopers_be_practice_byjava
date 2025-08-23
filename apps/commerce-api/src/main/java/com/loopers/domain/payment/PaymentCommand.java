@@ -15,10 +15,10 @@ public class PaymentCommand {
             String status,
             String reason
             ) {
-        public static Transaction of(PaymentCriteria.Transaction criteria, OrderEntity order){
+        public static Transaction of(PaymentCriteria.Transaction criteria, PaymentEntity payment){
             return new Transaction(
-                    order.getUserId(),
-                    order.getId(),
+                    payment.getUserId(),
+                    payment.getId(),
                     criteria.orderKey(),
                     criteria.transactionKey(),
                     criteria.cardType(),
@@ -44,5 +44,28 @@ public class PaymentCommand {
             Long totalPrice
     ){
 
+    }
+
+    public record UpdateTransaction(
+            Long userId,
+            Long paymentId,
+            String transactionKey,
+            String status,
+            String reason
+    ){
+        public static UpdateTransaction from(PaymentInfo.Transaction transaction, Long userId, Long paymentId) {
+            return new UpdateTransaction(
+                    userId,
+                    paymentId,
+                    transaction.transactionKey(),
+                    transaction.status(),
+                    transaction.reason()
+            );
+        }
+    }
+
+    public record Cancel(
+        Long orderId
+    ){
     }
 }

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "user_card")
 @Entity
 public class UserCardEntity extends BaseEntity {
     private Long userId;

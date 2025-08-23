@@ -16,7 +16,7 @@ public class PaymentV1Controller {
 
     private final PaymentFacade paymentFacade;
 
-    @PostMapping("/point")
+    @PostMapping("/points")
     public ApiResponse<PaymentV1Dto.Response.Summary> point(@RequestBody PaymentV1Dto.Request.Pay request) {
         PaymentCriteria.Point criteria = new PaymentCriteria.Point(
                 request.userId(),
@@ -27,7 +27,7 @@ public class PaymentV1Controller {
         return ApiResponse.success(PaymentV1Dto.Response.Summary.from(result));
     }
 
-    @PostMapping("/transaction")
+    @PostMapping("/transactions")
     public ApiResponse<PaymentV1Dto.Response.Summary> transaction(@RequestBody PaymentV1Dto.Request.Transaction transaction) {
         PaymentCriteria.Transaction criteria = new PaymentCriteria.Transaction(
                 transaction.transactionKey(),

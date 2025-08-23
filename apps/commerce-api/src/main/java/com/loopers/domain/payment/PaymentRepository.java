@@ -8,4 +8,8 @@ public interface PaymentRepository {
     Optional<PaymentEntity> findByOrderId(Long orderId);
 
     PaymentEntity saveAndFlush(PaymentEntity payment);
+
+    Optional<PaymentEntity> findById(Long id);
+
+    Optional<PaymentEntity> findByOrderKey(String orderKey);
 }
