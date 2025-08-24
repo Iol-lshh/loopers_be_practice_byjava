@@ -10,10 +10,7 @@ public class PaymentCriteria {
     ) {
         public OrderCommand.Complete toCommand(Long totalPrice) {
             return new OrderCommand.Complete(
-                    userId,
-                    orderId,
-                    totalPrice,
-                    "POINT"
+                    orderId
             );
         }
     }
@@ -27,12 +24,9 @@ public class PaymentCriteria {
             String status,
             String reason
     ){
-        public OrderCommand.Complete toCommand(Long userId, Long orderId, Long totalPrice) {
+        public OrderCommand.Complete toCommand(Long orderId) {
             return new OrderCommand.Complete(
-                    userId,
-                    orderId,
-                    totalPrice,
-                    "PG"
+                    orderId
             );
         }
     }

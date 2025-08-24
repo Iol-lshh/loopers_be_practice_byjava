@@ -36,7 +36,10 @@ public class PaymentEntity extends BaseEntity {
     public static PaymentEntity from(PaymentCommand.RegisterOrder paymentCommand) {
         String orderKey = PaymentKeyGenerator.generateOrderKey();
         return new PaymentEntity(
-                paymentCommand.orderId(), paymentCommand.userId(), orderKey, paymentCommand.totalPrice()
+                paymentCommand.orderId(),
+                paymentCommand.userId(),
+                orderKey,
+                paymentCommand.totalPrice()
         );
     }
 
@@ -59,6 +62,11 @@ public class PaymentEntity extends BaseEntity {
         if(transaction.status().equals(State.SUCCESS.name())) {
             this.state = State.SUCCESS;
         }
+        return this;
+    }
+
+    public PaymentEntity fail() {
+        this.state = State.FAILED;
         return this;
     }
 

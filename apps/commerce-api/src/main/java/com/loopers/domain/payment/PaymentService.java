@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
@@ -24,7 +25,7 @@ public class PaymentService {
     }
 
     @Transactional
-    public PaymentEntity pay(PaymentCommand.Transaction command) {
+    public PaymentEntity transact(PaymentCommand.Transact command) {
         PaymentInfo.Order orderInfo = paymentGateway.findOrder(command.userId(), command.orderKey()).orElseThrow(() -> new CoreException(
                 ErrorType.NOT_FOUND, "결제 정보를 찾을 수 없습니다. userId: " + command.userId() + ", orderId: " + command.orderId()
         ));
@@ -36,18 +37,12 @@ public class PaymentService {
     }
 
     public void request(PaymentCommand.Request requestCommand) {
-        log.info("PaymentService.request 시작 - userId: {}, orderId: {}", requestCommand.userId(), requestCommand.orderId());
-        
         UserCardEntity cardEntity = userCardRepository.findByUserId(requestCommand.userId()).orElseThrow(() -> new CoreException(
                 ErrorType.BAD_REQUEST, "사용자의 카드 정보를 찾을 수 없습니다. userId: " + requestCommand.userId())
         );
-        log.info("사용자 카드 정보 조회 성공 - cardType: {}, cardNumber: {}", cardEntity.getCardType(), cardEntity.getCardNumber());
-        
         PaymentEntity payment = paymentRepository.findByOrderId(requestCommand.orderId()).orElseThrow(() -> new CoreException(
                 ErrorType.NOT_FOUND, "결제 주문을 찾을 수 없습니다. orderId: " + requestCommand.orderId())
         );
-        log.info("결제 주문 정보 조회 성공 - orderKey: {}, amount: {}", payment.getOrderKey(), payment.getAmount());
-
         PaymentStatement.Request requestStatement = new PaymentStatement.Request(
                 payment.getOrderKey(),
                 payment.getUserId(),
@@ -55,36 +50,31 @@ public class PaymentService {
                 cardEntity.getCardNumber(),
                 cardEntity.getCardType()
         );
-        log.info("PG 결제 요청 준비 완료 - orderKey: {}, userId: {}, amount: {}, cardType: {}", 
-                requestStatement.orderKey(), requestStatement.userId(), requestStatement.totalPrice(), requestStatement.cardType());
-        
         try{
-            log.info("PG 결제 요청 시작");
             PaymentInfo.Transaction result = paymentGateway.request(requestStatement);
-            log.info("PG 결제 요청 성공 - transactionKey: {}, status: {}, reason: {}", 
-                    result.transactionKey(), result.status(), result.reason());
-            
-            PaymentCommand.UpdateTransaction updateCommand = PaymentCommand.UpdateTransaction
-                    .from(result, requestCommand.userId(), payment.getId());
-            log.info("UpdateTransaction 이벤트 발행 - paymentId: {}, transactionKey: {}", 
-                    updateCommand.paymentId(), updateCommand.transactionKey());
-            
-            eventPublisher.publishEvent(updateCommand);
-            log.info("UpdateTransaction 이벤트 발행 완료");
+            PaymentEvent.Pending pendingEvent = new PaymentEvent.Pending(
+                    result,
+                    requestCommand.userId(),
+                    requestCommand.orderId(),
+                    payment.getId()
+            );
+            eventPublisher.publishEvent(pendingEvent);
         } catch (Exception e) {
-            PaymentCommand.Cancel cancelCommand = new PaymentCommand.Cancel(requestCommand.orderId());
-            eventPublisher.publishEvent(cancelCommand);
             log.error("PG 결제 요청 실패", e);
             log.error("예외 상세: {}", e.toString());
             log.error("예외 메시지: {}", e.getMessage());
+            PaymentEvent.Failed failedEvent = new PaymentEvent.Failed(requestCommand.orderId());
+            eventPublisher.publishEvent(failedEvent);
         }
     }
 
+    @Transactional
     public UserCardEntity registerCard(UserCardCommand.Register command) {
         UserCardEntity userCardEntity = command.toEntity();
         return userCardRepository.save(userCardEntity);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public PaymentEntity register(PaymentCommand.RegisterOrder paymentCommand) {
         PaymentEntity paymentEntity = PaymentEntity.from(paymentCommand);
         return paymentRepository.save(paymentEntity);
@@ -95,10 +85,26 @@ public class PaymentService {
         PaymentEntity payment = paymentRepository.findById(command.paymentId())
                 .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "결제 정보를 찾을 수 없습니다. paymentId: " + command.paymentId()));
         payment.updateTransaction(command);
+        if(payment.getState().equals(PaymentEntity.State.SUCCESS)){
+            PaymentEvent.Success event = PaymentEvent.Success.from(payment);
+            eventPublisher.publishEvent(event);
+        }
         return paymentRepository.save(payment);
     }
 
+    @Transactional(readOnly = true)
     public Optional<PaymentEntity> findByOrderKey(String orderKey) {
         return paymentRepository.findByOrderKey(orderKey);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public PaymentEntity updateState(PaymentCommand.Fail failCommand) {
+        PaymentEntity payment = paymentRepository.findByOrderId(failCommand.orderId()).orElseThrow(() -> new CoreException(
+                ErrorType.NOT_FOUND, "결제 주문을 찾을 수 없습니다. orderId: " + failCommand.orderId()
+        ));
+        payment.fail();
+        PaymentEvent.Failed failedEvent = new PaymentEvent.Failed(failCommand.orderId());
+        eventPublisher.publishEvent(failedEvent);
+        return paymentRepository.save(payment);
     }
 }
