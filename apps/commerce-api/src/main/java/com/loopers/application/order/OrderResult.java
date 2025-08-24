@@ -12,14 +12,16 @@ public class OrderResult {
         Long orderId,
         Long userId,
         String orderDate,
-        long totalPrice
+        long totalPrice,
+        String state
     ) {
         public static Summary from(OrderEntity order) {
             return new Summary(
                 order.getId(),
                 order.getUserId(),
                 order.getCreatedAt().toString(),
-                order.getTotalPrice()
+                order.getTotalPrice(),
+                order.getState().name()
             );
         }
     }
@@ -29,6 +31,7 @@ public class OrderResult {
         Long userId,
         String orderDate,
         long totalPrice,
+        String state,
         List<Item> items,
         List<Coupon> coupons
     ) {
@@ -57,6 +60,7 @@ public class OrderResult {
                 order.getUserId(),
                 order.getCreatedAt().toString(),
                 order.getTotalPrice(),
+                order.getState().name(),
                 itemInfos,
                 coupons
             );

@@ -26,45 +26,47 @@ WHERE p.id = :id
 """)
     Optional<ProductInfo.ProductWithSignal> findWithSignal(Long id);
 
+    @Query(nativeQuery = true, value = """
+WITH
+    hot AS (
+        SELECT ls.target_id, ls.like_count
+        FROM like_summary ls FORCE INDEX (idx_ls_type_like_tid)
+        LEFT JOIN product p FORCE INDEX (idx_product_state_brand_id)
+            ON p.id = ls.target_id
+        WHERE ls.target_type = 'PRODUCT'
+            AND p.state = 'OPEN'
+        ORDER BY ls.like_count DESC, ls.target_id
+        LIMIT :#{#pageable.pageSize + #pageable.offset}
+    ),
+    cold AS (
+        SELECT p.id
+        FROM product p FORCE INDEX (idx_product_state_brand_id)
+        LEFT JOIN like_summary ls
+            ON ls.target_id = p.id AND ls.target_type = 'PRODUCT'
+        WHERE p.state = 'OPEN'
+            AND ls.target_id IS NULL
+        ORDER BY p.id
+        LIMIT :#{#pageable.pageSize + #pageable.offset}
+        )
+SELECT
+    u.id, p.brand_id, p.created_at, p.name, p.price,
+    p.released_at, p.state, p.stock, p.updated_at, u.like_count
+FROM product p
+INNER JOIN (
+    SELECT 0 b, h.target_id id, h.like_count FROM hot h
+    UNION ALL
+    SELECT 1 b, c.id, 0 FROM cold c
+) u ON p.id = u.id
+ORDER BY u.b, u.like_count DESC, p.id
+""")
+    List<ProductWithSignalRow> findAllWithSignalOrderByLikeCountDesc(Pageable pageable);
+
     @Query("""
 SELECT new com.loopers.domain.product.ProductInfo$ProductWithSignal(p, ls.likeCount)
 FROM ProductEntity p
 LEFT JOIN LikeSummaryEntity ls ON p.id = ls.targetId AND ls.targetType = 'PRODUCT'
 WHERE p.id IN :ids""")
     List<ProductInfo.ProductWithSignal> findAllWithSignal(List<Long> ids);
-
-    @Query(nativeQuery = true, value = """
-WITH
-    hot AS (
-        SELECT ls.target_id, ls.like_count
-        FROM like_summary ls FORCE INDEX (idx_ls_type_like_tid)
-                 JOIN product p FORCE INDEX (idx_product_state_brand_id)
-                      ON p.id = ls.target_id
-        WHERE ls.target_type = 'PRODUCT'
-          AND p.state = 'OPEN'
-        ORDER BY ls.like_count DESC, ls.target_id
-        LIMIT :#{#pageable.pageSize} OFFSET :#{#pageable.offset}
-    ),
-    cold AS (
-        SELECT p.id
-        FROM product p FORCE INDEX (idx_product_state_brand_id)
-                 LEFT JOIN like_summary ls
-                           ON ls.target_id = p.id AND ls.target_type = 'PRODUCT'
-        WHERE p.state = 'OPEN'
-          AND ls.target_id IS NULL
-        ORDER BY p.id
-        LIMIT :#{#pageable.pageSize} OFFSET :#{#pageable.offset}
-        )
-SELECT
-    u.id, p.brand_id, p.created_at, p.name, p.price,
-    p.released_at, p.state, p.stock, p.updated_at, u.like_count
-    FROM (SELECT 0 b, h.target_id id, h.like_count FROM hot h
-    UNION ALL
-    SELECT 1 b, c.id, NULL FROM cold c) u
-    JOIN product p ON p.id = u.id
-ORDER BY u.b, u.like_count DESC, p.id
-""")
-    List<ProductWithSignalRow> findAllWithSignalOrderByLikeCountDesc(Pageable pageable);
 
     @Query("""
 SELECT new com.loopers.domain.product.ProductInfo$ProductWithSignal(p, ls.likeCount)

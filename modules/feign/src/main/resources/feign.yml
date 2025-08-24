@@ -1,0 +1,25 @@
+feign:
+  httpclient:
+    enabled: true
+  client:
+    config:
+      default:
+        connectTimeout: 1000
+        readTimeout: 3000
+        loggerLevel: FULL
+  compression:
+    request:
+      enabled: true # 요청 압축
+      mime-types: application/json,application/xml,text/plain
+      min-request-size: 1024
+    response:
+      enabled: true # 압축 응답 받아줌
+
+---
+spring.config.activate.on-profile: prd
+
+feign:
+  client:
+    config:
+      default:
+        loggerLevel: BASIC, HEADER

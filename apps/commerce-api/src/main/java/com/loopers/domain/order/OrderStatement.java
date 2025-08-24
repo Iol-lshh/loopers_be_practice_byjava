@@ -8,8 +8,13 @@ public record OrderStatement(
     public interface Criterion{}
 
     public record UserId(Long userId) implements Criterion {}
+    public record OrderKey(String orderId) implements Criterion {}
 
     public static OrderStatement userId(Long userId) {
         return new OrderStatement(List.of(new UserId(userId)));
+    }
+
+    public static OrderStatement orderKey(String orderKey) {
+        return new OrderStatement(List.of(new OrderKey(orderKey)));
     }
 }

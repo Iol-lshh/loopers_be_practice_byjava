@@ -17,6 +17,19 @@ const users = userLines
     };
   });
 
+// 1-1. user card 데이터 생성
+const userCards = users.map((user, index) => {
+    // xxxx-xxxx-xxxx-xxxx 형식의 카드 번호 생성
+  const cardNumber = Math.floor(Math.random() * 10000000000000000).toString().padStart(16, '0')
+      .replace(/(\d{4})(?=\d)/g, '$1-');
+  const cardType = Math.random() < 0.5 ? 'SAMSUNG' : 'HYUNDAI';
+    return {
+        userId: index + 1, // 사용자 ID는 1부터 시작
+        cardNumber: cardNumber,
+        cardType: cardType,
+    }
+}).filter((_, index) => index < 100); // 100개만 사용
+
 // 2. 브랜드 샘플 데이터 로드 (CSV 파싱)
 const brandCsv = fs.readFileSync(path.join(__dirname, '../data/brand_sample_unique.csv'), 'utf8');
 const brandLines = brandCsv.split('\n').slice(1); // 헤더 제거
@@ -56,6 +69,7 @@ sqlContent += 'SET FOREIGN_KEY_CHECKS = 0;\n';
 sqlContent += 'TRUNCATE TABLE product;\n';
 sqlContent += 'TRUNCATE TABLE brand;\n';
 sqlContent += 'TRUNCATE TABLE member;\n';
+sqlContent += 'TRUNCATE TABLE user_card;\n';
 sqlContent += 'SET FOREIGN_KEY_CHECKS = 1;\n\n';
 
 // 사용자 INSERT
@@ -73,6 +87,14 @@ const userValues = users.map((user, index) => {
   return sb;
 }).join(',\n');
 sqlContent += userValues + ';\n\n';
+
+// 사용자 카드 INSERT
+sqlContent += '-- 사용자 카드 데이터\n';
+sqlContent += 'INSERT INTO user_card (user_id, card_number, card_type, created_at, updated_at) VALUES\n';
+const userCardValues = userCards.map(card =>
+  `(${card.userId}, '${card.cardNumber}', '${card.cardType}', NOW(), NOW())`
+).join(',\n');
+sqlContent += userCardValues + ';\n\n';
 
 // 브랜드 INSERT
 sqlContent += '-- 브랜드 데이터\n';

@@ -9,6 +9,7 @@ public class OrderV1Dto {
     public static class Request{
         public record Order(
                 Long userId,
+                String paymentType,
                 List<Item> items,
                 List<Long> coupons
         ) {
@@ -18,7 +19,7 @@ public class OrderV1Dto {
                                 item.productId(),
                                 item.quantity()
                         )).toList();
-                return new OrderCriteria.Order(userId, items, coupons);
+                return new OrderCriteria.Order(userId, paymentType, items, coupons);
             }
         }
 
@@ -34,14 +35,16 @@ public class OrderV1Dto {
                               Long orderId,
                               Long userId,
                               String orderDate,
-                              long totalPrice
+                              long totalPrice,
+                                String state
         ) {
             public static Summary from(OrderResult.Summary order) {
                 return new Summary(
                         order.orderId(),
                         order.userId(),
                         order.orderDate(),
-                        order.totalPrice()
+                        order.totalPrice(),
+                        order.state()
                 );
             }
 
@@ -57,6 +60,7 @@ public class OrderV1Dto {
                 Long userId,
                 String orderDate,
                 long totalPrice,
+                String state,
                 List<Item> items,
                 List<Coupon> coupons
         ) {
@@ -77,6 +81,7 @@ public class OrderV1Dto {
                         order.userId(),
                         order.orderDate(),
                         order.totalPrice(),
+                        order.state(),
                         itemInfos,
                         couponInfos
                 );

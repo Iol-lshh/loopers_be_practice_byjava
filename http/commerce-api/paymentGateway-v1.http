@@ -1,0 +1,16 @@
+### 주문 요청
+POST {{commerce-api}}/api/v1/orders
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "paymentType": "PG",
+  "items": [
+    {
+      "productId": 461,
+      "quantity": 1
+    }
+  ],
+  "coupons": []
+}
+

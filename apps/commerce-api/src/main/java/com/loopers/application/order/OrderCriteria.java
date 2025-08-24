@@ -16,6 +16,7 @@ public class OrderCriteria {
 
     public record Order(
             Long userId,
+            String paymentType,
             List<Item> orderItems,
             List<Long> orderCouponIds
     ) {
@@ -31,7 +32,7 @@ public class OrderCriteria {
                             couponId,
                             couponValueMap.getOrDefault(couponId, 0L)
                     )).toList();
-            return new OrderCommand.Order(userId, items, coupons);
+            return new OrderCommand.Order(userId, paymentType, items, coupons);
         }
 
         public Map<Long, Long> getOrderItemMap() {

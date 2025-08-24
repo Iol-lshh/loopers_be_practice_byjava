@@ -8,7 +8,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import static com.loopers.domain.user.UserValidator.*;
 
 @Getter
@@ -68,4 +67,5 @@ public class UserEntity extends BaseEntity {
             };
         }
     }
+
 }

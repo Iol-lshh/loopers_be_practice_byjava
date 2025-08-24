@@ -7,12 +7,14 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Getter
 @Entity
 @Table(name = "orders")
@@ -22,23 +24,26 @@ public class OrderEntity extends BaseEntity {
     private State state;
     @Version
     private Long version = 0L;
+    @Enumerated(EnumType.STRING)
+    private PaymentType paymentType;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "order")
     private List<OrderItemEntity> orderItems;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "order")
     private List<OrderCouponEntity> orderCoupons;
 
-    private OrderEntity(Long userId) {
+    private OrderEntity(Long userId, PaymentType paymentType) {
         super();
         this.userId = userId;
         this.state = State.PENDING;
+        this.paymentType = paymentType;
         this.orderItems = new ArrayList<>();
         this.orderCoupons = new ArrayList<>();
     }
 
     public static OrderEntity from(OrderCommand.Order orderCommand) {
-        OrderEntity order = new OrderEntity(orderCommand.userId());
+        OrderEntity order = new OrderEntity(orderCommand.userId(), PaymentType.of(orderCommand.paymentType()));
         order.addOrderItemsByCommand(orderCommand.orderItems());
         order.addOrderCoupons(orderCommand.orderCoupons());
         return order;
@@ -72,7 +77,9 @@ public class OrderEntity extends BaseEntity {
     }
 
     public void cancel() {
+        log.info("OrderEntity.cancel 시작 - orderId: {}, 현재 상태: {}", this.getId(), this.state);
         this.state = State.CANCELLED;
+        log.info("OrderEntity.cancel 완료 - orderId: {}, 변경된 상태: {}", this.getId(), this.state);
     }
 
     public List<Long> getOrderedProductIds() {
@@ -116,6 +123,32 @@ public class OrderEntity extends BaseEntity {
 
         public String getDescription() {
             return description;
+        }
+
+        public String getValue() {
+            return this.name();
+        }
+    }
+
+    @Getter
+    public enum PaymentType {
+        POINT("POINT"),
+        PG("PG")
+        ;
+
+        private final String value;
+
+        PaymentType(String value) {
+            this.value = value;
+        }
+
+        public static PaymentType of(String type) {
+            for (PaymentType t : PaymentType.values()) {
+                if (t.value.equals(type)) {
+                    return t;
+                }
+            }
+            throw new CoreException(ErrorType.BAD_REQUEST, "존재하지 않는 타입: " + type);
         }
     }
 }

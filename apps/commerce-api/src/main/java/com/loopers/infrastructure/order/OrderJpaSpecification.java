@@ -13,7 +13,10 @@ public class OrderJpaSpecification {
                 if (criterion instanceof OrderStatement.UserId(Long userId)) {
                     predicate = criteriaBuilder.and(predicate,
                             criteriaBuilder.equal(root.get("userId"), userId));
-
+                }
+                if (criterion instanceof OrderStatement.OrderKey(String orderKey)) {
+                    predicate = criteriaBuilder.and(predicate,
+                            criteriaBuilder.equal(root.get("orderKey"), orderKey));
                 }
             }
 

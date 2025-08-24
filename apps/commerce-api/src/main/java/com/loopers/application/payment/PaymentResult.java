@@ -1,30 +1,23 @@
 package com.loopers.application.payment;
 
-import com.loopers.domain.payment.PaymentEntity;
+import com.loopers.domain.order.OrderEntity;
 
 public class PaymentResult {
     public record Summary(
-            Long paymentId,
             Long userId,
             Long orderId,
+            Long totalAmount,
             String paymentType,
-            Long totalAmount
+            String state
     ){
-        public static Summary from(PaymentEntity payment) {
+        public static Summary from(OrderEntity order) {
             return new Summary(
-                    payment.getId(),
-                    payment.getUserId(),
-                    payment.getOrderId(),
-                    payment.getType().name(),
-                    payment.getAmount()
+                    order.getUserId(),
+                    order.getId(),
+                    order.getTotalPrice(),
+                    order.getPaymentType().getValue(),
+                    order.getState().getValue()
             );
         }
-    }
-
-    public record Discount(
-            Long id,
-            String type,
-            Long amount
-    ){
     }
 }

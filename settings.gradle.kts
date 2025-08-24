@@ -2,11 +2,15 @@ rootProject.name = "loopers-java-spring-template"
 
 include(
     ":apps:commerce-api",
+    ":apps:pg-simulator",
     ":modules:jpa",
     ":modules:redis",
+    ":modules:feign",
+    ":modules:resilience",
     ":supports:jackson",
     ":supports:logging",
     ":supports:monitoring",
+    ":supports:uuid",
 )
 
 // configurations
@@ -29,5 +33,3 @@ pluginManagement {
         }
     }
 }
-include("modules:redis")
-findProject(":modules:redis")?.name = "redis"
