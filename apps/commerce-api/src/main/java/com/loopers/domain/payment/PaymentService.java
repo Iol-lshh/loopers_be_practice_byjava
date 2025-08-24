@@ -59,7 +59,7 @@ public class PaymentService {
                     payment.getId()
             );
             eventPublisher.publishEvent(pendingEvent);
-        } catch (Exception e) {
+        } catch (CoreException e) {
             log.error("PG 결제 요청 실패", e);
             log.error("예외 상세: {}", e.toString());
             log.error("예외 메시지: {}", e.getMessage());

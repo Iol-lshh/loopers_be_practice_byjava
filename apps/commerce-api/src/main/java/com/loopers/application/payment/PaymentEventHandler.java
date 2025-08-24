@@ -25,7 +25,6 @@ public class PaymentEventHandler {
     public void handle(OrderEvent.Registered event) {
         log.info("OrderEventHandler.handle 시작 - userId: {}, orderId: {}, totalPrice: {}, paymentType: {}",
                 event.userId(), event.orderId(), event.totalPrice(), event.paymentType());
-
         try {
             OrderEntity.PaymentType paymentType = OrderEntity.PaymentType.of(event.paymentType());
             log.info("결제 방식 선택: {}", paymentType.name());
@@ -49,7 +48,6 @@ public class PaymentEventHandler {
     public void handle(PaymentEvent.Pending event) {
         log.info("PaymentEventHandler.handle 시작 - paymentId: {}, transactionKey: {}, status: {}",
                 event.paymentId(), event.transactionInfo().transactionKey(), "PENDING");
-
         PaymentCommand.UpdateTransaction command = PaymentCommand.UpdateTransaction
                 .from(event.transactionInfo(), event.userId(), event.paymentId());
         paymentService.update(command);

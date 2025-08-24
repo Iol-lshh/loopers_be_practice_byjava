@@ -33,7 +33,7 @@ public class LikeCounterTest {
     private DatabaseCleanUp databaseCleanUp;
     
     @MockitoSpyBean
-    private LikeCounter likeCounter;
+    private LikeService likeService;
 
     @AfterEach
     void tearDown() {
@@ -76,7 +76,7 @@ public class LikeCounterTest {
                 executor.submit(() -> {
                     try {
                         log.info("스레드 {}: 상품 {}에 좋아요 등록 시작", threadIndex, product.getId());
-                        likeCounter.increaseLikeCount(product.getId(), LikeEntity.TargetType.PRODUCT);
+                        likeService.increaseLikeCount(product.getId(), LikeEntity.TargetType.PRODUCT);
                         log.info("스레드 {}: 상품 {}에 좋아요 등록 완료", threadIndex, product.getId());
                     } catch (Exception e) {
                         log.error("스레드 {}: 좋아요 등록 실패", threadIndex, e);
@@ -93,7 +93,7 @@ public class LikeCounterTest {
             ArgumentCaptor<Long> targetIdCaptor = ArgumentCaptor.forClass(Long.class);
             ArgumentCaptor<LikeEntity.TargetType> targetTypeCaptor = ArgumentCaptor.forClass(LikeEntity.TargetType.class);
 
-            verify(likeCounter, atLeast(threadCount)).increaseLikeCount(targetIdCaptor.capture(), targetTypeCaptor.capture());
+            verify(likeService, atLeast(threadCount)).increaseLikeCount(targetIdCaptor.capture(), targetTypeCaptor.capture());
             List<Long> capturedTargetIds = targetIdCaptor.getAllValues();
 
             log.info("=== 테스트 결과 ===");
