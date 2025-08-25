@@ -1,5 +1,7 @@
 package com.loopers.domain.like;
 
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
@@ -31,9 +33,15 @@ public class LikeService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public LikeSummaryEntity register(LikeCommand.CreateSummary command) {
+        LikeSummaryEntity summary = LikeSummaryEntity.of(command.targetId(), command.targetType());
+        return likeRepository.save(summary);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void increaseLikeCount(Long targetId, LikeEntity.TargetType targetType) {
         LikeSummaryEntity summary = likeRepository.findSummaryWithLock(targetId, targetType)
-                .orElseGet(() -> LikeSummaryEntity.of(targetId, targetType));
+                .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "좋아요 요약 정보를 찾을 수 없습니다."));
         summary.increaseCount();
         likeRepository.save(summary);
     }
@@ -41,7 +49,7 @@ public class LikeService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void decreaseLikeCount(Long targetId, LikeEntity.TargetType targetType) {
         LikeSummaryEntity summary = likeRepository.findSummaryWithLock(targetId, targetType)
-                .orElseThrow(() -> new IllegalArgumentException("좋아요 요약 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "좋아요 요약 정보를 찾을 수 없습니다."));
         summary.decreaseCount();
         likeRepository.save(summary);
     }

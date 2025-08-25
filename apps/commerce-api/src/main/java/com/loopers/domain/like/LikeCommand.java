@@ -6,4 +6,11 @@ public class LikeCommand {
         Long targetId
     ) {
     }
+
+    public record CreateSummary (
+        Long userId,
+        Long targetId,
+        LikeEntity.TargetType targetType
+    ) {
+    }
 }

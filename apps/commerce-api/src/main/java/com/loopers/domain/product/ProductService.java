@@ -3,6 +3,7 @@ package com.loopers.domain.product;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,11 +19,18 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductReader productReader;
     private final ProductCacheRepository productCacheRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public ProductEntity register(ProductCommand.Register command) {
         ProductEntity product = ProductEntity.from(command);
-        return productRepository.save(product);
+        try{
+            product = productRepository.save(product);
+            return product;
+        } finally {
+            var event = ProductEvent.Registered.from(product);
+            eventPublisher.publishEvent(event);
+        }
     }
 
     @Transactional(readOnly = true)
