@@ -2,6 +2,7 @@ package com.loopers.application.payment;
 
 import com.loopers.domain.order.*;
 import com.loopers.domain.payment.*;
+import com.loopers.support.error.CoreException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -33,12 +34,10 @@ public class PaymentEventHandler {
             var paymentCommand = new PaymentCommand.RegisterOrder(event.userId(), event.orderId(), event.totalPrice());
             paymentService.register(paymentCommand);
             paymentWay.request(event.userId(), event.orderId(), event.totalPrice());
-        } catch (Exception e) {
+        } catch (CoreException e) {
             log.error("결제 요청 처리 실패", e);
             PaymentCommand.Fail failCommand = new PaymentCommand.Fail(event.orderId());
             paymentService.updateState(failCommand);
-            PaymentEvent.Failed failedEvent = new PaymentEvent.Failed(event.orderId());
-            eventPublisher.publishEvent(failedEvent);
             throw e;
         }
     }
@@ -46,10 +45,17 @@ public class PaymentEventHandler {
     @Async
     @EventListener
     public void handle(PaymentEvent.Pending event) {
-        log.info("PaymentEventHandler.handle 시작 - paymentId: {}, transactionKey: {}, status: {}",
-                event.paymentId(), event.transactionInfo().transactionKey(), "PENDING");
-        PaymentCommand.UpdateTransaction command = PaymentCommand.UpdateTransaction
-                .from(event.transactionInfo(), event.userId(), event.paymentId());
-        paymentService.update(command);
+        try{
+            log.info("PaymentEventHandler.handle 시작 - paymentId: {}, transactionKey: {}, status: {}",
+                    event.paymentId(), event.transactionInfo().transactionKey(), "PENDING");
+            PaymentCommand.UpdateTransaction command = PaymentCommand.UpdateTransaction
+                    .from(event.transactionInfo(), event.userId(), event.paymentId());
+            paymentService.update(command);
+        } catch (CoreException e) {
+            log.error("결제 진행중 상태 업데이트 실패", e);
+            PaymentCommand.Fail failCommand = new PaymentCommand.Fail(event.orderId());
+            paymentService.updateState(failCommand);
+            throw e;
+        }
     }
 }
