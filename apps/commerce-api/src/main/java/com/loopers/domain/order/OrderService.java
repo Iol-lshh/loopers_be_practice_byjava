@@ -5,7 +5,6 @@ import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -53,7 +52,7 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public OrderEntity cancel(OrderCommand.Cancel command) {
         OrderEntity order = orderRepository.find(command.orderId()).orElseThrow(() -> new CoreException(
                 ErrorType.NOT_FOUND, "주문을 찾을 수 없습니다.: " + command.orderId()));

@@ -9,9 +9,11 @@ import com.loopers.domain.user.UserService;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class PaymentFacade {
@@ -19,6 +21,7 @@ public class PaymentFacade {
     private final OrderService orderService;
     private final PointService pointService;
     private final PaymentService paymentService;
+    private final OrderPaymentSelector orderPaymentSelector;
 
     @Transactional
     public PaymentResult.Summary pay(PaymentCriteria.Point criteria) {
@@ -47,5 +50,36 @@ public class PaymentFacade {
         OrderCommand.Complete updateCommand = criteria.toCommand(payment.getOrderId());
         OrderEntity orderEntity = orderService.complete(updateCommand);
         return PaymentResult.Summary.from(orderEntity);
+    }
+
+    public void request(PaymentCriteria.Request criteria) {
+        try {
+            OrderEntity.PaymentType paymentType = OrderEntity.PaymentType.of(criteria.paymentType());
+            log.info("결제 방식 선택: {}", paymentType.name());
+
+            var paymentCommand = new PaymentCommand.RegisterOrder(criteria.userId(), criteria.orderId(), criteria.totalPrice());
+            paymentService.register(paymentCommand);
+
+            OrderPaymentWay paymentWay = orderPaymentSelector.get(paymentType);
+            paymentWay.request(criteria.userId(), criteria.orderId(), criteria.totalPrice());
+        } catch (CoreException e) {
+            log.error("결제 요청 처리 실패", e);
+            PaymentCommand.Fail failCommand = new PaymentCommand.Fail(criteria.orderId());
+            paymentService.updateState(failCommand);
+            throw e;
+        }
+    }
+
+    public void update(PaymentCriteria.Update criteria) {
+        try{
+            PaymentCommand.UpdateTransaction command = PaymentCommand.UpdateTransaction
+                    .from(criteria.transactionInfo(), criteria.userId(), criteria.paymentId());
+            paymentService.update(command);
+        } catch (CoreException e) {
+            log.error("결제 진행중 상태 업데이트 실패", e);
+            PaymentCommand.Fail failCommand = new PaymentCommand.Fail(criteria.orderId());
+            paymentService.updateState(failCommand);
+            throw e;
+        }
     }
 }

@@ -63,7 +63,7 @@ public class PaymentService {
             log.error("PG 결제 요청 실패", e);
             log.error("예외 상세: {}", e.toString());
             log.error("예외 메시지: {}", e.getMessage());
-            PaymentEvent.Failed failedEvent = new PaymentEvent.Failed(requestCommand.orderId());
+            PaymentEvent.Pg.Failed failedEvent = new PaymentEvent.Pg.Failed(requestCommand.orderId());
             eventPublisher.publishEvent(failedEvent);
         }
     }
@@ -80,7 +80,7 @@ public class PaymentService {
         return paymentRepository.save(paymentEntity);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public PaymentEntity update(PaymentCommand.UpdateTransaction command) {
         PaymentEntity payment = paymentRepository.findById(command.paymentId())
                 .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "결제 정보를 찾을 수 없습니다. paymentId: " + command.paymentId()));

@@ -5,7 +5,6 @@ import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -32,13 +31,13 @@ public class LikeService {
         return likeRepository.save(like);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public LikeSummaryEntity register(LikeCommand.CreateSummary command) {
         LikeSummaryEntity summary = LikeSummaryEntity.of(command.targetId(), command.targetType());
         return likeRepository.save(summary);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void increaseLikeCount(Long targetId, LikeEntity.TargetType targetType) {
         LikeSummaryEntity summary = likeRepository.findSummaryWithLock(targetId, targetType)
                 .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "좋아요 요약 정보를 찾을 수 없습니다."));
@@ -46,7 +45,7 @@ public class LikeService {
         likeRepository.save(summary);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void decreaseLikeCount(Long targetId, LikeEntity.TargetType targetType) {
         LikeSummaryEntity summary = likeRepository.findSummaryWithLock(targetId, targetType)
                 .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "좋아요 요약 정보를 찾을 수 없습니다."));

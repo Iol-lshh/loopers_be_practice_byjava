@@ -29,5 +29,10 @@ public class PaymentEvent {
             Long paymentId
         ){
         }
+
+        public record Failed(
+                Long orderId
+        ) {
+        }
     }
 }
