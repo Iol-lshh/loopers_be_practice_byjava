@@ -310,7 +310,7 @@ public class PaymentUsecaseIntegrationTest {
                             "결제 대기중"
                     ).getInfo());
             
-            // PaymentGateway.findOrder() 메서드에 대한 Mock 설정 추가
+            // Pg.findOrder() 메서드에 대한 Mock 설정 추가
             when(mockPaymentGateway.findOrder(anyLong(), anyString()))
                     .thenReturn(Optional.of(new PaymentInfo.Order(
                             "1",

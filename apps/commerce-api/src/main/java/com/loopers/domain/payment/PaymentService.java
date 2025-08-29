@@ -52,7 +52,7 @@ public class PaymentService {
         );
         try{
             PaymentInfo.Transaction result = paymentGateway.request(requestStatement);
-            PaymentEvent.Pending pendingEvent = new PaymentEvent.Pending(
+            PaymentEvent.Pg.Pending pendingEvent = new PaymentEvent.Pg.Pending(
                     result,
                     requestCommand.userId(),
                     requestCommand.orderId(),

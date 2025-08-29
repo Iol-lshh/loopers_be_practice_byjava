@@ -5,13 +5,6 @@ public class PaymentEvent {
         Long orderId
     ) {
     }
-    public record Pending(
-        PaymentInfo.Transaction transactionInfo,
-        Long userId,
-        Long orderId,
-        Long paymentId
-    ){
-    }
 
     public record Success(
         Long userId,
@@ -24,6 +17,17 @@ public class PaymentEvent {
                 command.getOrderId(),
                 command.getAmount()
             );
+        }
+    }
+
+    public static class Pg {
+
+        public record Pending(
+            PaymentInfo.Transaction transactionInfo,
+            Long userId,
+            Long orderId,
+            Long paymentId
+        ){
         }
     }
 }

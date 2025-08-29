@@ -44,7 +44,7 @@ public class PaymentEventHandler {
 
     @Async
     @EventListener
-    public void handle(PaymentEvent.Pending event) {
+    public void handle(PaymentEvent.Pg.Pending event) {
         try{
             log.info("PaymentEventHandler.handle 시작 - paymentId: {}, transactionKey: {}, status: {}",
                     event.paymentId(), event.transactionInfo().transactionKey(), "PENDING");
