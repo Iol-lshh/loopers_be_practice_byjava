@@ -10,8 +10,6 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Getter
 @Entity
 @Table(name = "payment_transaction")
@@ -20,6 +18,8 @@ public class PaymentTransactionEntity extends BaseEntity {
     private String transactionKey;
     private String status;
     private String reason;
+    private Long amount;
+    private Type type;
 
     @ManyToOne
     @JoinColumn(name = "payment_id")
@@ -27,7 +27,7 @@ public class PaymentTransactionEntity extends BaseEntity {
 
     public PaymentTransactionEntity(PaymentEntity paymentOrder, String transactionKey, String status, String reason) {
         if(transactionKey == null || transactionKey.isBlank()) {
-            throw new CoreException(ErrorType.BAD_REQUEST, "Transaction key cannot be null or blank");
+            throw new CoreException(ErrorType.BAD_REQUEST, "Transact key cannot be null or blank");
         }
         if(status == null || status.isBlank()) {
             throw new CoreException(ErrorType.BAD_REQUEST, "Status cannot be null or blank");
@@ -49,10 +49,15 @@ public class PaymentTransactionEntity extends BaseEntity {
 
     public PaymentTransactionEntity update(PaymentCommand.UpdateTransaction transaction) {
         if (transaction == null) {
-            throw new CoreException(ErrorType.BAD_REQUEST, "Transaction cannot be null");
+            throw new CoreException(ErrorType.BAD_REQUEST, "Transact cannot be null");
         }
         this.status = transaction.status();
         this.reason = transaction.reason();
         return this;
+    }
+
+    public enum Type {
+        POINT,
+        PG
     }
 }

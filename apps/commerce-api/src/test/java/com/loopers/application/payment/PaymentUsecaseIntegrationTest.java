@@ -3,10 +3,7 @@ package com.loopers.application.payment;
 import com.loopers.application.order.OrderCriteria;
 import com.loopers.application.order.OrderFacade;
 import com.loopers.application.order.OrderResult;
-import com.loopers.domain.coupon.CouponRepository;
 import com.loopers.domain.order.OrderCommand;
-import com.loopers.domain.order.OrderEntity;
-import com.loopers.domain.order.OrderRepository;
 import com.loopers.domain.payment.*;
 import com.loopers.domain.point.PointService;
 import com.loopers.domain.brand.BrandService;
@@ -50,10 +47,6 @@ import static org.mockito.Mockito.*;
 public class PaymentUsecaseIntegrationTest {
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
-    @Autowired
-    private OrderRepository orderRepository;
-    @Autowired
-    private CouponRepository couponRepository;
     @Autowired
     private PaymentService paymentService;
 
@@ -317,7 +310,7 @@ public class PaymentUsecaseIntegrationTest {
                             "결제 대기중"
                     ).getInfo());
             
-            // PaymentGateway.findOrder() 메서드에 대한 Mock 설정 추가
+            // Pg.findOrder() 메서드에 대한 Mock 설정 추가
             when(mockPaymentGateway.findOrder(anyLong(), anyString()))
                     .thenReturn(Optional.of(new PaymentInfo.Order(
                             "1",
@@ -348,6 +341,7 @@ public class PaymentUsecaseIntegrationTest {
             assertEquals("COMPLETED", result.state());
             verify(productService, times(1)).deduct(anyMap());
             verify(orderService, times(1)).register(any(OrderCommand.Order.class));
+            assertEquals(0L, productService.find(product.getId()).orElseThrow().getStock());
         }
 
         @DisplayName("결제 요청이 PG로 부터 실패되었을 때, 주문이 취소된다.")

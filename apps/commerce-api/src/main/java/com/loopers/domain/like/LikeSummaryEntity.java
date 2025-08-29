@@ -12,11 +12,11 @@ import java.io.Serializable;
 
 @Getter
 @Entity
+@IdClass(LikeSummaryEntity.LikeSummaryId.class)
 @Table(name = "like_summary", indexes = {
     @Index(name = "idx_ls_type_like_tid", columnList = "targetType, likeCount DESC, targetId"),
     @Index(name = "idx_ls_type_tid", columnList = "targetType, targetId")
 })
-@IdClass(LikeSummaryEntity.LikeSummaryId.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LikeSummaryEntity {
     @Id
@@ -27,7 +27,6 @@ public class LikeSummaryEntity {
     private LikeEntity.TargetType targetType;
     
     private Long likeCount;
-    @Version private Long version;
 
     public LikeSummaryEntity(Long targetId, LikeEntity.TargetType targetType, long likeCount) {
         if (targetId == null) {
