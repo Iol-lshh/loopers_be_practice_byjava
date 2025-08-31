@@ -5,7 +5,6 @@ import com.loopers.domain.payment.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -18,7 +17,6 @@ public class PaymentEventHandler {
     private final PaymentService paymentService;
     private final PaymentFacade paymentFacade;
 
-    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handle(OrderEvent.Registered event) {
         log.info("PaymentEventHandler OrderEvent.Registered 시작 - userId: {}, orderId: {}, totalPrice: {}, paymentType: {}",
@@ -28,7 +26,6 @@ public class PaymentEventHandler {
         paymentFacade.request(criteria);
     }
 
-    @Async
     @EventListener
     public void handle(PaymentEvent.Pg.Pending event) {
         log.info("PaymentEventHandler PaymentEvent.Pg.Pending 시작 - paymentId: {}, transactionKey: {}, status: {}",
@@ -37,7 +34,6 @@ public class PaymentEventHandler {
         paymentFacade.update(criteria);
     }
 
-    @Async
     @EventListener
     public void handle(PaymentEvent.Pg.Failed event) {
         log.info("PaymentEventHandler PaymentEvent.Pg.Failed 시작 - orderId: {}",
