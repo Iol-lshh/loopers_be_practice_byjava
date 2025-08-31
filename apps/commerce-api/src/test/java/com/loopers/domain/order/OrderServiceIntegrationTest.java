@@ -82,7 +82,7 @@ class OrderServiceIntegrationTest {
         @Test
         void completeOrder_updatesStatusToCompleted() {
             prepareUser(10000L);
-            prepareProduct(100L, 1L);
+            prepareProduct(100L, 100L);
             // given
             OrderCommand.Order orderCommand = new OrderCommand.Order(
                     1L,
@@ -94,10 +94,7 @@ class OrderServiceIntegrationTest {
 
             // when
             OrderCommand.Complete payCommand = new OrderCommand.Complete(
-                    order.getUserId(),
-                    order.getId(),
-                    order.getTotalPrice(),
-                    "POINT"
+                    order.getId()
             );
             OrderEntity completedOrder = orderService.complete(payCommand);
 
@@ -113,7 +110,7 @@ class OrderServiceIntegrationTest {
         void completeOrder_concurrencyTest() throws InterruptedException {
             // given
             prepareUser(10000L);
-            prepareProduct(100L, 1L);
+            prepareProduct(100L, 100L);
             OrderCommand.Order orderCommand = new OrderCommand.Order(
                     1L,
                     "POINT",
@@ -133,10 +130,7 @@ class OrderServiceIntegrationTest {
                 executorService.submit(() -> {
                     try {
                         OrderCommand.Complete payCommand = new OrderCommand.Complete(
-                                order.getUserId(),
-                                orderId,
-                                order.getTotalPrice(),
-                                "POINT"
+                                orderId
                         );
                         orderService.complete(payCommand);
                         completedCount.incrementAndGet();

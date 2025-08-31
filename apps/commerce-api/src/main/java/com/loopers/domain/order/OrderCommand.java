@@ -26,19 +26,13 @@ public class OrderCommand {
     }
 
     public record Complete(
-        Long userId,
-        Long orderId,
-        Long totalPrice,
-        String paymentType
+        Long orderId
     ){
     }
 
-    public record RequestPayment(
-        Long userId,
-        Long orderId,
-        Long totalPrice,
-        String paymentType
-    ) {
+    public record Cancel(
+            Long orderId
+    ){
     }
 
     public record Transaction(
@@ -52,8 +46,4 @@ public class OrderCommand {
     ) {
     }
 
-    public record Cancel(
-        Long orderId
-    ) {
-    }
 }

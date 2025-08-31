@@ -150,7 +150,7 @@ class PaymentServiceIntegrationTest {
                     .thenReturn(Optional.of(orderInfo));
 
             // when
-            PaymentCommand.Transaction transaction = new PaymentCommand.Transaction(
+            PaymentCommand.Transact transact = new PaymentCommand.Transact(
                     user.getId(),
                     order.orderId(),
                     paymentOrder.getOrderKey(),
@@ -161,7 +161,7 @@ class PaymentServiceIntegrationTest {
                     "SUCCESS",
                     "정상 승인되었습니다."
             );
-            PaymentEntity paymentEntity = paymentService.pay(transaction);
+            PaymentEntity paymentEntity = paymentService.transact(transact);
 
             // then
             assertNotNull(paymentEntity);

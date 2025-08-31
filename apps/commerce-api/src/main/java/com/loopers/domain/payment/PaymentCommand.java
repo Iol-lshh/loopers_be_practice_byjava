@@ -1,10 +1,9 @@
 package com.loopers.domain.payment;
 
 import com.loopers.application.payment.PaymentCriteria;
-import com.loopers.domain.order.OrderEntity;
 
 public class PaymentCommand {
-    public record Transaction(
+    public record Transact(
             Long userId,
             Long orderId,
             String orderKey,
@@ -15,8 +14,8 @@ public class PaymentCommand {
             String status,
             String reason
             ) {
-        public static Transaction of(PaymentCriteria.Transaction criteria, PaymentEntity payment){
-            return new Transaction(
+        public static Transact of(PaymentCriteria.Transaction criteria, PaymentEntity payment){
+            return new Transact(
                     payment.getUserId(),
                     payment.getId(),
                     criteria.orderKey(),
@@ -64,7 +63,7 @@ public class PaymentCommand {
         }
     }
 
-    public record Cancel(
+    public record Fail(
         Long orderId
     ){
     }

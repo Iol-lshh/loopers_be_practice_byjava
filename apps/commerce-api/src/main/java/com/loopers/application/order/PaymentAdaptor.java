@@ -32,26 +32,20 @@ public class PaymentAdaptor {
     @Slf4j
     @RequiredArgsConstructor
     @Component
-    public static class PGAdaptor implements OrderPaymentWay {
+    public static class PgAdaptor implements OrderPaymentWay {
 
         private final PaymentService paymentService;
 
         @Override
         public void request(Long userId, Long orderId, Long totalPrice) {
-            log.info("PGAdaptor.request 시작 - userId: {}, orderId: {}, totalPrice: {}", userId, orderId, totalPrice);
-            
-            try {
-                PaymentCommand.Request requestCommand = new PaymentCommand.Request(
-                        userId,
-                        orderId,
-                        totalPrice
-                );
-                paymentService.request(requestCommand);
-                log.info("PaymentService.request 호출 완료");
-            } catch (Exception e) {
-                log.error("PGAdaptor.request 실패", e);
-                throw e;
-            }
+            log.info("PgAdaptor.request 시작 - userId: {}, orderId: {}, totalPrice: {}", userId, orderId, totalPrice);
+            PaymentCommand.Request requestCommand = new PaymentCommand.Request(
+                    userId,
+                    orderId,
+                    totalPrice
+            );
+            paymentService.request(requestCommand);
+            log.info("PaymentService.request 호출 완료");
         }
 
         @Override

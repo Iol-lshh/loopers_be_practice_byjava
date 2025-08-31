@@ -45,9 +45,6 @@ public class LikeUsecaseIntegrationTest {
     @Autowired
     private ProductFacade productFacade;
 
-    @MockitoSpyBean
-    private LikeCounter likeCounter;
-
     @AfterEach
     void tearDown() {
         databaseCleanUp.truncateAllTables();
@@ -59,7 +56,7 @@ public class LikeUsecaseIntegrationTest {
     private ProductService productService;
     @Autowired
     private BrandService brandService;
-    @Autowired
+    @MockitoSpyBean
     private LikeService likeService;
 
     @Autowired
@@ -437,7 +434,7 @@ public class LikeUsecaseIntegrationTest {
             ArgumentCaptor<Long> targetIdCaptor = ArgumentCaptor.forClass(Long.class);
             ArgumentCaptor<LikeEntity.TargetType> targetTypeCaptor = ArgumentCaptor.forClass(LikeEntity.TargetType.class);
 
-            verify(likeCounter, atLeast(threadCount)).increaseLikeCount(targetIdCaptor.capture(), targetTypeCaptor.capture());
+            verify(likeService, atLeast(threadCount)).increaseLikeCount(targetIdCaptor.capture(), targetTypeCaptor.capture());
             List<Long> capturedTargetIds = targetIdCaptor.getAllValues();
             Set<Long> uniqueTargetIds = new HashSet<>(capturedTargetIds);
 

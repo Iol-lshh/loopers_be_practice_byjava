@@ -47,6 +47,8 @@ public class PaymentGatewayImpl implements PaymentGateway {
 
     @Override
     public PaymentInfo.Transaction request(PaymentStatement.Request requestStatement) {
+        log.info("PG 결제 진행 요청 - orderKey: {}, userId: {}, amount: {}, cardType: {}",
+                requestStatement.orderKey(), requestStatement.userId(), requestStatement.totalPrice(), requestStatement.cardType());
         PgV1Dto.Request.Transaction request = new PgV1Dto.Request.Transaction(
                 requestStatement.orderKey(),
                 requestStatement.cardType(),
@@ -56,6 +58,8 @@ public class PaymentGatewayImpl implements PaymentGateway {
         );
         try{
             var response = pgV1FeignClient.request(String.valueOf(requestStatement.userId()), request);
+            log.info("PG 결제 진행 요청 성공 - transactionKey: {}, status: {}, reason: {}",
+                    response.data().transactionKey(), response.data().status(), response.data().reason());
             return response.data().getInfo();
         } catch (CallNotPermittedException e) {
             log.error("PG request 서킷브레이커 오픈", e);
