@@ -1,14 +1,14 @@
 package com.loopers.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.*;
 import lombok.Getter;
+import org.springframework.data.domain.AfterDomainEventPublication;
+import org.springframework.data.domain.DomainEvents;
+
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * 생성/수정/삭제 정보를 자동으로 관리해준다.
@@ -69,5 +69,18 @@ public abstract class BaseEntity {
         if (this.deletedAt != null) {
             this.deletedAt = null;
         }
+    }
+
+    @Transient
+    private final List<Object> domainEvents = new ArrayList<>();
+
+    @DomainEvents
+    protected Collection<Object> domainEvents() {
+        return this.domainEvents;
+    }
+
+    @AfterDomainEventPublication
+    void clearDomainEvents() {
+        this.domainEvents.clear();
     }
 }
