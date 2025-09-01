@@ -75,7 +75,13 @@ public class ProductService {
     // ProductWithSignal 메서드들
     @Transactional(readOnly = true)
     public Optional<ProductInfo.ProductWithSignal> findWithSignal(Long id) {
-        return productReader.findWithSignal(id);
+        Optional<ProductInfo.ProductWithSignal> cached = productCacheRepository.findWithSignal(id);
+        if (cached.isPresent()) {
+            return cached;
+        }
+        Optional<ProductInfo.ProductWithSignal> mayInfo = productReader.findWithSignal(id);
+        mayInfo.ifPresent(info -> productCacheRepository.save(id, info));
+        return mayInfo;
     }
 
     @Transactional(readOnly = true)

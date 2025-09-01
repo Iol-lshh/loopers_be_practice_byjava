@@ -19,4 +19,8 @@ public class ProductCacheKeyGenerator {
 
         return keyBuilder.toString();
     }
+
+    public static String withSignalFrom(Long id) {
+        return "product_with_signal-v1:" + id;
+    }
 }

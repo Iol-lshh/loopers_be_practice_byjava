@@ -96,61 +96,87 @@ public class ProductServiceIntegrationTest {
     }
 
 
-        @DisplayName("상품 목록 조회 캐시")
-        @Nested
-        class ProductCacheTest {
-            @DisplayName("상품 목록을 조회할 때, 캐시가 적용되어 빠르게 응답한다.")
-            @Test
-            void returnCachedProductList_whenQuery() {
-                // given
-                BrandEntity preparedBrand = prepareBrand();
-                for (int i = 0; i < 20; i++) {
-                    prepareProduct(preparedBrand);
-                }
-                ProductStatement statement = ProductStatement.builder()
-                        .orderBy(new ProductStatement.CreatedAt(false))
-                        .build();
-                var list = productService.findWithSignals(statement, Pageable.ofSize(20));
-                assertEquals(20, list.size());
-                verify(productCacheRepository, times(1)).findWithSignal(any(ProductStatement.class), any(Pageable.class));
-                verify(productReader, times(1)).findWithSignals(any(ProductStatement.class), any(Pageable.class));
-                verify(productCacheRepository, times(1)).save(any(ProductStatement.class), any(Pageable.class), anyList());
-
-                // when
-                var productList = productService.findWithSignals(statement, Pageable.ofSize(20));
-
-                // then
-                assertFalse(productList.isEmpty());
-                assertEquals(20, productList.size());
-                verify(productCacheRepository, times(2)).findWithSignal(any(ProductStatement.class), any(Pageable.class)); // 총 2번 호출
+    @DisplayName("상품 목록 조회 캐시")
+    @Nested
+    class ProductCacheTest {
+        @DisplayName("상품 목록을 조회할 때, 캐시가 적용되어 빠르게 응답한다.")
+        @Test
+        void returnCachedProductList_whenQuery() {
+            // given
+            BrandEntity preparedBrand = prepareBrand();
+            for (int i = 0; i < 20; i++) {
+                prepareProduct(preparedBrand);
             }
+            ProductStatement statement = ProductStatement.builder()
+                    .orderBy(new ProductStatement.CreatedAt(false))
+                    .build();
+            var list = productService.findWithSignals(statement, Pageable.ofSize(20));
+            assertEquals(20, list.size());
+            verify(productCacheRepository, times(1)).findWithSignal(any(ProductStatement.class), any(Pageable.class));
+            verify(productReader, times(1)).findWithSignals(any(ProductStatement.class), any(Pageable.class));
+            verify(productCacheRepository, times(1)).save(any(ProductStatement.class), any(Pageable.class), anyList());
 
-            @DisplayName("상품 목록을 조회할 때, 캐시가 적용되어 빠르게 응답한다. (브랜드 ID 필터링)")
-            @Test
-            void returnCachedProductListByBrandID_whenQuery() {
-                // given
-                BrandEntity preparedBrand = prepareBrand();
-                for (int i = 0; i < 20; i++) {
-                    prepareProduct(preparedBrand);
-                }
-                ProductStatement statement = ProductStatement.builder()
-                        .brandId(preparedBrand.getId())
-                        .orderBy(new ProductStatement.CreatedAt(false))
-                        .build();
-                var list = productService.findWithSignals(statement, Pageable.ofSize(20));
-                assertEquals(20, list.size());
-                verify(productCacheRepository, times(1)).findWithSignal(any(ProductStatement.class), any(Pageable.class));
-                verify(productReader, times(1)).findWithSignals(any(ProductStatement.class), any(Pageable.class));
-                verify(productCacheRepository, times(1)).save(any(ProductStatement.class), any(Pageable.class), anyList());
+            // when
+            var productList = productService.findWithSignals(statement, Pageable.ofSize(20));
 
-                // when
-                var productList = productService.findWithSignals(statement, Pageable.ofSize(20));
-
-                // then
-                assertFalse(productList.isEmpty());
-                assertEquals(20, productList.size());
-                verify(productCacheRepository, times(2)).findWithSignal(any(ProductStatement.class), any(Pageable.class)); // 총 2번 호출
-            }
+            // then
+            assertFalse(productList.isEmpty());
+            assertEquals(20, productList.size());
+            verify(productCacheRepository, times(2)).findWithSignal(any(ProductStatement.class), any(Pageable.class)); // 총 2번 호출
         }
 
+        @DisplayName("상품 목록을 조회할 때, 캐시가 적용되어 빠르게 응답한다. (브랜드 ID 필터링)")
+        @Test
+        void returnCachedProductListByBrandID_whenQuery() {
+            // given
+            BrandEntity preparedBrand = prepareBrand();
+            for (int i = 0; i < 20; i++) {
+                prepareProduct(preparedBrand);
+            }
+            ProductStatement statement = ProductStatement.builder()
+                    .brandId(preparedBrand.getId())
+                    .orderBy(new ProductStatement.CreatedAt(false))
+                    .build();
+            var list = productService.findWithSignals(statement, Pageable.ofSize(20));
+            assertEquals(20, list.size());
+            verify(productCacheRepository, times(1)).findWithSignal(any(ProductStatement.class), any(Pageable.class));
+            verify(productReader, times(1)).findWithSignals(any(ProductStatement.class), any(Pageable.class));
+            verify(productCacheRepository, times(1)).save(any(ProductStatement.class), any(Pageable.class), anyList());
+
+            // when
+            var productList = productService.findWithSignals(statement, Pageable.ofSize(20));
+
+            // then
+            assertFalse(productList.isEmpty());
+            assertEquals(20, productList.size());
+            verify(productCacheRepository, times(2)).findWithSignal(any(ProductStatement.class), any(Pageable.class)); // 총 2번 호출
+        }
+    }
+
+    @DisplayName("상품 단건 조회 캐시")
+    @Nested
+    class ProductSingleCacheTest {
+        @DisplayName("상품 단건을 조회할 때, 캐시가 적용되어 빠르게 응답한다.")
+        @Test
+        void returnCachedProduct_whenQuery() {
+            // given
+            BrandEntity preparedBrand = prepareBrand();
+            ProductEntity preparedProduct = prepareProduct(preparedBrand);
+
+            var product = productService.findWithSignal(preparedProduct.getId());
+            assertTrue(product.isPresent());
+            assertEquals(preparedProduct.getId(), product.get().getId());
+            verify(productCacheRepository, times(1)).findWithSignal(anyLong());
+            verify(productReader, times(1)).findWithSignal(anyLong());
+            verify(productCacheRepository, times(1)).save(anyLong(), any(ProductInfo.ProductWithSignal.class));
+
+            // when
+            var cachedProduct = productService.findWithSignal(preparedProduct.getId());
+
+            // then
+            assertTrue(cachedProduct.isPresent());
+            assertEquals(preparedProduct.getId(), cachedProduct.get().getId());
+            verify(productCacheRepository, times(2)).findWithSignal(anyLong()); // 총 2번 호출
+        }
+    }
 }

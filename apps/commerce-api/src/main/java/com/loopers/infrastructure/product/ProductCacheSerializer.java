@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 public class ProductCacheSerializer {
@@ -35,6 +36,17 @@ public class ProductCacheSerializer {
                 throw new CoreException(ErrorType.INTERNAL_ERROR, "직렬화 실패" + e.getMessage());
             }
         }
+
+        public String serializeOneWithSignal(ProductInfo.ProductWithSignal info) {
+            if (info == null) {
+                return "";
+            }
+            try {
+                return mapper.writeValueAsString(info);
+            } catch (Exception e) {
+                throw new CoreException(ErrorType.INTERNAL_ERROR, "직렬화 실패" + e.getMessage());
+            }
+        }
     }
 
     @Component
@@ -49,6 +61,18 @@ public class ProductCacheSerializer {
                 // 직접 ProductWithSignal 리스트로 역직렬화
                 TypeReference<List<ProductInfo.ProductWithSignal>> typeRef = new TypeReference<List<ProductInfo.ProductWithSignal>>() {};
                 return mapper.readValue(serialized, typeRef);
+            } catch (Exception e) {
+                throw new CoreException(ErrorType.INTERNAL_ERROR, "역직렬화 실패" + e.getMessage());
+            }
+        }
+
+        public Optional<ProductInfo.ProductWithSignal> deserializeOneWithSignal(String target) {
+            if (target == null || target.isEmpty()) {
+                return Optional.empty();
+            }
+            try {
+                ProductInfo.ProductWithSignal productWithSignal = mapper.readValue(target, ProductInfo.ProductWithSignal.class);
+                return Optional.of(productWithSignal);
             } catch (Exception e) {
                 throw new CoreException(ErrorType.INTERNAL_ERROR, "역직렬화 실패" + e.getMessage());
             }
