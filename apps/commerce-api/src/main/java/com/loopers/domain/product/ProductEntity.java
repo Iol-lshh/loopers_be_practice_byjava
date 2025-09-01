@@ -78,6 +78,7 @@ public class ProductEntity extends BaseEntity {
         this.stock -= quantity;
         if (this.stock == 0) {
             this.state = State.outOfStock();
+            domainEvents().add(new ProductEvent.Domain.OutOfStock(this.getId()));
         }
     }
 

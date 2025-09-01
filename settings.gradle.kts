@@ -3,7 +3,7 @@ rootProject.name = "loopers-java-spring-template"
 include(
     ":apps:commerce-api",
     ":apps:pg-simulator",
-    ":apps:consumer-api",
+    ":apps:commerce-collector",
     ":modules:jpa",
     ":modules:redis",
     ":modules:feign",
@@ -13,6 +13,7 @@ include(
     ":supports:logging",
     ":supports:monitoring",
     ":supports:uuid",
+    ":sharing:event"
 )
 
 // configurations
