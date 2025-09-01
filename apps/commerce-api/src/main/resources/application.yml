@@ -21,6 +21,7 @@ spring:
     import:
       - jpa.yml
       - redis.yml
+      - kafka.yml
       - logging.yml
       - monitoring.yml
       - feign.yml
@@ -74,6 +75,11 @@ spring:
   config:
     activate:
       on-profile: local, test
+  kafka:
+    properties:
+      auto:
+        create.topics.enable: true
+
 
 ---
 spring:
