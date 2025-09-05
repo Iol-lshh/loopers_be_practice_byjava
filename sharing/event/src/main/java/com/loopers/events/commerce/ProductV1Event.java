@@ -7,8 +7,7 @@ public class ProductV1Event {
     }
 
     public record OutOfStock(
-            Long productId,
-            String eventId
+            Long productId
     ) {
     }
 }

@@ -1,4 +1,4 @@
-package com.loopers.infrastructure.product;
+package com.loopers.infrastructure.catalog;
 
 public class ProductCacheKeyGenerator {
     public static String withSignalFrom(Long id) {

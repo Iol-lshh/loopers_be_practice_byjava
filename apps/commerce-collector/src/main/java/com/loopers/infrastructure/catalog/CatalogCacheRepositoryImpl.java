@@ -1,4 +1,4 @@
-package com.loopers.infrastructure.product;
+package com.loopers.infrastructure.catalog;
 
 import com.loopers.domain.catalog.CatalogCacheRepository;
 import lombok.RequiredArgsConstructor;

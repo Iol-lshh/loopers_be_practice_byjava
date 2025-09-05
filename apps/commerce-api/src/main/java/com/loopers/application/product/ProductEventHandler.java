@@ -5,7 +5,6 @@ import com.loopers.domain.product.ProductEvent;
 import com.loopers.domain.product.ProductGlobalEventPublisher;
 import com.loopers.domain.product.ProductService;
 import com.loopers.events.commerce.ProductV1Event;
-import com.loopers.util.uuid.UuidV7Generator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -27,8 +26,7 @@ public class ProductEventHandler {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handle(ProductEvent.Domain.OutOfStock event) {
-        String eventId = UuidV7Generator.generateUuidV7().toString();
-        var globalEvent = new ProductV1Event.OutOfStock(event.productId(), eventId);
+        var globalEvent = new ProductV1Event.OutOfStock(event.productId());
         productGlobalEventPublisher.publish(globalEvent);
     }
 }
