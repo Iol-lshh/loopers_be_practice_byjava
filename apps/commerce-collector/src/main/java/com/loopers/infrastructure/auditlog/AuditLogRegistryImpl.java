@@ -1,9 +1,12 @@
 package com.loopers.infrastructure.auditlog;
 
+import com.fasterxml.jackson.databind.introspect.AnnotationCollector;
 import com.loopers.domain.auditlog.AuditLogEntity;
 import com.loopers.domain.auditlog.AuditLogRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Component
@@ -14,5 +17,10 @@ public class AuditLogRegistryImpl implements AuditLogRegistry {
     @Override
     public AuditLogEntity save(AuditLogEntity auditLogEntity) {
         return auditLogJpaRepository.save(auditLogEntity);
+    }
+
+    @Override
+    public Optional<AuditLogEntity> findByEventId(String eventId) {
+        return auditLogJpaRepository.findByEventId(eventId);
     }
 }
