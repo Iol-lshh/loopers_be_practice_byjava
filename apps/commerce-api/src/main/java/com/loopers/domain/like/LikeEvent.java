@@ -24,5 +24,19 @@ public class LikeEvent {
             );
         }
     }
+
+    public record Updated(
+            Long targetId,
+            LikeEntity.TargetType targetType,
+            Long likeCount
+    ) {
+        public static Updated from(LikeSummaryEntity likeEntity) {
+            return new Updated(
+                    likeEntity.getTargetId(),
+                    likeEntity.getTargetType(),
+                    likeEntity.getLikeCount()
+            );
+        }
+    }
 }
 
