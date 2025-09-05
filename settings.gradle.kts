@@ -13,7 +13,8 @@ include(
     ":supports:logging",
     ":supports:monitoring",
     ":supports:uuid",
-    ":sharing:event"
+    ":sharing:event",
+    ":sharing:error"
 )
 
 // configurations
