@@ -21,12 +21,15 @@ public class KafkaTestContainersConfig {
         System.setProperty("spring.kafka.bootstrap-servers",
                 String.format("%s:%d", kafkaContainer.getHost(), kafkaContainer.getFirstMappedPort()));
 
-        // 추가 Kafka 설정들
+        // 추가 Kafka 설정들 - 실제 애플리케이션과 일치시키기
         System.setProperty("spring.kafka.producer.key-serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        System.setProperty("spring.kafka.producer.value-serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        System.setProperty("spring.kafka.producer.value-serializer", "org.springframework.kafka.support.serializer.JsonSerializer");
         System.setProperty("spring.kafka.consumer.key-deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        System.setProperty("spring.kafka.consumer.value-deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        System.setProperty("spring.kafka.consumer.value-deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
         System.setProperty("spring.kafka.consumer.auto-offset-reset", "earliest");
         System.setProperty("spring.kafka.consumer.group-id", "test-group");
+        
+        // 테스트에서 토픽 자동 생성 강제 활성화
+        System.setProperty("spring.kafka.properties.auto.create.topics.enable", "true");
     }
 }

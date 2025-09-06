@@ -6,6 +6,7 @@ import com.loopers.domain.productmetric.ProductMetricRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -23,4 +24,16 @@ public class ProductMetricRegistryImpl implements ProductMetricRegistry {
     public Optional<ProductMetricEntity> findByProductId(Long productId) {
         return jpaRepository.findByProductId(productId);
     }
+
+    @Override
+    public List<ProductMetricEntity> findAllByProductIds(List<ProductMetricCommand.AddSoldCount> productId) {
+        List<Long> ids = productId.stream().map(ProductMetricCommand.AddSoldCount::productId).toList();
+        return jpaRepository.findAllByProductIds(ids);
+    }
+
+    @Override
+    public List<ProductMetricEntity> saveAll(List<ProductMetricEntity> entities) {
+        return jpaRepository.saveAll(entities);
+    }
+
 }

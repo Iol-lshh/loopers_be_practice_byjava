@@ -14,8 +14,7 @@ public class OrderV1Event {
             Long userId,
             Long orderId,
             Long totalPrice,
-            String paymentType,
-            String eventId
+            String paymentType
     ) {
     }
 
@@ -25,8 +24,7 @@ public class OrderV1Event {
             Long totalPrice,
             String paymentType,
             List<Long> couponIds,
-            Map<Long, Long> itemQuantityMap,
-            String eventId
+            Map<Long, Long> itemQuantityMap
     ) {
     }
 
@@ -34,8 +32,7 @@ public class OrderV1Event {
             Long orderId,
             Long userId,
             Long totalPrice,
-            String paymentType,
-            String eventId
+            String paymentType
     ){
     }
 }

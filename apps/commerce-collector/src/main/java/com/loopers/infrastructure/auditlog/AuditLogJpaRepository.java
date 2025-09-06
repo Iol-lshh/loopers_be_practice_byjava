@@ -1,6 +1,5 @@
 package com.loopers.infrastructure.auditlog;
 
-import com.fasterxml.jackson.databind.introspect.AnnotationCollector;
 import com.loopers.domain.auditlog.AuditLogEntity;
 import org.springframework.data.repository.CrudRepository;
 

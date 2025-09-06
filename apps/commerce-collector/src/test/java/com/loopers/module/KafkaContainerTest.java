@@ -49,8 +49,23 @@ public class KafkaContainerTest {
         var receivedRecord = kafkaTemplate.receive(topic, metadata.partition(), metadata.offset());
         assertNotNull(receivedRecord, "수신된 메시지가 null입니다");
 
-        // 수신된 메시지 검증
-        assertEquals(testMessage, receivedRecord.value(), "전송된 메시지와 수신된 메시지가 일치하지 않습니다");
+        // 수신된 메시지 검증 (바이트 배열을 문자열로 변환)
+        Object receivedValue = receivedRecord.value();
+        String receivedMessage;
+        
+        if (receivedValue instanceof byte[]) {
+            // 바이트 배열인 경우 문자열로 변환
+            receivedMessage = new String((byte[]) receivedValue);
+        } else {
+            receivedMessage = receivedValue.toString();
+        }
+        
+        // JSON 직렬화된 문자열에서 따옴표 제거
+        if (receivedMessage.startsWith("\"") && receivedMessage.endsWith("\"")) {
+            receivedMessage = receivedMessage.substring(1, receivedMessage.length() - 1);
+        }
+        
+        assertEquals(testMessage, receivedMessage, "전송된 메시지와 수신된 메시지가 일치하지 않습니다");
         assertEquals(metadata.topic(), receivedRecord.topic(), "토픽이 일치하지 않습니다");
         assertEquals(metadata.partition(), receivedRecord.partition(), "파티션이 일치하지 않습니다");
         assertEquals(metadata.offset(), receivedRecord.offset(), "오프셋이 일치하지 않습니다");
