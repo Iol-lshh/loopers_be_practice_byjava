@@ -9,6 +9,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -24,8 +25,8 @@ public class ProductCacheRepositoryImpl implements ProductCacheRepository {
             return List.of();
         }
         String keyPattern = ProductCacheKeyGenerator.withSignalFrom(statement, pageable);
-        String targetIds = redisTemplate.opsForValue().get(keyPattern);
-        return deserializer.deserializeWithSignal(targetIds);
+        String targets = redisTemplate.opsForValue().get(keyPattern);
+        return deserializer.deserializeWithSignal(targets);
     }
 
     @Override
@@ -38,5 +39,21 @@ public class ProductCacheRepositoryImpl implements ProductCacheRepository {
         redisTemplate.opsForValue().set(keyPattern, serialized);
         redisTemplate.expire(keyPattern, 60, TimeUnit.SECONDS);
         return productWithSignals;
+    }
+
+    @Override
+    public Optional<ProductInfo.ProductWithSignal> findWithSignal(Long id) {
+        String keyPattern = ProductCacheKeyGenerator.withSignalFrom(id);
+        String target = redisTemplate.opsForValue().get(keyPattern);
+        return deserializer.deserializeOneWithSignal(target);
+    }
+
+    @Override
+    public ProductInfo.ProductWithSignal save(Long id, ProductInfo.ProductWithSignal info) {
+        String keyPattern = ProductCacheKeyGenerator.withSignalFrom(id);
+        String serialized = serializer.serializeOneWithSignal(info);
+        redisTemplate.opsForValue().set(keyPattern, serialized);
+        redisTemplate.expire(keyPattern, 60, TimeUnit.SECONDS);
+        return info;
     }
 }

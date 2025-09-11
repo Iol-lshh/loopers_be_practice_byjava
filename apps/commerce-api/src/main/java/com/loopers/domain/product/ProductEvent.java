@@ -7,4 +7,11 @@ public class ProductEvent {
             return new Registered(product.getId());
         }
     }
+
+    public static class Domain {
+        public record OutOfStock(
+                Long productId
+        ) {
+        }
+    }
 }

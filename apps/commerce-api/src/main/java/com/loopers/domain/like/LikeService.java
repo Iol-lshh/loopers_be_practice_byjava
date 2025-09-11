@@ -43,6 +43,8 @@ public class LikeService {
                 .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "좋아요 요약 정보를 찾을 수 없습니다."));
         summary.increaseCount();
         likeRepository.save(summary);
+        LikeEvent.Updated event = LikeEvent.Updated.from(summary);
+        eventPublisher.publishEvent(event);
     }
 
     @Transactional

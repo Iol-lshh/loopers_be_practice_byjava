@@ -1,11 +1,10 @@
 package com.loopers.application.like;
 
-import com.loopers.domain.like.LikeCommand;
-import com.loopers.domain.like.LikeEntity;
-import com.loopers.domain.like.LikeEvent;
-import com.loopers.domain.like.LikeService;
+import com.loopers.domain.like.*;
 import com.loopers.domain.product.ProductEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +15,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 public class LikeEventHandler {
     private final LikeService likeService;
+    private final LikeGlobalEventPublisher globalEventPublisher;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -36,5 +36,11 @@ public class LikeEventHandler {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handle(LikeEvent.Decreased event) {
         likeService.decreaseLikeCount(event.targetId(), event.targetType());
+    }
+
+    @Async
+    @EventListener
+    public void handle(LikeEvent.Updated event) {
+        globalEventPublisher.publish(event);
     }
 }
