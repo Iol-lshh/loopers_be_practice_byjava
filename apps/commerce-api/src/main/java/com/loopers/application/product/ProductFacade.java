@@ -83,4 +83,11 @@ public class ProductFacade {
 
         return ProductResult.Summary.of(brandList, productWithSignals);
     }
+
+    public List<ProductResult.Summary> getTodayRanking(Integer page, Integer size) {
+        List<ProductInfo.ProductWithSignal> productWithSignals = productService.findTodayRankingWithSignal(page, size);
+        List<Long> brandIds = productWithSignals.stream().map(ProductInfo.ProductWithSignal::getBrandId).distinct().toList();
+        List<BrandEntity> brands = brandService.find(brandIds);
+        return ProductResult.Summary.of(brands, productWithSignals);
+    }
 }

@@ -6,7 +6,6 @@ public class LikeV1Event {
     }
 
     public record Updated(
-            Long userId,
             Long productId,
             Long count
     ) {

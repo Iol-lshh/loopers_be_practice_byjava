@@ -2,6 +2,7 @@ package com.loopers.application.like;
 
 import com.loopers.domain.like.*;
 import com.loopers.domain.product.ProductEvent;
+import com.loopers.events.commerce.LikeV1Event;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -41,6 +42,10 @@ public class LikeEventHandler {
     @Async
     @EventListener
     public void handle(LikeEvent.Updated event) {
-        globalEventPublisher.publish(event);
+        var globalEvent = new LikeV1Event.Updated(
+                event.targetId(),
+                event.likeCount()
+        );
+        globalEventPublisher.publish(globalEvent);
     }
 }

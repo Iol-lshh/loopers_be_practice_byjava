@@ -33,7 +33,7 @@ public class OrderV1GlobalEventHandler {
         log.info("handle OrderV1Event.Completed messages: {}", messages.size());
         for (var message : messages) {
             auditLogService.log(message.eventId(), OrderV1Event.TOPIC.COMPLETED, message.payload());
-            List<ProductMetricCommand.AddSoldCount> commands = message.payload().itemQuantityMap()
+            List<ProductMetricCommand.AddSoldCount> countCommands = message.payload().itemQuantityMap()
                     .entrySet()
                     .stream()
                     .map(entry -> new ProductMetricCommand.AddSoldCount(
@@ -41,7 +41,15 @@ public class OrderV1GlobalEventHandler {
                             entry.getValue()
                     ))
                     .toList();
-            productMetricService.addSoldCount(commands);
+            List<ProductMetricCommand.AddSoldAmount> amountCommands = message.payload().itemPriceMap()
+                    .entrySet()
+                    .stream()
+                    .map(entry -> new ProductMetricCommand.AddSoldAmount(
+                            entry.getKey(),
+                            entry.getValue()
+                    ))
+                    .toList();
+            productMetricService.addSoldCount(countCommands, amountCommands);
         }
         acknowledgment.acknowledge();
     }

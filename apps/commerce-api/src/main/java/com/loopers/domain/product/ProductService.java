@@ -106,4 +106,10 @@ public class ProductService {
         product.release();
         return productRepository.save(product);
     }
+
+
+    public List<ProductInfo.ProductWithSignal> findTodayRankingWithSignal(Integer page, Integer size) {
+        List<Long> ids = productCacheRepository.findTodayRankingIds(page, size);
+        return productRepository.findWithSignal(ids);
+    }
 }

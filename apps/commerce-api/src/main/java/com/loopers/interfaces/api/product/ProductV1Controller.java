@@ -46,4 +46,13 @@ public class ProductV1Controller {
         var result = productFacade.list(criteria, pageable);
         return ApiResponse.success(ProductV1Dto.SummaryResponse.of(result));
     }
+
+    @GetMapping("/ranking/today")
+    public ApiResponse<List<ProductV1Dto.SummaryResponse>> todayRanking(
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "20") Integer size
+    ) {
+        var result = productFacade.getTodayRanking(page, size);
+        return ApiResponse.success(ProductV1Dto.SummaryResponse.of(result));
+    }
 }

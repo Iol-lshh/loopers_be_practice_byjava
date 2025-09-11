@@ -96,6 +96,14 @@ public class OrderEntity extends BaseEntity {
                 ));
     }
 
+    public Map<Long, Long> getItemPriceMap() {
+        return getOrderItems().stream()
+                .collect(Collectors.toMap(
+                        OrderItemEntity::getProductId,
+                        OrderItemEntity::getPrice
+                ));
+    }
+
     public Map<Long, Long> getAppliedCouponValueMap() {
         return getOrderCoupons().stream()
                 .collect(Collectors.toMap(

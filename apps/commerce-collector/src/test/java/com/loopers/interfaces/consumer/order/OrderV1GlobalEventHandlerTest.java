@@ -72,7 +72,8 @@ public class OrderV1GlobalEventHandlerTest {
                     1000L,
                     "PG",
                     List.of(1L, 2L),
-                    Map.of(1L, 2L, 3L, 1L)
+                    Map.of(1L, 2L, 3L, 1L),
+                    Map.of(1L, 2L, 3L, 2L)
             );
             GlobalEvent<OrderV1Event.Completed> event = GlobalEvent.of(
                     OrderV1Event.TOPIC.COMPLETED,
@@ -107,7 +108,8 @@ public class OrderV1GlobalEventHandlerTest {
                     1000L,
                     "PG",
                     List.of(1L, 2L),
-                    Map.of(1L, 2L, 3L, 1L)
+                    Map.of(1L, 2L, 3L, 1L),
+                    Map.of(1L, 2L, 3L, 2L)
             );
             GlobalEvent<OrderV1Event.Completed> event = GlobalEvent.of(
                     OrderV1Event.TOPIC.COMPLETED,

@@ -1,7 +1,7 @@
 package com.loopers.infrastructure.productmetric;
 
-import com.loopers.domain.productmetric.ProductMetricCommand;
 import com.loopers.domain.productmetric.ProductMetricEntity;
+import com.loopers.domain.productmetric.ProductMetricInfo;
 import com.loopers.domain.productmetric.ProductMetricRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -21,19 +21,23 @@ public class ProductMetricRegistryImpl implements ProductMetricRegistry {
     }
 
     @Override
-    public Optional<ProductMetricEntity> findByProductId(Long productId) {
+    public Optional<ProductMetricEntity> findByProductIdAndMetric(Long productId, String metric) {
         return jpaRepository.findByProductId(productId);
     }
 
     @Override
-    public List<ProductMetricEntity> findAllByProductIds(List<ProductMetricCommand.AddSoldCount> productId) {
-        List<Long> ids = productId.stream().map(ProductMetricCommand.AddSoldCount::productId).toList();
-        return jpaRepository.findAllByProductIds(ids);
+    public List<ProductMetricEntity> findAllByProductIdsAndMetric(List<Long> productIds, String metric) {
+        return jpaRepository.findAllByProductIds(productIds, metric);
     }
 
     @Override
     public List<ProductMetricEntity> saveAll(List<ProductMetricEntity> entities) {
         return jpaRepository.saveAll(entities);
+    }
+
+    @Override
+    public Optional<ProductMetricInfo.Aggregate> findAggregate(Long productId) {
+        return jpaRepository.findAggregate(productId);
     }
 
 }
