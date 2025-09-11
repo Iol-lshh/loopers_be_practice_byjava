@@ -11,4 +11,8 @@ public class RankingService {
     public void updateRanking(RankingCommand.UpdateRanking updateCommand) {
         rankingCacheRepository.put(updateCommand);
     }
+
+    public void addLastDayRanking() {
+        rankingCacheRepository.addLastDayRanking();
+    }
 }

@@ -28,4 +28,7 @@ public interface ProductMetricJpaRepository extends JpaRepository<ProductMetricE
         GROUP BY p.productId
     """)
     Optional<ProductMetricInfo.Aggregate> findAggregate(Long productId);
+
+    @Query("SELECT DISTINCT p.productId FROM ProductMetricEntity p")
+    List<Long> findAllDistinctProductIds();
 }

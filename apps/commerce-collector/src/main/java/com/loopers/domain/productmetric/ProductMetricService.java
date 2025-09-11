@@ -1,6 +1,7 @@
 package com.loopers.domain.productmetric;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,7 @@ import java.util.Optional;
 public class ProductMetricService {
 
     private final ProductMetricRegistry productMetricRegistry;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public ProductMetricEntity updateLikeCount(ProductMetricCommand.UpdateLikeCount command) {
@@ -80,5 +82,9 @@ public class ProductMetricService {
 
     public Optional<ProductMetricInfo.Aggregate> findAggregate(Long productId) {
         return productMetricRegistry.findAggregate(productId);
+    }
+
+    public List<Long> findAllDistinctProductIds() {
+        return productMetricRegistry.findAllDistinctProductIds();
     }
 }

@@ -12,4 +12,6 @@ public interface ProductMetricRegistry {
     List<ProductMetricEntity> saveAll(List<ProductMetricEntity> entities);
 
     Optional<ProductMetricInfo.Aggregate> findAggregate(Long productId);
+    
+    List<Long> findAllDistinctProductIds();
 }

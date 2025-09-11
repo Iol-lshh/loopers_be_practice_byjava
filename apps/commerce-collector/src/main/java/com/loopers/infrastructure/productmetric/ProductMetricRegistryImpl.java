@@ -40,4 +40,9 @@ public class ProductMetricRegistryImpl implements ProductMetricRegistry {
         return jpaRepository.findAggregate(productId);
     }
 
+    @Override
+    public List<Long> findAllDistinctProductIds() {
+        return jpaRepository.findAllDistinctProductIds();
+    }
+
 }
