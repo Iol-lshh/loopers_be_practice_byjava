@@ -6,8 +6,12 @@ import java.util.Optional;
 public interface ProductMetricRegistry {
     ProductMetricEntity save(ProductMetricEntity entity);
 
-    Optional<ProductMetricEntity> findByProductId(Long productId);
-    List<ProductMetricEntity> findAllByProductIds(List<ProductMetricCommand.AddSoldCount> productId);
+    Optional<ProductMetricEntity> findByProductIdAndMetric(Long productId, String metric);
+    List<ProductMetricEntity> findAllByProductIdsAndMetric(List<Long> productIds, String metric);
 
     List<ProductMetricEntity> saveAll(List<ProductMetricEntity> entities);
+
+    Optional<ProductMetricInfo.Aggregate> findAggregate(Long productId);
+    
+    List<Long> findAllDistinctProductIds();
 }

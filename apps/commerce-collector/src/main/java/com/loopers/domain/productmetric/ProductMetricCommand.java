@@ -13,6 +13,12 @@ public class ProductMetricCommand {
     ){
     }
 
+    public record AddSoldAmount(
+            Long productId,
+            Long soldAmount
+    ){
+    }
+
     public record AddViewCount(
             Long productId,
             Long viewCount

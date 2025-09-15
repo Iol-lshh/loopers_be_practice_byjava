@@ -2,8 +2,8 @@ rootProject.name = "loopers-java-spring-template"
 
 include(
     ":apps:commerce-api",
-    ":apps:pg-simulator",
     ":apps:commerce-collector",
+    ":apps:pg-simulator",
     ":modules:jpa",
     ":modules:redis",
     ":modules:feign",
@@ -13,8 +13,8 @@ include(
     ":supports:logging",
     ":supports:monitoring",
     ":supports:uuid",
+    ":sharing:error",
     ":sharing:event",
-    ":sharing:error"
 )
 
 // configurations

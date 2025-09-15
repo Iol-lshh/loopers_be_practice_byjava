@@ -47,6 +47,11 @@ public class ProductRepositoryImpl implements ProductRepository, ProductReader {
     }
 
     @Override
+    public List<ProductInfo.ProductWithSignal> findWithSignal(List<Long> ids) {
+        return List.of();
+    }
+
+    @Override
     public List<ProductInfo.ProductWithSignal> findWithSignals(ProductStatement statement, Pageable pageable) {
         if(statement.getBrandId() != null) {
             if (statement.getOrderBy() instanceof ProductStatement.LikeCount) {
@@ -84,5 +89,4 @@ public class ProductRepositoryImpl implements ProductRepository, ProductReader {
     public List<ProductInfo.ProductWithSignal> findWithSignals(List<Long> ids) {
         return productJpaRepository.findAllWithSignal(ids);
     }
-
 }

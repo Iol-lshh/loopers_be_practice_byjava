@@ -8,9 +8,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -55,5 +59,21 @@ public class ProductCacheRepositoryImpl implements ProductCacheRepository {
         redisTemplate.opsForValue().set(keyPattern, serialized);
         redisTemplate.expire(keyPattern, 60, TimeUnit.SECONDS);
         return info;
+    }
+
+    @Override
+    public List<Long> findTodayRankingIds(Integer page, Integer size) {
+        Set<String> set = redisTemplate.opsForZSet().reverseRange(
+                "product:ranking:"+ LocalDate.now(),
+                page * size,
+                (page + 1) * size - 1
+        );
+        if (set == null || set.isEmpty()) {
+            return Collections.emptyList();
+        }
+        
+        return set.stream()
+                .map(Long::valueOf)
+                .collect(Collectors.toList());
     }
 }

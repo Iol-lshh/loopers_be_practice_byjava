@@ -25,13 +25,19 @@ public class ProductMetricEntity extends BaseEntity {
     public ProductMetricEntity(ProductMetricCommand.AddSoldCount command) {
         this.productId = command.productId();
         this.metricName = "sold_count";
-        this.metricValue = "0";
+        this.metricValue = String.valueOf(command.soldCount());
+    }
+
+    public ProductMetricEntity(ProductMetricCommand.AddSoldAmount command) {
+        this.productId = command.productId();
+        this.metricName = "sold_amount";
+        this.metricValue = String.valueOf(command.soldAmount());
     }
 
     public ProductMetricEntity(ProductMetricCommand.AddViewCount command) {
         this.productId = command.productId();
         this.metricName = "view_count";
-        this.metricValue = "0";
+        this.metricValue = String.valueOf(command.viewCount());
     }
 
     public void updateLikeCount(ProductMetricCommand.UpdateLikeCount command) {
@@ -55,5 +61,13 @@ public class ProductMetricEntity extends BaseEntity {
         }
         Long currentViewCount = Long.parseLong(this.metricValue);
         this.metricValue = String.valueOf(currentViewCount + command.viewCount());
+    }
+
+    public void addSoldAmount(ProductMetricCommand.AddSoldAmount command) {
+        if(!this.metricName.equals("sold_amount")) {
+            throw new IllegalArgumentException("sold_amount 메트릭이 아닙니다.");
+        }
+        Long currentSoldAmount = Long.parseLong(this.metricValue);
+        this.metricValue = String.valueOf(currentSoldAmount + command.soldAmount());
     }
 }

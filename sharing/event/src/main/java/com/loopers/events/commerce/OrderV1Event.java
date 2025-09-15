@@ -24,7 +24,8 @@ public class OrderV1Event {
             Long totalPrice,
             String paymentType,
             List<Long> couponIds,
-            Map<Long, Long> itemQuantityMap
+            Map<Long, Long> itemQuantityMap,
+            Map<Long, Long> itemPriceMap
     ) {
     }
 

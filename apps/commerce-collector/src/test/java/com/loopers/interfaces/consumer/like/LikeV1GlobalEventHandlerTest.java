@@ -72,7 +72,6 @@ class LikeV1GlobalEventHandlerTest {
             Thread.sleep(2000);
             var event = new LikeV1Event.Updated(
                     1L,
-                    1L,
                     1L
             );
             var globalEvent = GlobalEvent.of(LikeV1Event.TOPIC.UPDATED, event);

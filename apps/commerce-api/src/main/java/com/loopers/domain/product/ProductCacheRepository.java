@@ -13,4 +13,6 @@ public interface ProductCacheRepository {
     Optional<ProductInfo.ProductWithSignal> findWithSignal(Long id);
 
     ProductInfo.ProductWithSignal save(Long id, ProductInfo.ProductWithSignal info);
+
+    List<Long> findTodayRankingIds(Integer page, Integer size);
 }

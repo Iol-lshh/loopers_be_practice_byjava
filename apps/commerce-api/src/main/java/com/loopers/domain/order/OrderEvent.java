@@ -18,7 +18,8 @@ public class OrderEvent {
         Long totalPrice,
         String paymentType,
         List<Long> couponIds,
-        Map<Long, Long> itemQuantityMap
+        Map<Long, Long> itemQuantityMap,
+        Map<Long, Long> itemPriceMap
     ) {
         public static Completed from(OrderEntity order) {
             return new Completed(
@@ -27,7 +28,8 @@ public class OrderEvent {
                 order.getTotalPrice(),
                 order.getPaymentType().getValue(),
                 order.getCouponIds(),
-                order.getItemQuantityMap()
+                order.getItemQuantityMap(),
+                order.getItemPriceMap()
             );
         }
     }

@@ -1,6 +1,5 @@
 package com.loopers.infrastructure.like;
 
-import com.loopers.domain.like.LikeEvent;
 import com.loopers.domain.like.LikeGlobalEventPublisher;
 import com.loopers.events.GlobalEvent;
 import com.loopers.events.commerce.LikeV1Event;
@@ -15,11 +14,11 @@ public class LikeGlobalEventPublisherImpl implements LikeGlobalEventPublisher {
     private final KafkaTemplate<Object, Object> kafkaTemplate;
 
     @Override
-    public void publish(LikeEvent.Updated event) {
+    public void publish(LikeV1Event.Updated event) {
         var message = GlobalEvent.of(LikeV1Event.TOPIC.UPDATED, event);
         kafkaTemplate.send(
                 LikeV1Event.TOPIC.UPDATED,
-                event.targetType() + "-" + event.targetId(),
+                 "product-" + event.productId(),
                 message
         );
     }
