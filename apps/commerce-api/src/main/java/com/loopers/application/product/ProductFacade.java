@@ -90,4 +90,18 @@ public class ProductFacade {
         List<BrandEntity> brands = brandService.find(brandIds);
         return ProductResult.Summary.of(brands, productWithSignals);
     }
+
+    public List<ProductResult.Summary> getWeeklyRanking(Integer page, Integer size) {
+        List<ProductInfo.ProductWithSignal> productWithSignals = productService.findWeeklyRankingWithSignal(page, size);
+        List<Long> brandIds = productWithSignals.stream().map(ProductInfo.ProductWithSignal::getBrandId).distinct().toList();
+        List<BrandEntity> brands = brandService.find(brandIds);
+        return ProductResult.Summary.of(brands, productWithSignals);
+    }
+
+    public List<ProductResult.Summary> getMonthlyRanking(Integer page, Integer size) {
+        List<ProductInfo.ProductWithSignal> productWithSignals = productService.findMonthlyRankingWithSignal(page, size);
+        List<Long> brandIds = productWithSignals.stream().map(ProductInfo.ProductWithSignal::getBrandId).distinct().toList();
+        List<BrandEntity> brands = brandService.find(brandIds);
+        return ProductResult.Summary.of(brands, productWithSignals);
+    }
 }

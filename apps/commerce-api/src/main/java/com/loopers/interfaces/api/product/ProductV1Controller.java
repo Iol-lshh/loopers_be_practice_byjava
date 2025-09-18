@@ -55,4 +55,22 @@ public class ProductV1Controller {
         var result = productFacade.getTodayRanking(page, size);
         return ApiResponse.success(ProductV1Dto.SummaryResponse.of(result));
     }
+
+    @GetMapping("/ranking/weekly")
+    public ApiResponse<List<ProductV1Dto.SummaryResponse>> weeklyRanking(
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "20") Integer size
+    ) {
+        var result = productFacade.getWeeklyRanking(page, size);
+        return ApiResponse.success(ProductV1Dto.SummaryResponse.of(result));
+    }
+
+    @GetMapping("/ranking/monthly")
+    public ApiResponse<List<ProductV1Dto.SummaryResponse>> monthlyRanking(
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "20") Integer size
+    ) {
+        var result = productFacade.getMonthlyRanking(page, size);
+        return ApiResponse.success(ProductV1Dto.SummaryResponse.of(result));
+    }
 }

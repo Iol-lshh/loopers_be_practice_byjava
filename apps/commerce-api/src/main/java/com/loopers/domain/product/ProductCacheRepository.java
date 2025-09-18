@@ -15,4 +15,8 @@ public interface ProductCacheRepository {
     ProductInfo.ProductWithSignal save(Long id, ProductInfo.ProductWithSignal info);
 
     List<Long> findTodayRankingIds(Integer page, Integer size);
+
+    List<Long> findWeeklyRankingIds(Integer page, Integer size);
+
+    List<Long> findMonthlyRankingIds(Integer page, Integer size);
 }

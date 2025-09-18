@@ -15,6 +15,8 @@ import org.springframework.batch.core.job.flow.FlowExecutionStatus;
 import org.springframework.batch.core.job.flow.JobExecutionDecider;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.core.step.tasklet.Tasklet;
+import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -31,8 +33,8 @@ public class ProductMetricAggregateBatchConfig {
     @Bean
     public Job productMetricAggregateJob() {
         return new JobBuilder("productMetricAggregateJob", jobRepository)
-                .start(stepDecider()).on("WEEKLY").to(weeklyAggregateStep()).next(monthlyAggregateStep())
-                .from(stepDecider()).on("MONTHLY").to(monthlyAggregateStep())
+                .start(stepDecider()).on("WEEKLY").to(weeklyAggregateStep()).next(monthlyAggregateStep()).next(cacheRankingStep())
+                .from(stepDecider()).on("MONTHLY").to(monthlyAggregateStep()).next(cacheRankingStep())
                 .end()
                 .build();
     }
@@ -54,6 +56,22 @@ public class ProductMetricAggregateBatchConfig {
                 .writer(productMetricWriter.monthlyWriter())
                 .build();
     }
+
+    @Bean
+    public Step cacheRankingStep() {
+        return new StepBuilder("cacheRankingStep", jobRepository)
+                .tasklet(cacheRankingTasklet(), transactionManager)
+                .build();
+    }
+
+    @Bean
+    public Tasklet cacheRankingTasklet() {
+        return (contribution, chunkContext) -> {
+            productMetricWriter.cacheRanking();
+            return RepeatStatus.FINISHED;
+        };
+    }
+
 
 
     @Bean

@@ -112,4 +112,14 @@ public class ProductService {
         List<Long> ids = productCacheRepository.findTodayRankingIds(page, size);
         return productRepository.findWithSignal(ids);
     }
+
+    public List<ProductInfo.ProductWithSignal> findWeeklyRankingWithSignal(Integer page, Integer size) {
+        List<Long> ids = productCacheRepository.findWeeklyRankingIds(page, size);
+        return productRepository.findWithSignal(ids);
+    }
+
+    public List<ProductInfo.ProductWithSignal> findMonthlyRankingWithSignal(Integer page, Integer size) {
+        List<Long> ids = productCacheRepository.findMonthlyRankingIds(page, size);
+        return productRepository.findWithSignal(ids);
+    }
 }
