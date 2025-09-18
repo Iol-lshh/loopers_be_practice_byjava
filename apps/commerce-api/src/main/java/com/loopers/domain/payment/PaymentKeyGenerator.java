@@ -1,6 +1,6 @@
 package com.loopers.domain.payment;
 
-import com.loopers.util.uuid.UuidV7Generator;
+import com.loopers.support.uuid.UuidV7Generator;
 
 import java.util.UUID;
 

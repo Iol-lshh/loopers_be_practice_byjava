@@ -2,7 +2,7 @@ package com.loopers.interfaces.api.product;
 
 import com.loopers.application.product.ProductFacade;
 import com.loopers.domain.product.ProductStatement;
-import com.loopers.interfaces.api.ApiResponse;
+import com.loopers.support.api.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;

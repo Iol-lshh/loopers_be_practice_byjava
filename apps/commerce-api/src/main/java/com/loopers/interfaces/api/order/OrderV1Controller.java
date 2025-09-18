@@ -2,7 +2,7 @@ package com.loopers.interfaces.api.order;
 
 import com.loopers.application.order.OrderCriteria;
 import com.loopers.application.order.OrderFacade;
-import com.loopers.interfaces.api.ApiResponse;
+import com.loopers.support.api.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface ProductMetricJpaRepository extends JpaRepository<ProductMetricEntity, Long> {
 
-    @Query("SELECT p FROM ProductMetricEntity p WHERE p.productId IN :productIds AND p.metricName = :metric")
+    @Query("SELECT p FROM ProductMetricEntity p WHERE p.productId IN :productIds AND p.metricName = :metric AND p.metricDate = CURRENT_DATE")
     List<ProductMetricEntity> findAllByProductIds(List<Long> productIds, String metric);
 
     Optional<ProductMetricEntity> findByProductId(Long productId);
@@ -25,6 +25,7 @@ public interface ProductMetricJpaRepository extends JpaRepository<ProductMetricE
         )
         FROM ProductMetricEntity p
         WHERE p.productId = :productId
+            AND p.metricDate >= CURRENT_DATE
         GROUP BY p.productId
     """)
     Optional<ProductMetricInfo.Aggregate> findAggregate(Long productId);

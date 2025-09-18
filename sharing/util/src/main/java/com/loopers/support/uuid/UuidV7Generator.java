@@ -1,4 +1,4 @@
-package com.loopers.util.uuid;
+package com.loopers.support.uuid;
 
 import java.util.UUID;
 import java.time.Instant;
