@@ -43,3 +43,25 @@ public class ProductMetricAggregateJobRunner implements CommandLineRunner {
         }
     }
 }
+
+/*
+ * # 처음부터 실행 (startProductId 미지정 시 0부터 시작)
+java -jar batch.jar --job.name=productMetricWeeklyAggregateJob
+
+# 특정 상품 ID부터 실행 (예: 1000번 상품부터)
+java -jar batch.jar --job.name=productMetricWeeklyAggregateJob startProductId=1000
+
+---
+
+# 주간 집계만 실행
+java -jar batch.jar --job.name=productMetricAggregateJob stepType=WEEKLY
+
+# 월간 집계만 실행
+java -jar batch.jar --job.name=productMetricAggregateJob stepType=MONTHLY
+
+# 둘 다 실행 (기본값)
+java -jar batch.jar --job.name=productMetricAggregateJob stepType=BOTH
+
+# 특정 상품 ID부터 주간 집계만 실행
+java -jar batch.jar --job.name=productMetricAggregateJob stepType=WEEKLY startProductId=1000
+ */
