@@ -39,6 +39,9 @@ public class ProductMetricWriterImpl implements ProductMetricWriter {
                             like_count,
                             sold_count,
                             sold_amount,
+                            year,
+                            month,
+                            week_of_month,
                             aggregated_at
                         ) VALUES (
                             :productId,
@@ -46,7 +49,10 @@ public class ProductMetricWriterImpl implements ProductMetricWriter {
                             :likeCount,
                             :soldCount,
                             :soldAmount,
-                            NOW()
+                            :year,
+                            :month,
+                            :weekOfMonth
+                            NOW(),
                         )
                         ON DUPLICATE KEY UPDATE
                             view_count = VALUES(view_count),
@@ -70,6 +76,8 @@ public class ProductMetricWriterImpl implements ProductMetricWriter {
                             like_count,
                             sold_count,
                             sold_amount,
+                            year,
+                            month,
                             aggregated_at
                         ) VALUES (
                             :productId,
@@ -77,6 +85,8 @@ public class ProductMetricWriterImpl implements ProductMetricWriter {
                             :likeCount,
                             :soldCount,
                             :soldAmount,
+                            :year,
+                            :month,
                             NOW()
                         )
                         ON DUPLICATE KEY UPDATE

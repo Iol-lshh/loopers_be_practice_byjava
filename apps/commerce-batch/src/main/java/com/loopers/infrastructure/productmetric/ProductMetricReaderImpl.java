@@ -30,7 +30,11 @@ public class ProductMetricReaderImpl implements ProductMetricReader {
                             SUM(CASE WHEN p.metric_name = 'view_count'  THEN CAST(p.metric_value AS SIGNED) ELSE 0 END) AS view_count,
                             SUM(CASE WHEN p.metric_name = 'like_count'  THEN CAST(p.metric_value AS SIGNED) ELSE 0 END) AS like_count,
                             SUM(CASE WHEN p.metric_name = 'sold_count'  THEN CAST(p.metric_value AS SIGNED) ELSE 0 END) AS sold_count,
-                            SUM(CASE WHEN p.metric_name = 'sold_amount' THEN CAST(p.metric_value AS SIGNED) ELSE 0 END) AS sold_amount
+                            SUM(CASE WHEN p.metric_name = 'sold_amount' THEN CAST(p.metric_value AS SIGNED) ELSE 0 END) AS sold_amount,
+                            YEAR(CURRENT_DATE) AS year,
+                            MONTH(CURRENT_DATE) AS month,
+                            WEEKOFMONTH(CURRENT_DATE) AS week_of_month,
+                            CURRENT_DATE AS aggregated_at
                         FROM product_metrics p
                         WHERE p.metric_date >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY)
                           AND p.product_id >= %d
@@ -55,7 +59,10 @@ public class ProductMetricReaderImpl implements ProductMetricReader {
                             SUM(CASE WHEN p.metric_name = 'view_count'  THEN CAST(p.metric_value AS SIGNED) ELSE 0 END) AS view_count,
                             SUM(CASE WHEN p.metric_name = 'like_count'  THEN CAST(p.metric_value AS SIGNED) ELSE 0 END) AS like_count,
                             SUM(CASE WHEN p.metric_name = 'sold_count'  THEN CAST(p.metric_value AS SIGNED) ELSE 0 END) AS sold_count,
-                            SUM(CASE WHEN p.metric_name = 'sold_amount' THEN CAST(p.metric_value AS SIGNED) ELSE 0 END) AS sold_amount
+                            SUM(CASE WHEN p.metric_name = 'sold_amount' THEN CAST(p.metric_value AS SIGNED) ELSE 0 END) AS sold_amount,
+                            YEAR(CURRENT_DATE) AS year,
+                            MONTH(CURRENT_DATE) AS month,
+                            CURRENT_DATE AS aggregated_at
                         FROM product_metrics p
                         WHERE p.metric_date >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)
                           AND p.product_id >= %d
