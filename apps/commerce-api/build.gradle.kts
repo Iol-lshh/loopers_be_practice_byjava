@@ -8,8 +8,9 @@ dependencies {
     implementation(project(":supports:jackson"))
     implementation(project(":supports:logging"))
     implementation(project(":supports:monitoring"))
-    implementation(project(":supports:uuid"))
     implementation(project(":sharing:event"))
+    implementation(project(":sharing:util"))
+
 
     // web
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -25,5 +26,4 @@ dependencies {
     testImplementation(testFixtures(project(":modules:kafka")))
     testImplementation(testFixtures(project(":modules:feign")))
     testImplementation(testFixtures(project(":modules:resilience")))
-
 }

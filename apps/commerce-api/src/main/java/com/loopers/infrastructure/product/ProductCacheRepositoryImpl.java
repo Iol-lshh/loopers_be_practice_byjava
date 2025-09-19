@@ -9,6 +9,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.temporal.IsoFields;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -72,6 +73,39 @@ public class ProductCacheRepositoryImpl implements ProductCacheRepository {
             return Collections.emptyList();
         }
         
+        return set.stream()
+                .map(Long::valueOf)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Long> findWeeklyRankingIds(Integer page, Integer size) {
+        Set<String> set = redisTemplate.opsForZSet().reverseRange(
+                "product:ranking:"+ LocalDate.now().getYear()+LocalDate.now().getMonthValue()+
+                    LocalDate.now().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR),
+                page * size,
+                (page + 1) * size - 1
+        );
+        if (set == null || set.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return set.stream()
+                .map(Long::valueOf)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Long> findMonthlyRankingIds(Integer page, Integer size) {
+        Set<String> set = redisTemplate.opsForZSet().reverseRange(
+                "product:ranking:"+ LocalDate.now().getYear()+LocalDate.now().getMonthValue(),
+                page * size,
+                (page + 1) * size - 1
+        );
+        if (set == null || set.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         return set.stream()
                 .map(Long::valueOf)
                 .collect(Collectors.toList());

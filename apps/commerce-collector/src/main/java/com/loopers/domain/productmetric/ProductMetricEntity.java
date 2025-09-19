@@ -7,6 +7,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -15,29 +17,34 @@ public class ProductMetricEntity extends BaseEntity {
     private Long productId;
     private String metricName;
     private String metricValue;
+    private LocalDate metricDate;
 
     public ProductMetricEntity(ProductMetricCommand.UpdateLikeCount command) {
         this.productId = command.productId();
         this.metricName = "like_count";
         this.metricValue = String.valueOf(command.likeCount());
+        this.metricDate = LocalDate.now();
     }
 
     public ProductMetricEntity(ProductMetricCommand.AddSoldCount command) {
         this.productId = command.productId();
         this.metricName = "sold_count";
         this.metricValue = String.valueOf(command.soldCount());
+        this.metricDate = LocalDate.now();
     }
 
     public ProductMetricEntity(ProductMetricCommand.AddSoldAmount command) {
         this.productId = command.productId();
         this.metricName = "sold_amount";
         this.metricValue = String.valueOf(command.soldAmount());
+        this.metricDate = LocalDate.now();
     }
 
     public ProductMetricEntity(ProductMetricCommand.AddViewCount command) {
         this.productId = command.productId();
         this.metricName = "view_count";
         this.metricValue = String.valueOf(command.viewCount());
+        this.metricDate = LocalDate.now();
     }
 
     public void updateLikeCount(ProductMetricCommand.UpdateLikeCount command) {

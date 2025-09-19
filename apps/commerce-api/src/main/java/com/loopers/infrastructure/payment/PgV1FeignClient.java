@@ -1,6 +1,6 @@
 package com.loopers.infrastructure.payment;
 
-import com.loopers.interfaces.api.ApiResponse;
+import com.loopers.support.api.ApiResponse;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;

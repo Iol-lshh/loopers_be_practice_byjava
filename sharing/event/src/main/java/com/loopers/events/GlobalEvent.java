@@ -1,6 +1,6 @@
 package com.loopers.events;
 
-import com.loopers.util.uuid.UuidV7Generator;
+import com.loopers.support.uuid.UuidV7Generator;
 
 import java.time.LocalDateTime;
 

@@ -6,9 +6,8 @@ dependencies {
     implementation(project(":supports:jackson"))
     implementation(project(":supports:logging"))
     implementation(project(":supports:monitoring"))
-    implementation(project(":supports:uuid"))
     implementation(project(":sharing:event"))
-    implementation(project(":sharing:error"))
+    implementation(project(":sharing:util"))
 
     // web
     implementation("org.springframework.boot:spring-boot-starter-web")

@@ -3,7 +3,7 @@ package com.loopers.interfaces.api.like;
 import com.loopers.application.like.LikeFacade;
 import com.loopers.application.product.ProductFacade;
 import com.loopers.domain.product.ProductStatement;
-import com.loopers.interfaces.api.ApiResponse;
+import com.loopers.support.api.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

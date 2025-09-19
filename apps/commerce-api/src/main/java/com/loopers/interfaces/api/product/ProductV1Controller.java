@@ -2,7 +2,7 @@ package com.loopers.interfaces.api.product;
 
 import com.loopers.application.product.ProductFacade;
 import com.loopers.domain.product.ProductStatement;
-import com.loopers.interfaces.api.ApiResponse;
+import com.loopers.support.api.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
@@ -53,6 +53,24 @@ public class ProductV1Controller {
             @RequestParam(required = false, defaultValue = "20") Integer size
     ) {
         var result = productFacade.getTodayRanking(page, size);
+        return ApiResponse.success(ProductV1Dto.SummaryResponse.of(result));
+    }
+
+    @GetMapping("/ranking/weekly")
+    public ApiResponse<List<ProductV1Dto.SummaryResponse>> weeklyRanking(
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "20") Integer size
+    ) {
+        var result = productFacade.getWeeklyRanking(page, size);
+        return ApiResponse.success(ProductV1Dto.SummaryResponse.of(result));
+    }
+
+    @GetMapping("/ranking/monthly")
+    public ApiResponse<List<ProductV1Dto.SummaryResponse>> monthlyRanking(
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "20") Integer size
+    ) {
+        var result = productFacade.getMonthlyRanking(page, size);
         return ApiResponse.success(ProductV1Dto.SummaryResponse.of(result));
     }
 }

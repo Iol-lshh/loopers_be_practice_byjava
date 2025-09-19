@@ -1,3 +1,3 @@
 dependencies {
-    implementation(project(":supports:uuid"))
+    implementation(project(":sharing:util"))
 }
